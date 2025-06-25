@@ -1,0 +1,64 @@
+{
+  "name": {
+    "en": "Virtual Air Conditioner"
+  },
+  "class": "thermostat",
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [],
+  "capabilities": [
+    "onoff",
+    "target_temperature",
+    "measure_temperature",
+    "thermostat_mode",
+    "onoff.swing",
+    "onoff.sleep",
+    "onoff.learning"
+  ],
+  "capabilitiesOptions": {
+    "thermostat_mode": {
+      "values": [
+        { "id": "off", "title": { "en": "Off" } },
+        { "id": "cool", "title": { "en": "Cool" } },
+        { "id": "heat", "title": { "en": "Heat" } },
+        { "id": "auto", "title": { "en": "Auto" } },
+        { "id": "dry", "title": { "en": "Dry" } },
+        { "id": "fan", "title": { "en": "Fan" } },
+        { "id": "Learning", "title": { "en": "Learning" } }
+      ]
+    },
+     "onoff.learning": {
+      "title": { "en": "Learning" },
+      "uiComponent": "toggle"  
+    }
+  },
+  "settings": [
+    {
+      "id": "ha_ip",
+      "type": "text",
+      "label": { "en": "Home Assistant IP" }
+    },
+    {
+      "id": "remote_entity_name",
+      "type": "text",
+      "label": { "en": "Remote Entity Name" }
+    },
+    {
+      "id": "auto_on_temp_change",
+      "type": "checkbox",
+      "label": { "en": "Turn ON when temperature is changed" }
+    }
+  ],
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": { "next": "add_devices" }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}

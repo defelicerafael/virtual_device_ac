@@ -1,0 +1,159 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.company.myapp",
+  "version": "1.0.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Pantea Smart Devices"
+  },
+  "description": {
+    "en": "AC virtual device"
+  },
+  "category": [
+    "climate"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Rafael Defelice",
+    "email": "defelicerafael@gmail.com"
+  },
+  "flow": {
+    "actions": [
+      {
+        "title": "Learn IR Signal",
+        "subtitle": "Trigger your AC to enter learning mode",
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=virtual_ac",
+            "title": "Device",
+            "description": "Select the Virtual AC device to learn an IR signal"
+          }
+        ],
+        "id": "learn_signal"
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Virtual Air Conditioner"
+      },
+      "class": "thermostat",
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [],
+      "capabilities": [
+        "onoff",
+        "target_temperature",
+        "measure_temperature",
+        "thermostat_mode",
+        "onoff.swing",
+        "onoff.sleep",
+        "onoff.learning"
+      ],
+      "capabilitiesOptions": {
+        "thermostat_mode": {
+          "values": [
+            {
+              "id": "off",
+              "title": {
+                "en": "Off"
+              }
+            },
+            {
+              "id": "cool",
+              "title": {
+                "en": "Cool"
+              }
+            },
+            {
+              "id": "heat",
+              "title": {
+                "en": "Heat"
+              }
+            },
+            {
+              "id": "auto",
+              "title": {
+                "en": "Auto"
+              }
+            },
+            {
+              "id": "dry",
+              "title": {
+                "en": "Dry"
+              }
+            },
+            {
+              "id": "fan",
+              "title": {
+                "en": "Fan"
+              }
+            },
+            {
+              "id": "Learning",
+              "title": {
+                "en": "Learning"
+              }
+            }
+          ]
+        },
+        "onoff.learning": {
+          "title": {
+            "en": "Learning"
+          },
+          "uiComponent": "toggle"
+        }
+      },
+      "settings": [
+        {
+          "id": "ha_ip",
+          "type": "text",
+          "label": {
+            "en": "Home Assistant IP"
+          }
+        },
+        {
+          "id": "remote_entity_name",
+          "type": "text",
+          "label": {
+            "en": "Remote Entity Name"
+          }
+        },
+        {
+          "id": "auto_on_temp_change",
+          "type": "checkbox",
+          "label": {
+            "en": "Turn ON when temperature is changed"
+          }
+        }
+      ],
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "virtual_ac"
+    }
+  ]
+}

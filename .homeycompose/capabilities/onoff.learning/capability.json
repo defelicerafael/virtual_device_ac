@@ -1,0 +1,8 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Learning Mode",
+    "es": "Modo Aprendizaje"
+  },
+  "uiComponent": "toggle"
+}

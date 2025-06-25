@@ -1,0 +1,71 @@
+{
+  "id": "com.company.myapp",
+  "version": "1.0.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Pantea Smart Devices"
+  },
+  "description": {
+    "en": "AC virtual device"
+  },
+  "category": [
+    "climate"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Rafael Defelice",
+    "email": "defelicerafael@gmail.com"
+  },
+  "drivers": [
+    {
+      "id": "virtual_ac",
+      "name": {
+        "en": "Virtual Air Conditioner"
+      },
+      "class": "thermostat",
+      "capabilities": [
+        "onoff",
+        "target_temperature",
+        "measure_temperature",
+        "thermostat_mode",
+        "onoff.learning"
+      ],
+      "settings": [
+        {
+          "id": "default_temperature",
+          "type": "number",
+          "label": {
+            "en": "Default Temperature"
+          },
+          "value": 22
+        }
+      ]
+    }
+  ],
+  "flow": {
+    "actions": [
+      {
+        "id": "learn_signal",
+        "title": {
+          "en": "Learn signal"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=virtual_ac"
+          }
+        ]
+      }
+    ]
+  }
+}
