@@ -37,7 +37,7 @@
         "target_temperature",
         "measure_temperature",
         "thermostat_mode",
-        "onoff.learning"
+        "learning_mode"
       ],
       "settings": [
         {

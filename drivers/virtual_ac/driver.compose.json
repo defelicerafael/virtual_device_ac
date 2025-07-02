@@ -12,9 +12,9 @@
     "target_temperature",
     "measure_temperature",
     "thermostat_mode",
-    "onoff.swing",
-    "onoff.sleep",
-    "onoff.learning"
+    "learning_mode",
+    "swing_on_off",
+    "sleep_on_off"
   ],
   "capabilitiesOptions": {
     "thermostat_mode": {
@@ -24,13 +24,21 @@
         { "id": "heat", "title": { "en": "Heat" } },
         { "id": "auto", "title": { "en": "Auto" } },
         { "id": "dry", "title": { "en": "Dry" } },
-        { "id": "fan", "title": { "en": "Fan" } },
-        { "id": "Learning", "title": { "en": "Learning" } }
+        { "id": "fan", "title": { "en": "Fan" } }
+        
       ]
     },
-     "onoff.learning": {
+     "learning_mode": {
       "title": { "en": "Learning" },
-      "uiComponent": "toggle"  
+      "uiComponent": "button"  
+    },
+     "sleep_on_off": {
+      "title": { "en": "Sleep" },
+      "uiComponent": "button"  
+    },
+     "swing_on_off": {
+      "title": { "en": "Swing" },
+      "uiComponent": "button"  
     }
   },
   "settings": [

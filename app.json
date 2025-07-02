@@ -59,9 +59,9 @@
         "target_temperature",
         "measure_temperature",
         "thermostat_mode",
-        "onoff.swing",
-        "onoff.sleep",
-        "onoff.learning"
+        "learning_mode",
+        "swing_on_off",
+        "sleep_on_off"
       ],
       "capabilitiesOptions": {
         "thermostat_mode": {
@@ -101,20 +101,26 @@
               "title": {
                 "en": "Fan"
               }
-            },
-            {
-              "id": "Learning",
-              "title": {
-                "en": "Learning"
-              }
             }
           ]
         },
-        "onoff.learning": {
+        "learning_mode": {
           "title": {
             "en": "Learning"
           },
-          "uiComponent": "toggle"
+          "uiComponent": "button"
+        },
+        "sleep_on_off": {
+          "title": {
+            "en": "Sleep"
+          },
+          "uiComponent": "button"
+        },
+        "swing_on_off": {
+          "title": {
+            "en": "Swing"
+          },
+          "uiComponent": "button"
         }
       },
       "settings": [
@@ -155,5 +161,37 @@
       ],
       "id": "virtual_ac"
     }
-  ]
+  ],
+  "capabilities": {
+    "learning_mode": {
+      "type": "boolean",
+      "title": {
+        "en": "Learning"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button",
+      "uiQuickAction": false
+    },
+    "sleep_on_off": {
+      "type": "boolean",
+      "title": {
+        "en": "Learning"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle",
+      "uiQuickAction": false
+    },
+    "swing_on_off": {
+      "type": "boolean",
+      "title": {
+        "en": "Swing"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle",
+      "uiQuickAction": false
+    }
+  }
 }

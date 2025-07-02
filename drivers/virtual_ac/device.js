@@ -11,13 +11,13 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
     // Estado interno para aprendizaje
     this.learningMode = false;
 
+
     // Capabilities normales
     const caps = [
       'onoff',
       'target_temperature',
+      "measure_temperature",
       'thermostat_mode',
-      'onoff.swing',
-      'onoff.sleep'
     ];
     for (const cap of caps) {
       this.registerCapabilityListener(cap, async (value) => {
@@ -26,14 +26,27 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
       });
     }
 
-    // Listener para botón de aprendizaje
-    this.registerCapabilityListener('onoff.learning', async value => {
-      this.log('Learning mode changed:', value);
+    // Listener para el botón de aprendizaje (sin estado)
+    this.registerCapabilityListener('learning_mode', async value => {
+      this.log('Learning mode button pressed:', value);
       if (value) {
         this.learningMode = true;
         await this.sendCommand('learn', null);
-        await this.setCapabilityValue('onoff.learning', false); // apaga el botón
+        await this.setCapabilityValue('learning_mode', false); // Reseteamos el botón
       }
+      return Promise.resolve();
+    });
+
+
+    this.registerCapabilityListener('sleep_on_off', async value => {
+      this.log('sleep_on_off button pressed:', value);
+      await this.sendCommand('sleep_on_off', value);
+      return Promise.resolve();
+    });
+
+    this.registerCapabilityListener('swing_on_off', async value => {
+      this.log('swing_on_off button pressed:', value);
+      await this.sendCommand('swing_on_off', value);
       return Promise.resolve();
     });
   }
@@ -49,8 +62,8 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
     }
 
     const device = 'ac1';
-    const sleep = this.getCapabilityValue('onoff.sleep') ? 'on' : 'off';
-    const swing = this.getCapabilityValue('onoff.swing') ? 'on' : 'off';
+    const sleep = this.getCapabilityValue('sleep_on_off') ? 'on' : 'off';
+    const swing = this.getCapabilityValue('swing_on_off') ? 'on' : 'off';
     const fan_mode = 'auto';
     const temperature = this.getCapabilityValue('target_temperature');
     const hvac_mode = this.getCapabilityValue('thermostat_mode') || 'off';
@@ -60,7 +73,6 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
       await this.setCapabilityValue('thermostat_mode', 'cool');
     }
 
-    // Payload común
     const payload = {
       remote_entity: `remote.${remoteEntity}`,
       device,
@@ -75,7 +87,7 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
     let url = `http://${ip}:8123/api/webhook/`;
     if (this.learningMode) {
       url += 'ac_learn';
-      this.learningMode = false; // lo desactivamos después
+      this.learningMode = false;
     } else {
       if (capability !== 'thermostat_mode' && hvac_mode === 'off') {
         this.log(`${this.getName()} en off, no se envía comando.`);
