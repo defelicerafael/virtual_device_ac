@@ -12,12 +12,21 @@ class VirtualACDriver  extends Homey.Driver {
   // This method is called when a user is adding a device
   // and the 'list_devices' view is called
   async onPairListDevices() {
+    let counter = await this.homey.settings.get('device_counter') || 1;
+    const deviceId = `pantea_virtual_ac_${counter}`;
+    await this.homey.settings.set('device_counter', counter + 1);
+
     return [
       {
-        name: "Virtual Air Conditioner",
+        name: `Pantea Virtual AC ${counter}`,
         data: {
-          id: "virtual_ac",
+          id: deviceId
         },
+        settings: {
+          ha_ip: "",
+          remote_entity_name: `pantea_ac_${counter}`,
+          auto_on_temp_change: false
+        }
       },
     ];
   }

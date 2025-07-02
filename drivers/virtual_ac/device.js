@@ -52,6 +52,8 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
   }
 
   async sendCommand(capability, value) {
+    
+    
     const ip = this.getSetting('ha_ip');
     const remoteEntity = this.getSetting('remote_entity_name');
     const autoOn = this.getSetting('auto_on_temp_change');
@@ -61,7 +63,9 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
       return;
     }
 
-    const device = 'ac1';
+    const device = remoteEntity; // ← dinámico, e.g. "ac1"
+    this.log(`Comando para: ${device}`);
+
     const sleep = this.getCapabilityValue('sleep_on_off') ? 'on' : 'off';
     const swing = this.getCapabilityValue('swing_on_off') ? 'on' : 'off';
     const fan_mode = 'auto';
