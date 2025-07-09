@@ -26,26 +26,9 @@
     "name": "Rafael Defelice",
     "email": "defelicerafael@gmail.com"
   },
-  "flow": {
-    "actions": [
-      {
-        "title": "Learn IR Signal",
-        "subtitle": "Trigger your AC to enter learning mode",
-        "args": [
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=virtual_ac",
-            "title": "Device",
-            "description": "Select the Virtual AC device to learn an IR signal"
-          }
-        ],
-        "id": "learn_signal"
-      }
-    ]
-  },
   "drivers": [
     {
+      "id": "virtual_ac",
       "name": {
         "en": "Virtual Air Conditioner"
       },
@@ -158,8 +141,7 @@
           "id": "add_devices",
           "template": "add_devices"
         }
-      ],
-      "id": "virtual_ac"
+      ]
     }
   ],
   "capabilities": {

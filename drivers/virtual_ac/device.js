@@ -51,12 +51,26 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
     });
   }
 
+  async onSettings({ oldSettings, newSettings, changedKeys }) {
+    try {
+      this.log('⚙️ Cambios en settings:', changedKeys);
+      for (const key of changedKeys) {
+        this.log(`🔧 ${key}:`, newSettings[key]);
+      }
+    } catch (error) {
+      this.error('❌ Error en onSettings:', error);
+    }
+  }
+
   async sendCommand(capability, value) {
     
     
     const ip = this.getSetting('ha_ip');
     const remoteEntity = this.getSetting('remote_entity_name');
     const autoOn = this.getSetting('auto_on_temp_change');
+
+    console.log('ip', ip, 'remoteEntity', remoteEntity, 'autoOn', autoOn);
+
 
     if (!ip || !remoteEntity) {
       this.log('Faltan settings. Abortando envío.');

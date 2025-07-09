@@ -23,7 +23,7 @@ class VirtualACDriver  extends Homey.Driver {
           id: deviceId
         },
         settings: {
-          ha_ip: "",
+          ha_ip: "panteasmart.local",
           remote_entity_name: `pantea_ac_${counter}`,
           auto_on_temp_change: false
         }

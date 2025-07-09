@@ -27,45 +27,10 @@
   },
   "drivers": [
     {
-      "id": "virtual_ac",
+      "id": "virtual_ac",     
       "name": {
         "en": "Virtual Air Conditioner"
-      },
-      "class": "thermostat",
-      "capabilities": [
-        "onoff",
-        "target_temperature",
-        "measure_temperature",
-        "thermostat_mode",
-        "learning_mode"
-      ],
-      "settings": [
-        {
-          "id": "default_temperature",
-          "type": "number",
-          "label": {
-            "en": "Default Temperature"
-          },
-          "value": 22
-        }
-      ]
-    }
-  ],
-  "flow": {
-    "actions": [
-      {
-        "id": "learn_signal",
-        "title": {
-          "en": "Learn signal"
-        },
-        "args": [
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=virtual_ac"
-          }
-        ]
       }
-    ]
-  }
+    }
+  ]
 }
