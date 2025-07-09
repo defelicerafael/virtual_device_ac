@@ -122,6 +122,13 @@
           }
         },
         {
+          "id": "codigo",
+          "type": "text",
+          "label": {
+            "en": "codigo por defecto ac1"
+          }
+        },
+        {
           "id": "auto_on_temp_change",
           "type": "checkbox",
           "label": {
