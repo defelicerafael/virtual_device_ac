@@ -1,30 +1,40 @@
 'use strict';
 
 const Homey = require('homey');
-const fetch = require('node-fetch');
+
 
 module.exports = class PanteaVirtualAC extends Homey.Device {
 
   async onInit() {
     this.log('Pantea Virtual AC inicializado:', this.getName());
 
+    // --- INICIO DE LÍNEAS DE DEPURACIÓN DE IDs ---
+    
+
     // Estado interno para aprendizaje
     this.learningMode = false;
 
 
     // Capabilities normales
-    const caps = [
-      'onoff',
-      'target_temperature',
-      "measure_temperature",
-      'thermostat_mode',
-    ];
-    for (const cap of caps) {
-      this.registerCapabilityListener(cap, async (value) => {
-        await this.sendCommand(cap, value);
-        return Promise.resolve();
-      });
-    }
+    this.registerCapabilityListener('onoff', async (value) => {
+      await this.sendCommand('onoff', value);
+      return Promise.resolve();
+    });
+
+    this.registerCapabilityListener('target_temperature', async (value) => {
+      await this.sendCommand('target_temperature', value);
+      return Promise.resolve();
+    });
+
+    this.registerCapabilityListener('measure_temperature', async (value) => {
+      await this.sendCommand('measure_temperature', value);
+      return Promise.resolve();
+    });
+
+  this.registerCapabilityListener('thermostat_mode', async (value) => {
+    await this.sendCommand('thermostat_mode', value);
+    return Promise.resolve();
+  });
 
     // Listener para el botón de aprendizaje (sin estado)
     this.registerCapabilityListener('learning_mode', async value => {

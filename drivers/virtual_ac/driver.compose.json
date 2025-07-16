@@ -17,31 +17,7 @@
     "swing_on_off",
     "sleep_on_off"
   ],
-  "capabilitiesOptions": {
-    "thermostat_mode": {
-      "values": [
-        { "id": "off", "title": { "en": "Off" } },
-        { "id": "cool", "title": { "en": "Cool" } },
-        { "id": "heat", "title": { "en": "Heat" } },
-        { "id": "auto", "title": { "en": "Auto" } },
-        { "id": "dry", "title": { "en": "Dry" } },
-        { "id": "fan", "title": { "en": "Fan" } }
-        
-      ]
-    },
-     "learning_mode": {
-      "title": { "en": "Learning" },
-      "uiComponent": "button"  
-    },
-     "sleep_on_off": {
-      "title": { "en": "Sleep" },
-      "uiComponent": "button"  
-    },
-     "swing_on_off": {
-      "title": { "en": "Swing" },
-      "uiComponent": "button"  
-    }
-  },
+  
   "settings": [
     {
       "id": "ha_ip",
