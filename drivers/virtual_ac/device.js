@@ -47,6 +47,11 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
       return Promise.resolve();
     });
 
+    this.registerCapabilityListener('fan_mode', async (value) => {
+      this.log('fan_mode cambiado a:', value);
+      await this.sendCommand('fan_mode', value);
+      return Promise.resolve();
+    });
 
     this.registerCapabilityListener('sleep_on_off', async value => {
       this.log('sleep_on_off button pressed:', value);
@@ -72,75 +77,84 @@ module.exports = class PanteaVirtualAC extends Homey.Device {
     }
   }
 
-  async sendCommand(capability, value) {
-    
-    
-    const ip = this.getSetting('ha_ip');
-    const remoteEntity = this.getSetting('remote_entity_name');
-    const autoOn = this.getSetting('auto_on_temp_change');
-    const codigo = this.getSetting('codigo_ac');
-
-    console.log('ip', ip, 'remoteEntity', remoteEntity, 'autoOn', autoOn);
-
-
-    if (!ip || !remoteEntity) {
-      this.log('Faltan settings. Abortando envío.');
-      return;
-    }
-
-    const device = codigo; // ← dinámico, e.g. "ac1"
-    this.log(`Comando para: ${device}`);
-
-    const sleep = this.getCapabilityValue('sleep_on_off') ? 'on' : 'off';
-    const swing = this.getCapabilityValue('swing_on_off') ? 'on' : 'off';
-    const fan_mode = 'auto';
-    const temperature = this.getCapabilityValue('target_temperature');
-    const hvac_mode = this.getCapabilityValue('thermostat_mode') || 'off';
-
-    // Auto-on si corresponde
-    if (capability === 'target_temperature' && autoOn && hvac_mode === 'off') {
-      await this.setCapabilityValue('thermostat_mode', 'cool');
-    }
-
-    const payload = {
-      remote_entity: `remote.${remoteEntity}`,
-      device,
-      hvac_mode,
-      fan_mode,
-      sleep,
-      swing,
-      temperature
+  getCurrentState(overrides = {}) {
+    return {
+      remote_entity: `remote.${this.getSetting('remote_entity_name')}`,
+      device: this.getSetting('codigo_ac'),
+      hvac_mode: overrides.hvac_mode ?? this.getCapabilityValue('thermostat_mode') ?? 'off',
+      fan_mode: 'auto',
+      sleep: overrides.sleep ?? (this.getCapabilityValue('sleep_on_off') ? 'on' : 'off'),
+      swing: overrides.swing ?? (this.getCapabilityValue('swing_on_off') ? 'on' : 'off'),
+      temperature: overrides.temperature ?? this.getCapabilityValue('target_temperature'),
+      onoff: overrides.onoff ?? this.getCapabilityValue('onoff'),
+      fan_mode: overrides.fan_mode ?? this.getCapabilityValue('fan_mode') ?? 'auto',
+      
     };
+  }
 
-    // Webhook URL
-    let url = `http://${ip}:8123/api/webhook/`;
-    if (this.learningMode) {
-      url += 'ac_learn';
-      this.learningMode = false;
-    } else {
-      if (capability !== 'thermostat_mode' && hvac_mode === 'off') {
-        this.log(`${this.getName()} en off, no se envía comando.`);
-        return;
-      }
-      url += 'ac_command';
-    }
+  async sendCommand(capability, value) {
+  const ip = this.getSetting('ha_ip');
+  const autoOn = this.getSetting('auto_on_temp_change');
+  const learning = this.learningMode;
 
-    this.log('Enviando a Home Assistant:', url);
-    this.log(JSON.stringify(payload));
+  if (!ip || !this.getSetting('remote_entity_name')) {
+    this.log('Faltan settings. Abortando envío.');
+    return;
+  }
 
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+  // Armamos overrides según qué capability se está cambiando
+  const overrides = {};
 
-      if (!res.ok) throw new Error(`Error ${res.status}`);
-      this.log('Comando enviado correctamente.');
-    } catch (err) {
-      this.error('Error al enviar comando:', err);
+  if (capability === 'target_temperature') overrides.temperature = value;
+  if (capability === 'thermostat_mode') overrides.hvac_mode = value;
+  if (capability === 'swing_on_off') overrides.swing = value ? 'on' : 'off';
+  if (capability === 'sleep_on_off') overrides.sleep = value ? 'on' : 'off';
+  if (capability === 'onoff') overrides.onoff = value;
+  if (capability === 'fan_mode') overrides.fan_mode = value;
+
+  // Auto encendido si corresponde
+  if (capability === 'target_temperature' && autoOn) {
+    const hvac = this.getCapabilityValue('thermostat_mode');
+    if (!hvac || hvac === 'off') {
+      this.log('Auto-on: Activando modo cool automáticamente.');
+      await this.setCapabilityValue('thermostat_mode', 'cool');
+      overrides.hvac_mode = 'cool';
     }
   }
+
+  const payload = this.getCurrentState(overrides);
+  this.log(`📦 Payload generado (capability: ${capability}):`, JSON.stringify(payload, null, 2));
+
+  // Armamos URL según modo
+  let url = `http://${ip}:8123/api/webhook/`;
+  if (learning) {
+    url += 'ac_learn';
+    this.learningMode = false;
+  } else {
+    if (capability !== 'thermostat_mode' && payload.hvac_mode === 'off') {
+      this.log(`${this.getName()} en off, no se envía comando.`);
+      return;
+    }
+    url += 'ac_command';
+  }
+
+  this.log('Enviando a Home Assistant:', url);
+  this.log(JSON.stringify(payload));
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    this.log('Comando enviado correctamente.');
+  } catch (err) {
+    this.error('Error al enviar comando:', err);
+  }
+}
+
 
   async setLearningMode(enable) {
     this.log(`Modo aprendizaje (interno): ${enable}`);
