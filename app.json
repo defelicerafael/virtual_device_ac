@@ -36,6 +36,11 @@
       "platforms": [
         "local"
       ],
+      "images": {
+        "small": "/drivers/virtual_ac/assets/icon.svg",
+        "large": "/drivers/virtual_ac/assets/icon.svg",
+        "xlarge": "/drivers/virtual_ac/assets/icon.svg"
+      },
       "connectivity": [],
       "capabilities": [
         "onoff",
