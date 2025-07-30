@@ -32,7 +32,7 @@
       "name": {
         "en": "Virtual Air Conditioner"
       },
-      "class": "thermostat",
+      "class": "climate",
       "platforms": [
         "local"
       ],
@@ -134,7 +134,19 @@
           "label": {
             "en": "Turn ON when temperature is changed"
           }
-        }
+        },
+        {
+  "id": "ha_port",
+  "type": "number",
+  "label": {
+    "en": "Home Assistant port"
+  },
+  "hint": {
+    "en": "Ejemplo: 8123 (por defecto)"
+  },
+  "value": 8123,
+  "optional": false
+}
       ],
       "pair": [
         {

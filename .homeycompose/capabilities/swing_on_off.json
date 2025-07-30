@@ -3,6 +3,6 @@
   "title": { "en": "Swing" },
   "getable": true,
   "setable": true,
-  "uiComponent": "toggle",
+  "uiComponent": "button",
   "uiQuickAction": false
 }

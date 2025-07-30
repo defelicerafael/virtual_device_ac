@@ -4,8 +4,6 @@ class VirtualACDriver  extends Homey.Driver {
   // this method is called when the app is started and the Driver is inited
   async onInit() {
      this.log('VirtualACDriver has been initialized');
-
-      
   }
   
   
@@ -26,7 +24,8 @@ class VirtualACDriver  extends Homey.Driver {
           ha_ip: "panteasmart.local",
           remote_entity_name: `pantea_ac_${counter}`,
           codigo_ac: "ac1",
-          auto_on_temp_change: false
+          auto_on_temp_change: false,
+          ha_port:8123
         }
       },
     ];

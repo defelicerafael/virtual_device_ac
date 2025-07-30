@@ -44,12 +44,11 @@
         "thermostat_mode",
         "learning_mode",
         "swing_on_off",
-        "sleep_on_off",
-        "fan_mode"
+        "sleep_on_off"
       ],
       "capabilitiesOptions": {
         "target_temperature": {
-          "min": 15,
+          "min": 16,
           "max": 30,
           "step": 1,
           "units": {
@@ -116,11 +115,11 @@
     "sleep_on_off": {
       "type": "boolean",
       "title": {
-        "en": "Learning"
+        "en": "Sleep"
       },
       "getable": true,
       "setable": true,
-      "uiComponent": "toggle",
+      "uiComponent": "button",
       "uiQuickAction": false
     },
     "swing_on_off": {
@@ -130,7 +129,7 @@
       },
       "getable": true,
       "setable": true,
-      "uiComponent": "toggle",
+      "uiComponent": "button",
       "uiQuickAction": false
     }
   }
