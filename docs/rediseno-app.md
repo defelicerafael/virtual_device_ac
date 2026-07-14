@@ -73,7 +73,7 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 
 16. **Learning con encendido en 2 pasos (2026-07-13).** Con el modo learning activo en un device configurado en 2 pasos:
     - Si se modifica el **modo** del termostato → se envía **solo el modo** en la secuencia (el resto vacío, estilo `simple_mode` del script) → el servidor aprende el comando de encendido/modo.
-    - Si se modifica la **temperatura** → se envía la **secuencia entera** (payload completo) → así, repitiendo temperatura por temperatura, se aprende todo el rango de 16 a 30 grados.
+    - Si se modifica la **temperatura** → se envía el learning **SIN temperatura** (payload completo pero sin temp). Del lado del servidor, el script de `ac_learn` se encarga solo de ir aprendiendo **todas las temperaturas de 16 a 30** en una sola sesión. (O sea: UN disparo de learning cubre todo el rango — no hay que repetir por temperatura, y el auto-apagado del botón tras el primer comando no molesta.)
 
 ## Preguntas abiertas
 4. **Campos del wizard de pairing.** Con las autodetecciones (def. 13) la lista tentativa quedó más corta: nombre del device, host/IP de Pantea Home Manager (+puerto), entidad remote, code de la planilla (**opcional** — vacío = modo legacy, def. 13), device fuente de temperatura (drop-down, def. 9), auto-on al mover temperatura. ¿Confirmás? ¿Algo más/menos?
