@@ -27,6 +27,8 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 
 - Definiciones 13–15: autodetección desde planilla (modo/ON separado y fan aprendido) + override 3 estados en settings avanzados; swing como filas `mode=swing_on/swing_off` sin columnas nuevas; planilla la mantiene Fernán (learn → archivo integración Broadlink en servidor → spreadsheet); URL del webservice configurable a nivel app con la de PS Broadlink como default. Learning confirmado: se apaga solo tras el primer comando.
 
+- Ampliada def. 13: el code es OPCIONAL — sin code el device es 100% legacy (el servidor resuelve con lo aprendido del remote) y el override de "encendido en 2 pasos" es lo que habilita la secuencia de 2 pasos.
+
 ### Pendiente / próximo paso
 - Últimas preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (confirmar campos wizard), 8 (alcance/Flow cards), 14 (cache: ¿botón "recargar códigos"?), y detalle del wait de 2s (¿fijo o configurable?).
 - Después: armar la propuesta de diseño completa (capabilities, modelo de estado, flujo de comandos, wizard) — ya hay definiciones suficientes.
