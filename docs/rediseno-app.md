@@ -50,10 +50,9 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 5. **Swing y sleep (2026-07-13).** Se modelan distinto:
    - **Swing:** comando separado con **códigos on/off** (filas `swing_on`/`swing_off` en la planilla). Si el aire tiene un solo código toggle, se repite el mismo código en ambas filas. En Homey: toggle con estado.
    - **Sleep:** sigue **dentro de la clave compuesta** `{modo}_{fan}_{temp}_{sleep}` — es parte del código que se envía junto con la temperatura, como hoy. En Homey: toggle con estado; al cambiarlo se reenvía el comando completo.
+   - **Al prender (2026-07-13):** swing y sleep conservan lo vigente en el tile (misma regla que la temperatura). Sleep va implícito en el comando completo de encendido. Para swing: comparar los códigos `swing_on` y `swing_off` de ese aire — si son **diferentes**, después de mandar el encendido se manda el código de swing correspondiente al estado del tile; si son **iguales** (toggle), no se manda nada (no se puede saber el estado real del equipo).
 
 ## Preguntas abiertas
-
-3. **Swing/sleep — comportamiento al apagar/prender.** Al apagar el AC, ¿swing/sleep se resetean o se conservan? ¿Y al prender: vale la misma regla que la temperatura (gana lo vigente en el tile)?
 4. **Campos del wizard de pairing.** ¿Qué carga exactamente el instalador: IP/host de HA, entidad remote, nombre del device, el código del spreadsheet, auto-on, "tiene fan_mode aprendido"? ¿Y cómo es ese "código del spreadsheet" — un identificador de marca/modelo de AC? ¿Ejemplo real? ¿Reemplaza conceptualmente a `codigo_ac` (que queda fijo "ac1" solo por compatibilidad con HA)?
 5. **Retorno HA→Homey.** ¿Incluir vía de vuelta (temperatura ambiente real, confirmación de envío IR) vía endpoint API de la app? ¿O unidireccional y se elimina `measure_temperature`?
 6. **Manejo de errores.** Si HA no responde: ¿(a) revertir capability en UI, (b) warning/unavailable en el device, (c) reintentos? Combinables.
