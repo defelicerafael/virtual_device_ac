@@ -31,9 +31,15 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 
 - Def. 16: learning + 2 pasos → cambio de modo aprende solo el comando de modo (resto vacío); cambio de temperatura envía el learning SIN temp y el script de ac_learn del servidor aprende solo todo el rango 16–30 en una sesión (un disparo cubre todo).
 
+- Defs. 17–19: campos del wizard confirmados (con "Encender al cambiar temperatura"); cache con botón "recargar códigos"; Flow cards de acción SÍ.
+- **Escrita la propuesta de diseño completa: [propuesta-diseno.md](propuesta-diseno.md)** (BORRADOR) — arquitectura, capabilities, flujo de comando, lib/, wizard, flow cards, migración. Con puntos [CONSULTAR].
+
+### Fase actual (actualizada)
+**Revisión de la propuesta de diseño.** Todas las preguntas de producto están respondidas (1–19 en definiciones).
+
 ### Pendiente / próximo paso
-- Últimas preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (confirmar campos wizard), 8 (alcance/Flow cards), 14 (cache: ¿botón "recargar códigos"?), y detalle del wait de 2s (¿fijo o configurable?).
-- Después: armar la propuesta de diseño completa (capabilities, modelo de estado, flujo de comandos, wizard) — ya hay definiciones suficientes.
+- Fernán revisa [propuesta-diseno.md](propuesta-diseno.md) y responde los [CONSULTAR]: driver id (`ac` vs `virtual_ac`), nombre de `fan_mode`, conservar ids de capabilities viejas, wait 2s fijo, wizard en 1 o 2 vistas, lista de flow cards, nombres de módulos/funciones de lib/.
+- Con la propuesta aprobada: plan de implementación y a codear.
 - Ofrecido: armar borrador de propuesta de diseño con lo ya definido, marcando lo pendiente como variantes.
 - Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).

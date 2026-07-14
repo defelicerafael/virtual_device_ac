@@ -75,16 +75,20 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
     - Si se modifica el **modo** del termostato → se envía **solo el modo** en la secuencia (el resto vacío, estilo `simple_mode` del script) → el servidor aprende el comando de encendido/modo.
     - Si se modifica la **temperatura** → se envía el learning **SIN temperatura** (payload completo pero sin temp). Del lado del servidor, el script de `ac_learn` se encarga solo de ir aprendiendo **todas las temperaturas de 16 a 30** en una sola sesión. (O sea: UN disparo de learning cubre todo el rango — no hay que repetir por temperatura, y el auto-apagado del botón tras el primer comando no molesta.)
 
+17. **Campos del wizard — confirmados (2026-07-13).** Nombre, host/IP de Pantea Home Manager (+puerto), entidad remote, code de planilla (opcional), device fuente de temperatura, **"Encender al cambiar temperatura"** (al último modo utilizado o seleccionado).
+18. **Cache de códigos (2026-07-13).** Alcanza con el botón **"recargar códigos"** (maintenance action en settings del device).
+19. **Flow cards (2026-07-13).** Sí, se necesitan **cards de acción** (lista concreta a definir en la propuesta de diseño).
+
 ## Preguntas abiertas
-4. **Campos del wizard de pairing.** Con las autodetecciones (def. 13) la lista tentativa quedó más corta: nombre del device, host/IP de Pantea Home Manager (+puerto), entidad remote, code de la planilla (**opcional** — vacío = modo legacy, def. 13), device fuente de temperatura (drop-down, def. 9), auto-on al mover temperatura. ¿Confirmás? ¿Algo más/menos?
+4. ~~Campos del wizard~~ → RESUELTO (definición 17).
 5. ~~Retorno HA→Homey~~ → RESUELTO (definición 9): measure_temperature se espeja de otro device de Homey elegido en pairing/settings; sin device fuente, se quita la capability.
 6. ~~Manejo de errores~~ → RESUELTO (definición 10): reintentos + warning + revertir UI + Telegram.
 7. ~~Botón Learning~~ → RESUELTO (definiciones 7 y 14): botón por device, se apaga tras el primer comando; lo aprendido queda en el servidor y Fernán lo pasa a mano a la planilla.
-8. **Alcance.** ¿Estructura pensada para más tipos de device virtual a futuro o app "de los AC"? ¿Flow cards (hoy no hay ninguna)?
+8. **Alcance.** Flow cards → RESUELTO (definición 19): sí, cards de acción. Queda solo la parte estructural (¿preparada para más tipos de device a futuro?) — se resuelve en la propuesta de diseño.
 9. ~~HomeyScript "PS Broadlink" (falta el código)~~ → RESUELTO: código en [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js), análisis en [ps-broadlink-analisis.md](ps-broadlink-analisis.md). Del análisis salen las preguntas 10–15.
 10. **Swing.** PARCIALMENTE RESUELTO (ver definición 5): swing va como comando separado con códigos on/off (filas `swing_on`/`swing_off` en la planilla — el formato actual ya soporta filas sin temp indexadas por modo). Queda pendiente: confirmar que hoy efectivamente no se envía nunca (el script lo lee pero no lo pone en el payload) y que los flows/planilla actuales no lo cubren por otro lado.
 11. ~~Fallback legacy~~ → RESUELTO (definición 8): sigue vivo, igual que el script.
 12. ~~Learning global vs por device~~ → RESUELTO (definición 7): botón por device.
 13. ~~"Modo/ON separado" / fan aprendido~~ → RESUELTO (definición 13): autodetección desde la planilla + override de 3 estados en settings avanzados. Queda el detalle: ¿el wait de 2s entre comando de modo y completo va fijo o configurable?
-14. **Cache de comandos IR.** Hoy: variable global de Homey, se invalida editando el script (`limpiarCache`). En la nueva app, ¿alcanza con cachear en memoria/store y un botón "recargar códigos" (maintenance action) para cuando se actualiza la planilla?
+14. ~~Cache de comandos IR~~ → RESUELTO (definición 18): botón "recargar códigos".
 15. ~~Planilla / webservice~~ → RESUELTO (definiciones 12, 14 y 15): formato relevado; la mantiene Fernán (learn → archivo integración Broadlink → spreadsheet); URL configurable a nivel app con la actual como default.
