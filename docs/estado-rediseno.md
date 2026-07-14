@@ -18,6 +18,7 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - Definición 5 (completa): swing = comando separado con códigos on/off (`swing_on`/`swing_off`; si el aire es toggle se repite el código); sleep = sigue dentro de la clave compuesta `{modo}_{fan}_{temp}_{sleep}`, parte del código que va con la temperatura.
 
 - Resuelta la pregunta 3: al prender, swing/sleep conservan lo vigente en el tile; sleep va implícito en el comando completo; swing se reenvía tras el encendido SOLO si `swing_on` ≠ `swing_off` en la planilla (si son iguales = toggle, no se manda).
+- Definición 6 (branding): el usuario NUNCA ve "Home Assistant" — todos los textos de la app dicen "Pantea Home Manager" (campo de conexión: "Host/IP de Pantea Home Manager").
 
 ### Pendiente / próximo paso
 - Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (campos wizard), 5–8, 11–15 (fallback legacy sí/no, learning global vs por device, modo/ON separado, invalidación de cache, formato/ejemplo de la planilla).
