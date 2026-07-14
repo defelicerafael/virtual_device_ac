@@ -42,15 +42,20 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 
 ## Definiciones tomadas
 
-(ninguna todavía — ver preguntas abiertas)
+1. **On/off (2026-07-13).** Al prender: se restaura el **último modo** en que estuvo prendido, pero la **temperatura vigente del tile gana** — si alguien movió la temperatura estando apagado (con auto-on deshabilitado), al prender se usa esa temperatura nueva, no la del momento de apagar. `auto_on_temp_change` sigue existiendo como opción por device.
+2. **Modos y velocidad (2026-07-13).** Se agregan los modos `dry` y `fan` (queda: off/auto/heat/cool/dry/fan) y la capability `fan_mode` (velocidad). En la config del tile habrá una opción "tiene fan_mode aprendido": si NO lo tiene, se envía siempre `auto` (comportamiento actual de todos los equipos).
+3. **Requisito nuevo — lógica del HomeyScript "PS Broadlink" (2026-07-13).** Como la app no funcionaba bien, hoy el trabajo real lo hace un HomeyScript ("PS Broadlink.js" o similar) en el Homey Pro de ferno "San Fran": recibe el device virtual que disparó el evento y envía a HA la acción a realizar. Además puede consultar un **webservice de un Google Spreadsheet** para obtener el código de un comando en particular. Es **indispensable** que la nueva app incorpore esa funcionalidad (la lógica del script pasa a vivir adentro de la app).
 
 ## Preguntas abiertas
 
-1. **¿Qué significa "igual a la última vez que estuvo prendido"?** ¿Snapshot completo (modo+temp+swing+sleep al momento de apagar) o solo el modo como hoy? Si está apagado y mueven la temperatura a 24°, al prender ¿va a 24° o al valor del snapshot? ¿Sigue existiendo `auto_on_temp_change`?
-2. **Modos y ventilador.** ¿Qué modos ofrecer (hoy real: auto/heat/cool/off; intención: +dry/fan)? ¿Agregar `fan_mode` (velocidad)? ¿Los códigos IR distinguen velocidad?
-3. **Swing/sleep.** ¿Los códigos IR son toggle (mismo código alterna) o hay código on y código off? Define si en Homey son toggles con estado confiable o botones pulso. Al apagar el AC, ¿swing/sleep se resetean o se conservan?
+3. **Swing/sleep.** ¿Los códigos IR son toggle (mismo código alterna) o hay código on y código off? Define si en Homey son toggles con estado confiable o botones pulso. Al apagar el AC, ¿swing/sleep se resetean o se conservan? ¿Y al prender: se restauran los del último encendido o vale la misma regla que la temperatura (gana lo vigente en el tile)?
 4. **Pairing.** ¿Quién da de alta — instalador o cliente? ¿Alta automática + corregir settings (hoy) o wizard con vistas custom (IP HA, entidad remote, código)? ¿`codigo_ac` auto-incrementa?
 5. **Retorno HA→Homey.** ¿Incluir vía de vuelta (temperatura ambiente real, confirmación de envío IR) vía endpoint API de la app? ¿O unidireccional y se elimina `measure_temperature`?
 6. **Manejo de errores.** Si HA no responde: ¿(a) revertir capability en UI, (b) warning/unavailable en el device, (c) reintentos? Combinables.
 7. **Botón Learning.** ¿Visible en el device o maintenance action en settings avanzados? ¿Cómo es el flujo `ac_learn` del lado HA?
 8. **Alcance.** ¿Estructura pensada para más tipos de device virtual a futuro o app "de los AC"? ¿Flow cards (hoy no hay ninguna)?
+9. **HomeyScript "PS Broadlink" (falta el código).** No hay copia en el Drive (`Homey/HomeyScript/` tiene solo scripts de lights); vive en el Homey Pro "San Fran". Hace falta exportarlo/pegarlo para documentarlo. A responder mirándolo o de memoria:
+   - ¿Cómo se dispara hoy? (¿un Flow que escucha cambios del device virtual y llama al script?)
+   - ¿Qué manda a HA — el mismo webhook `ac_command` con el payload completo, u otra cosa (código IR crudo)?
+   - ¿Qué devuelve el webservice del spreadsheet (código IR por comando? mapeo device→código?) y cuándo se consulta: siempre, como fallback, o solo para ciertos comandos? ¿URL/auth del webservice?
+   - ¿El spreadsheet es la fuente de verdad de los códigos aprendidos, o conviven con lo aprendido vía `ac_learn` en HA?

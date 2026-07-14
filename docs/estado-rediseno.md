@@ -10,9 +10,12 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ### Hecho
 - Relevamiento completo de la app actual, punta a punta. Hallazgos y problemas documentados en [rediseno-app.md](rediseno-app.md).
 - Detectado que el `app.json` compilado no incluye modos dry/fan ni `ha_port` por duplicación de config entre `.homeycompose/app.json` y `driver.compose.json`.
+- Respondidas las preguntas 1 y 2 (on/off restaura último modo pero gana la temperatura vigente del tile; modos +dry/fan; fan_mode con opción "aprendido" por device) → sección "Definiciones tomadas".
+- Apareció requisito nuevo indispensable: incorporar la lógica del HomeyScript "PS Broadlink" (Homey Pro San Fran) que hoy hace el trabajo real, incluida la consulta de códigos a un webservice de Google Spreadsheet.
 
 ### Pendiente / próximo paso
-- Fernán tiene que responder las 8 preguntas abiertas de [rediseno-app.md](rediseno-app.md) (las 1, 3 y 4 son las que destraban la propuesta de diseño).
+- **Conseguir el código del HomeyScript "PS Broadlink.js"** del Homey Pro San Fran (no hay copia en el Drive) y documentarlo — pregunta 9 de [rediseno-app.md](rediseno-app.md).
+- Fernán tiene que responder las preguntas abiertas restantes (3–9); la 3 y la 4 destraban la propuesta de diseño.
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Después: definir implementación juntos.
 
