@@ -25,8 +25,11 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 
 - Relevada la planilla IR consultando el webservice en vivo → [planilla-ir.md](planilla-ir.md). Code = entero, sirve para varias marcas. Hallazgo: code 5 ya tiene filas de modo-solo → se puede AUTODETECTAR "modo/ON separado" (y quizás "fan_mode aprendido") desde la planilla en vez de flag manual.
 
+- Definiciones 13–15: autodetección desde planilla (modo/ON separado y fan aprendido) + override 3 estados en settings avanzados; swing como filas `mode=swing_on/swing_off` sin columnas nuevas; planilla la mantiene Fernán (learn → archivo integración Broadlink en servidor → spreadsheet); URL del webservice configurable a nivel app con la de PS Broadlink como default. Learning confirmado: se apaga solo tras el primer comando.
+
 ### Pendiente / próximo paso
-- Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (campos wizard), 8 (alcance/Flow cards), 13 (autodetección vs flag manual), 14 (invalidación de cache), 15 (quién mantiene la planilla, URL configurable), resto de la 7 (flujo ac_learn del lado servidor) y confirmación de que learning se apaga solo tras un comando.
+- Últimas preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (confirmar campos wizard), 8 (alcance/Flow cards), 14 (cache: ¿botón "recargar códigos"?), y detalle del wait de 2s (¿fijo o configurable?).
+- Después: armar la propuesta de diseño completa (capabilities, modelo de estado, flujo de comandos, wizard) — ya hay definiciones suficientes.
 - Ofrecido: armar borrador de propuesta de diseño con lo ya definido, marcando lo pendiente como variantes.
 - Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
