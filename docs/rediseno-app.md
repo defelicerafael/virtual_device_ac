@@ -71,6 +71,10 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 14. **Mantenimiento de la planilla (2026-07-13).** La mantiene **Fernán**. Proceso ante un tipo de aire nuevo: se hace el learn de todos los comandos (vía `ac_learn`), y después Fernán copia los códigos desde el archivo que genera la integración Broadlink en el servidor al spreadsheet. (Responde también el resto de la pregunta 7: lo aprendido queda en el servidor y pasa a la planilla a mano.)
 15. **URL del webservice configurable (2026-07-13).** La URL del Apps Script se puede modificar en la **configuración de la app** (a nivel app, igual para todos los tiles), con la URL actual de PS Broadlink.js como **valor por defecto**.
 
+16. **Learning con encendido en 2 pasos (2026-07-13).** Con el modo learning activo en un device configurado en 2 pasos:
+    - Si se modifica el **modo** del termostato → se envía **solo el modo** en la secuencia (el resto vacío, estilo `simple_mode` del script) → el servidor aprende el comando de encendido/modo.
+    - Si se modifica la **temperatura** → se envía la **secuencia entera** (payload completo) → así, repitiendo temperatura por temperatura, se aprende todo el rango de 16 a 30 grados.
+
 ## Preguntas abiertas
 4. **Campos del wizard de pairing.** Con las autodetecciones (def. 13) la lista tentativa quedó más corta: nombre del device, host/IP de Pantea Home Manager (+puerto), entidad remote, code de la planilla (**opcional** — vacío = modo legacy, def. 13), device fuente de temperatura (drop-down, def. 9), auto-on al mover temperatura. ¿Confirmás? ¿Algo más/menos?
 5. ~~Retorno HA→Homey~~ → RESUELTO (definición 9): measure_temperature se espeja de otro device de Homey elegido en pairing/settings; sin device fuente, se quita la capability.

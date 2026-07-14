@@ -29,6 +29,8 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 
 - Ampliada def. 13: el code es OPCIONAL — sin code el device es 100% legacy (el servidor resuelve con lo aprendido del remote) y el override de "encendido en 2 pasos" es lo que habilita la secuencia de 2 pasos.
 
+- Def. 16: learning + 2 pasos → cambio de modo aprende solo el comando de modo (resto vacío); cambio de temperatura aprende el comando completo (se repite para cubrir 16–30°).
+
 ### Pendiente / próximo paso
 - Últimas preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (confirmar campos wizard), 8 (alcance/Flow cards), 14 (cache: ¿botón "recargar códigos"?), y detalle del wait de 2s (¿fijo o configurable?).
 - Después: armar la propuesta de diseño completa (capabilities, modelo de estado, flujo de comandos, wizard) — ya hay definiciones suficientes.
