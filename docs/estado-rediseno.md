@@ -39,9 +39,11 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 
 - Def. 20: la palabra "virtual" no aparece en ningún texto visible — el driver se muestra "Aire Acondicionado".
 
+- **Escrito el plan de implementación: [plan-implementacion.md](plan-implementacion.md)** — 8 etapas (0 limpieza → 1 ir-codes → 2 command-sender/telegram → 3 driver mínimo → 4 wizard → 5 temp-mirror → 6 flow cards → 7 cierre/migración), cada una con su prueba.
+
 ### Pendiente / próximo paso
-- **Plan de implementación y a codear** según [propuesta-diseno.md](propuesta-diseno.md).
-- ⚠️ Dependencia externa: **extender el Apps Script** para exponer la hoja "Marcas" (verificado que hoy no la devuelve — `?code=Marcas` etc. dan `[]`). Lo hace Fernán; el wizard degrada elegante si no está.
+- Fernán revisa/aprueba el plan → arrancar por la Etapa 0.
+- ⚠️ Dependencia externa: **extender el Apps Script** para exponer la hoja "Marcas" (verificado que hoy no la devuelve — `?code=Marcas` etc. dan `[]`). Lo hace Fernán, en paralelo; el wizard degrada elegante si no está (lo necesita la Etapa 4).
 - Ofrecido: armar borrador de propuesta de diseño con lo ya definido, marcando lo pendiente como variantes.
 - Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
