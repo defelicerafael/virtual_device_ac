@@ -12,10 +12,11 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - Detectado que el `app.json` compilado no incluye modos dry/fan ni `ha_port` por duplicación de config entre `.homeycompose/app.json` y `driver.compose.json`.
 - Respondidas las preguntas 1 y 2 (on/off restaura último modo pero gana la temperatura vigente del tile; modos +dry/fan; fan_mode con opción "aprendido" por device) → sección "Definiciones tomadas".
 - Apareció requisito nuevo indispensable: incorporar la lógica del HomeyScript "PS Broadlink" (Homey Pro San Fran) que hoy hace el trabajo real, incluida la consulta de códigos a un webservice de Google Spreadsheet.
+- Respondida la pregunta 4: alta solo por instalador → wizard de pairing con vistas custom; `codigo_ac` fijo "ac1" (el código configurable pasa a ser el del lookup en el spreadsheet).
 
 ### Pendiente / próximo paso
 - **Conseguir el código del HomeyScript "PS Broadlink.js"** del Homey Pro San Fran (no hay copia en el Drive) y documentarlo — pregunta 9 de [rediseno-app.md](rediseno-app.md).
-- Fernán tiene que responder las preguntas abiertas restantes (3–9); la 3 y la 4 destraban la propuesta de diseño.
+- Fernán tiene que responder las preguntas abiertas restantes (3, 4-campos-wizard, 5–9); la 3 y el detalle del código del spreadsheet destraban la propuesta de diseño.
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Después: definir implementación juntos.
 
