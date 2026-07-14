@@ -1,6 +1,6 @@
 # Propuesta de diseño — nueva com.panteasmart.devices
 
-BORRADOR para revisar con Fernán antes de escribir código. Basada en las definiciones 1–19 de [rediseno-app.md](rediseno-app.md). Los puntos marcados **[CONSULTAR]** necesitan su ok (método: proponer alternativas y consultar nombres antes de fijarlos).
+APROBADA por Fernán el 2026-07-13 (con los ajustes de esa revisión incorporados). Basada en las definiciones 1–19 de [rediseno-app.md](rediseno-app.md).
 
 ## 1. Visión general
 
@@ -10,7 +10,7 @@ Estructura preparada para más tipos de device a futuro: la lógica compartida (
 
 ## 2. Driver y capabilities
 
-- Driver id: **[CONSULTAR]** propongo `ac` (nuevo, limpio). Alternativa: mantener `virtual_ac` (no hay migración que proteger — los tiles actuales no son de esta app — pero da continuidad con lo publicado).
+- Driver id: **`ac`** (decidido 2026-07-13).
 - Class: `thermostat`.
 
 | Capability | Tipo | Valores / opciones | Notas |
@@ -19,12 +19,12 @@ Estructura preparada para más tipos de device a futuro: la lógica compartida (
 | `thermostat_mode` | estándar | off/auto/heat/cool/dry/fan | def. 2 |
 | `target_temperature` | estándar | 16–30 °C paso 1 | |
 | `measure_temperature` | estándar | — | Solo si hay device fuente (def. 9); se quita si no |
-| `fan_mode` | **custom** | auto/low/medium/high/turbo | def. 11. **[CONSULTAR]** nombre: propongo `fan_mode`; alt.: `pantea_fan_speed` |
+| `fan_mode` | **custom** | auto/low/medium/high/turbo | def. 11. Nombre `fan_mode` (decidido) |
 | `swing_on_off` | custom | toggle | def. 5; mismo id que la app vieja |
 | `sleep_on_off` | custom | toggle | def. 5; mismo id que la app vieja |
 | `learning_mode` | custom | botón | def. 7; se apaga tras el primer comando |
 
-**[CONSULTAR]** capabilities custom: propongo conservar los ids de la app vieja (`swing_on_off`, `sleep_on_off`, `learning_mode`) para no reinventar; solo se agrega `fan_mode`.
+Capabilities custom (decidido): se conservan los ids de la app vieja (`swing_on_off`, `sleep_on_off`, `learning_mode`); solo se agrega `fan_mode`.
 
 ## 3. Modelo de estado
 
@@ -56,11 +56,11 @@ Reglas particulares:
 - **fan efectivo**: si "fan aprendido" (auto o forzado) es NO → se envía siempre `auto` (def. 2).
 - **Swing**: comando propio (`swing_on`/`swing_off`). Al prender: si los códigos swing_on ≠ swing_off del code → después del encendido se manda el del estado del tile; si son iguales o no hay code → no se manda (def. 5).
 - **Encender al cambiar temperatura** (setting): si está apagado y se mueve la temperatura → prende al último modo (como hoy). Si está deshabilitado → el cambio queda en el tile y se aplica al prender (def. 1).
-- El **wait de 2s** del encendido en 2 pasos: constante interna (no setting) — **[CONSULTAR]** ¿ok fijo?
+- El **wait de 2s** del encendido en 2 pasos: constante interna, fija (decidido).
 
 ## 5. Servicios compartidos (`lib/`)
 
-**[CONSULTAR]** nombres de módulos y funciones principales:
+Nombres de módulos y funciones (decididos 2026-07-13):
 
 | Módulo propuesto | Responsabilidad | Funciones clave (propuestas) |
 |---|---|---|
@@ -80,7 +80,7 @@ Reglas particulares:
 
 ## 7. Wizard de pairing (def. 3 y 17)
 
-Vista custom única (o dos pasos si queda larga — **[CONSULTAR]** preferencia):
+Vista custom única:
 
 1. Nombre del device
 2. Host/IP de Pantea Home Manager (default `panteasmart.local`) + puerto (default 8123)
@@ -89,21 +89,33 @@ Vista custom única (o dos pasos si queda larga — **[CONSULTAR]** preferencia)
 5. Device fuente de temperatura (drop-down de devices con `measure_temperature` + opción "Ninguno")
 6. Encender al cambiar temperatura (checkbox, default sí)
 
-Validación en el wizard: si hay code, se consulta el webservice ahí mismo (feedback inmediato: "code 3: 31 comandos — cool/heat, fan auto" / "code no encontrado").
+Validación en el wizard: si hay code, se consulta el webservice ahí mismo con feedback inmediato: qué comandos tiene ("code 3: 31 comandos — cool/heat, fan auto") **y a qué marcas/modelos aplica** (decidido 2026-07-13; el dato está en la hoja "Marcas" del spreadsheet).
 
-## 8. Flow cards de acción (def. 19)
+**⚠️ Requiere extender el Apps Script:** verificado 2026-07-13 que el webservice actual solo filtra por `code` en la hoja de códigos (`?code=Marcas`, `?sheet=`, `?brands=` devuelven `[]`). Hace falta agregarle un endpoint/parámetro (ej. `?marcas={code}`) que devuelva las filas de la hoja "Marcas". Lo coordina Fernán, que mantiene el Apps Script. Si el code no trae marcas, el wizard lo muestra igual sin esa línea.
 
-**[CONSULTAR]** lista propuesta:
+## 8. Flow cards (def. 19 — acción, triggers y conditions decididos 2026-07-13)
 
-1. Prender (al último modo) / Apagar
-2. Setear modo (picker off/auto/heat/cool/dry/fan)
-3. Setear temperatura
-4. Setear velocidad (picker con turbo)
-5. Swing on/off, Sleep on/off
+Las de capabilities estándar (`onoff`, `target_temperature`, `thermostat_mode`) las genera Homey solo. Cards propias para lo custom:
 
-(Las estándar de `onoff`/`target_temperature`/`thermostat_mode` las da Homey solo por las capabilities; las custom necesitan cards propias: fan, swing, sleep.)
+**Acciones:**
+1. Prender (al último modo) / Apagar *(estándar, gratis)*
+2. Setear modo *(estándar, gratis)*
+3. Setear temperatura *(estándar, gratis)*
+4. Setear velocidad (picker auto/low/medium/high/turbo)
+5. Swing on/off
+6. Sleep on/off
 
-¿Triggers/conditions también? (ej. "se encendió", "el modo es X") — no pedidas; se pueden sumar después sin romper nada.
+**Triggers:**
+1. Se encendió / se apagó *(estándar, gratis)*
+2. Cambió el modo *(estándar, gratis)*
+3. Cambió la velocidad
+4. Swing cambió / Sleep cambió
+
+**Conditions:**
+1. Está encendido *(estándar, gratis)*
+2. El modo es X *(estándar, gratis)*
+3. La velocidad es X
+4. Swing está on / Sleep está on
 
 ## 9. Migración y limpieza
 

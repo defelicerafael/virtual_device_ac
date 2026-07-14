@@ -35,11 +35,11 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - **Escrita la propuesta de diseño completa: [propuesta-diseno.md](propuesta-diseno.md)** (BORRADOR) — arquitectura, capabilities, flujo de comando, lib/, wizard, flow cards, migración. Con puntos [CONSULTAR].
 
 ### Fase actual (actualizada)
-**Revisión de la propuesta de diseño.** Todas las preguntas de producto están respondidas (1–19 en definiciones).
+**Propuesta de diseño APROBADA (2026-07-13).** Todas las preguntas de producto respondidas; todos los [CONSULTAR] decididos: driver `ac`, capability `fan_mode` + ids viejos, wait 2s fijo, wizard de una vista con info de marcas del code, flow cards de acción + triggers + conditions, nombres de lib/ ok.
 
 ### Pendiente / próximo paso
-- Fernán revisa [propuesta-diseno.md](propuesta-diseno.md) y responde los [CONSULTAR]: driver id (`ac` vs `virtual_ac`), nombre de `fan_mode`, conservar ids de capabilities viejas, wait 2s fijo, wizard en 1 o 2 vistas, lista de flow cards, nombres de módulos/funciones de lib/.
-- Con la propuesta aprobada: plan de implementación y a codear.
+- **Plan de implementación y a codear** según [propuesta-diseno.md](propuesta-diseno.md).
+- ⚠️ Dependencia externa: **extender el Apps Script** para exponer la hoja "Marcas" (verificado que hoy no la devuelve — `?code=Marcas` etc. dan `[]`). Lo hace Fernán; el wizard degrada elegante si no está.
 - Ofrecido: armar borrador de propuesta de diseño con lo ya definido, marcando lo pendiente como variantes.
 - Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
