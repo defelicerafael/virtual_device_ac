@@ -20,9 +20,11 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - Resuelta la pregunta 3: al prender, swing/sleep conservan lo vigente en el tile; sleep va implícito en el comando completo; swing se reenvía tras el encendido SOLO si `swing_on` ≠ `swing_off` en la planilla (si son iguales = toggle, no se manda).
 - Definición 6 (branding): el usuario NUNCA ve "Home Assistant" — todos los textos de la app dicen "Pantea Home Manager" (campo de conexión: "Host/IP de Pantea Home Manager").
 - Definición 7: learning pasa a ser botón POR DEVICE (reemplaza el botón global "Aprender AC"); activo → el próximo comando va a `ac_learn`.
+- Definiciones 8–11 (ronda AskUserQuestion): fallback legacy sigue vivo; measure_temperature se espeja de un device fuente elegido en pairing (drop-down) / editable en settings con validación, sin fuente → se quita la capability dinámicamente; errores = reintentos + warning + revertir UI + Telegram (reusando config del tile "Envio a Telegram" de lights); fan_mode con turbo.
+- Verificado en lights: driver `virtual_telegram` con settings token/chat cliente/chat soporte como fuente canónica, y uso real de add/removeCapability dinámico (factible).
 
 ### Pendiente / próximo paso
-- Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (campos wizard), 5–8, 11–15 (fallback legacy sí/no, learning global vs por device, modo/ON separado, invalidación de cache, formato/ejemplo de la planilla).
+- Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (campos wizard + ejemplo del code), 8 (alcance/Flow cards), 13 (modo/ON separado como opción), 14 (invalidación de cache), 15 (planilla: quién la mantiene, ejemplo de filas, URL configurable), resto de la 7 (flujo ac_learn del lado servidor) y confirmación de que learning se apaga solo tras un comando.
 - Ofrecido: armar borrador de propuesta de diseño con lo ya definido, marcando lo pendiente como variantes.
 - Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
