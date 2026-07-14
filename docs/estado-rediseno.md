@@ -22,6 +22,6 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - Proponer alternativas y consultar nombres antes de fijarlos.
 
 ### Contexto útil
-- Repo git en `Homey/Apps/com.panteasmart.devices`, branch `master` (origin en GitHub). Hay un `app.json` modificado sin commitear previo a este trabajo.
+- Repo git en `Homey/Apps/com.panteasmart.devices`. El rediseño vive en el branch **`claude`** (creado desde `master` el 2026-07-13), igual que en lights. Hay un `app.json` modificado sin commitear previo a este trabajo (solo un texto de label) y dos stashes viejos.
 - Lado HA: webhooks `ac_command` / `ac_learn`, patrón scripts Broadlink (HA fatato 192.168.68.60, RM4 Pro).
 - Debug de apps Homey: SSH a panteasmart-ferno, `/opt/pantea/scripts/homey-app run/log/install` (ojo gotcha DNS homeylocal en dev-mode).
