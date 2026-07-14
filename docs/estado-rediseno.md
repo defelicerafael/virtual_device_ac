@@ -13,10 +13,11 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - Respondidas las preguntas 1 y 2 (on/off restaura último modo pero gana la temperatura vigente del tile; modos +dry/fan; fan_mode con opción "aprendido" por device) → sección "Definiciones tomadas".
 - Apareció requisito nuevo indispensable: incorporar la lógica del HomeyScript "PS Broadlink" (Homey Pro San Fran) que hoy hace el trabajo real, incluida la consulta de códigos a un webservice de Google Spreadsheet.
 - Respondida la pregunta 4: alta solo por instalador → wizard de pairing con vistas custom; `codigo_ac` fijo "ac1" (el código configurable pasa a ser el del lookup en el spreadsheet).
+- **Conseguido y analizado el HomeyScript "PS Broadlink"**: copia en [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js), análisis en [ps-broadlink-analisis.md](ps-broadlink-analisis.md). Hallazgo clave: en producción los tiles son de la app Device Capabilities + Flows + script — la nueva app reemplaza a los tres. Lookup IR: cache → planilla (`command_code`) → fallback legacy; secuencia "modo/ON separado"; learning con botón global; fan_mode incluye turbo.
 
 ### Pendiente / próximo paso
-- **Conseguir el código del HomeyScript "PS Broadlink.js"** del Homey Pro San Fran (no hay copia en el Drive) y documentarlo — pregunta 9 de [rediseno-app.md](rediseno-app.md).
-- Fernán tiene que responder las preguntas abiertas restantes (3, 4-campos-wizard, 5–9); la 3 y el detalle del código del spreadsheet destraban la propuesta de diseño.
+- Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 3 (sleep al apagar/prender), 4 (campos wizard), 5–8, y las nuevas 10–15 que salieron del script (swing ausente del payload, fallback legacy sí/no, learning global vs por device, modo/ON separado, invalidación de cache, formato de la planilla).
+- Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Después: definir implementación juntos.
 
