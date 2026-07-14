@@ -23,8 +23,10 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - Definiciones 8–11 (ronda AskUserQuestion): fallback legacy sigue vivo; measure_temperature se espeja de un device fuente elegido en pairing (drop-down) / editable en settings con validación, sin fuente → se quita la capability dinámicamente; errores = reintentos + warning + revertir UI + Telegram (reusando config del tile "Envio a Telegram" de lights); fan_mode con turbo.
 - Verificado en lights: driver `virtual_telegram` con settings token/chat cliente/chat soporte como fuente canónica, y uso real de add/removeCapability dinámico (factible).
 
+- Relevada la planilla IR consultando el webservice en vivo → [planilla-ir.md](planilla-ir.md). Code = entero, sirve para varias marcas. Hallazgo: code 5 ya tiene filas de modo-solo → se puede AUTODETECTAR "modo/ON separado" (y quizás "fan_mode aprendido") desde la planilla en vez de flag manual.
+
 ### Pendiente / próximo paso
-- Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (campos wizard + ejemplo del code), 8 (alcance/Flow cards), 13 (modo/ON separado como opción), 14 (invalidación de cache), 15 (planilla: quién la mantiene, ejemplo de filas, URL configurable), resto de la 7 (flujo ac_learn del lado servidor) y confirmación de que learning se apaga solo tras un comando.
+- Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 4 (campos wizard), 8 (alcance/Flow cards), 13 (autodetección vs flag manual), 14 (invalidación de cache), 15 (quién mantiene la planilla, URL configurable), resto de la 7 (flujo ac_learn del lado servidor) y confirmación de que learning se apaga solo tras un comando.
 - Ofrecido: armar borrador de propuesta de diseño con lo ya definido, marcando lo pendiente como variantes.
 - Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
