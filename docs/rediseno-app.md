@@ -79,6 +79,8 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 18. **Cache de códigos (2026-07-13).** Alcanza con el botón **"recargar códigos"** (maintenance action en settings del device).
 19. **Flow cards (2026-07-13).** Sí, se necesitan **cards de acción** (lista concreta a definir en la propuesta de diseño).
 
+20. **Sin la palabra "virtual" (2026-07-13).** La palabra "virtual" no aparece en NINGÚN texto visible al usuario: el driver se muestra como **"Aire Acondicionado"** (no "Virtual Air Conditioner") al agregar el device, y el nombre por defecto del device tampoco la lleva. Complementa la definición 6 (branding).
+
 ## Preguntas abiertas
 4. ~~Campos del wizard~~ → RESUELTO (definición 17).
 5. ~~Retorno HA→Homey~~ → RESUELTO (definición 9): measure_temperature se espeja de otro device de Homey elegido en pairing/settings; sin device fuente, se quita la capability.

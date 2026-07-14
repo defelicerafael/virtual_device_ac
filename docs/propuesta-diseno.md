@@ -4,13 +4,14 @@ APROBADA por Fernán el 2026-07-13 (con los ajustes de esa revisión incorporado
 
 ## 1. Visión general
 
-Una app, un driver de AC virtual. Cada device reemplaza a un trío actual (tile Device Capabilities + Flow + HomeyScript PS Broadlink): escucha sus propias capabilities, resuelve el comando IR (planilla → cache → legacy) y lo POSTea al webhook del servidor. Todo lo visible dice "Pantea Home Manager", nunca Home Assistant.
+Una app, un driver de aire acondicionado. Cada device reemplaza a un trío actual (tile Device Capabilities + Flow + HomeyScript PS Broadlink): escucha sus propias capabilities, resuelve el comando IR (planilla → cache → legacy) y lo POSTea al webhook del servidor. Todo lo visible dice "Pantea Home Manager", nunca Home Assistant, y la palabra "virtual" no aparece en ningún texto de cara al usuario (def. 20).
 
 Estructura preparada para más tipos de device a futuro: la lógica compartida (planilla, envío, Telegram, espejo de temperatura) vive en `lib/`, el driver solo orquesta. Agregar un tipo nuevo = nuevo driver que reusa `lib/`.
 
 ## 2. Driver y capabilities
 
 - Driver id: **`ac`** (decidido 2026-07-13).
+- Nombre visible del driver: **"Aire Acondicionado"** — la palabra "virtual" no aparece en ningún texto visible al usuario (def. 20), ni en el alta del device ni en el nombre por defecto.
 - Class: `thermostat`.
 
 | Capability | Tipo | Valores / opciones | Notas |

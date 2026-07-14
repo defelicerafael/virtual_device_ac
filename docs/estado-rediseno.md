@@ -37,6 +37,8 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ### Fase actual (actualizada)
 **Propuesta de diseño APROBADA (2026-07-13).** Todas las preguntas de producto respondidas; todos los [CONSULTAR] decididos: driver `ac`, capability `fan_mode` + ids viejos, wait 2s fijo, wizard de una vista con info de marcas del code, flow cards de acción + triggers + conditions, nombres de lib/ ok.
 
+- Def. 20: la palabra "virtual" no aparece en ningún texto visible — el driver se muestra "Aire Acondicionado".
+
 ### Pendiente / próximo paso
 - **Plan de implementación y a codear** según [propuesta-diseno.md](propuesta-diseno.md).
 - ⚠️ Dependencia externa: **extender el Apps Script** para exponer la hoja "Marcas" (verificado que hoy no la devuelve — `?code=Marcas` etc. dan `[]`). Lo hace Fernán; el wizard degrada elegante si no está.
