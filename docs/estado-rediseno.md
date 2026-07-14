@@ -15,8 +15,10 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - Respondida la pregunta 4: alta solo por instalador → wizard de pairing con vistas custom; `codigo_ac` fijo "ac1" (el código configurable pasa a ser el del lookup en el spreadsheet).
 - **Conseguido y analizado el HomeyScript "PS Broadlink"**: copia en [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js), análisis en [ps-broadlink-analisis.md](ps-broadlink-analisis.md). Hallazgo clave: en producción los tiles son de la app Device Capabilities + Flows + script — la nueva app reemplaza a los tres. Lookup IR: cache → planilla (`command_code`) → fallback legacy; secuencia "modo/ON separado"; learning con botón global; fan_mode incluye turbo.
 
+- Definición 5: swing/sleep se modelan con códigos on/off separados (si el aire es toggle, se repite el código en ambas filas).
+
 ### Pendiente / próximo paso
-- Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 3 (sleep al apagar/prender), 4 (campos wizard), 5–8, y las nuevas 10–15 que salieron del script (swing ausente del payload, fallback legacy sí/no, learning global vs por device, modo/ON separado, invalidación de cache, formato de la planilla).
+- Fernán tiene que responder las preguntas abiertas de [rediseno-app.md](rediseno-app.md): 3 (swing/sleep al apagar/prender + ¿sleep sigue en la clave compuesta o pasa a comando separado?), 4 (campos wizard), 5–8, 11–15 (fallback legacy sí/no, learning global vs por device, modo/ON separado, invalidación de cache, formato/ejemplo de la planilla).
 - Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
 - Después: definir implementación juntos.
