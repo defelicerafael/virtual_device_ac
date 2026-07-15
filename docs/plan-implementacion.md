@@ -64,7 +64,7 @@ Compose de acciones/triggers/conditions propias (velocidad, swing, sleep — sec
 1. `homey app validate` nivel publish; íconos/imágenes propios (sin "virtual").
 2. Checklist de regresión completa (todas las reglas de las definiciones 1–20, una por una).
 3. Migración de los aires reales de San Fran: alta con wizard → borrar tile DC + Flow correspondiente → cuando no quede ninguno, retirar el HomeyScript PS Broadlink.
-4. Sync final de docs (regla de siempre) + versión 2.0.0.
+4. Sync final de docs (regla de siempre). (La versión 2.0.0 se adelantó: fijada el 2026-07-15 a pedido de Fernán, con `.homeychangelog.json`. Los bumps siguientes van con el workflow manual de GitHub "Update Homey App Version".)
 
 ## Dependencia externa (en paralelo, la maneja Fernán)
 
