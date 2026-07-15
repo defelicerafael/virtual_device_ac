@@ -1,8 +1,11 @@
 {
   "type": "boolean",
-  "title": { "en": "Sleep" },
+  "title": {
+    "en": "Sleep",
+    "es": "Sleep"
+  },
   "getable": true,
   "setable": true,
-  "uiComponent": "button",
+  "uiComponent": "toggle",
   "uiQuickAction": false
 }

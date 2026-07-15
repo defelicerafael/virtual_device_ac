@@ -1,6 +1,9 @@
 {
   "type": "boolean",
-  "title": { "en": "Learning" },
+  "title": {
+    "en": "Learning",
+    "es": "Aprender"
+  },
   "getable": true,
   "setable": true,
   "uiComponent": "button",

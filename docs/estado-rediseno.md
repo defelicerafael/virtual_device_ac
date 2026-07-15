@@ -5,7 +5,7 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ## Última actualización: 2026-07-15
 
 ### Fase actual
-**Implementación — Etapas 0, 1 y 2 completas.** Siguiente: Etapa 3 (driver `ac` mínimo probado contra servidor real).
+**Implementación — Etapas 0–2 completas; Etapa 3 con CÓDIGO COMPLETO, falta la prueba contra servidor real** (`homey-app run` en ferno + verificar POSTs en HA — coordinar con Fernán contra qué Homey/HA probar).
 
 ### Mapa de documentos
 - [rediseno-app.md](rediseno-app.md) — las 20 definiciones de producto + relevamiento de la app vieja. TODO el detalle de qué hace la app está ahí.
@@ -27,7 +27,13 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
   - `TelegramNotifier.notifyFailure()`: chat de SOPORTE con fallback a chat cliente (config del tile de lights vía `getChannelConfig` inyectado — el cableado HomeyAPI va en Etapa 5). Nunca lanza.
   - **33 tests en verde** (incluye fixture sintético code 99 con filas swing_on/swing_off, que la planilla real aún no tiene). Validate publish sigue OK.
   - ⚠️ Decisiones menores a confirmar con Fernán: (a) learning SIN temp también aplica cuando el trigger es modo en devices no-2-pasos (aprende el rango del modo elegido); (b) aviso Telegram va a chat soporte, fallback cliente.
-- ⬜ Etapa 3 — Driver `ac` mínimo (pairing provisorio) probado contra HA real
+- 🟡 **Etapa 3 — Driver `ac` (2026-07-15): código completo, PENDIENTE prueba real.**
+  - Capabilities: `fan_mode` nueva (picker con turbo, es/en); `swing_on_off`/`sleep_on_off` pasados a toggle; `learning_mode` botón; `button.reload_codes` como maintenance action.
+  - `driver.compose.json`: "Aire Acondicionado" (sin "virtual"), class thermostat, modos off/auto/cool/heat/dry/fan (es/en), temp 16–30, settings agrupados (Conexión: host/puerto PHM + entidad remote; Equipo: code, fuente de temperatura, encender al cambiar temperatura; Avanzado: overrides 3 estados). Pairing PROVISORIO (template estándar; wizard en Etapa 4).
+  - `device.js`: todas las reglas — on/off restaura último modo (store `last_mode`); temp con auto-on enciende (trigger mode ⇒ 2 pasos) o queda en tile; fan/sleep/swing en off no envían; swing post-encendido solo si `swing_on`≠`swing_off`; learning por device que se apaga tras el primer comando; falla ⇒ warning + Telegram + THROW (la UI revierte sola — las capabilities acompañantes se setean solo tras éxito); measure_temperature se agrega/quita según `temp_source` (espejo real en Etapa 5); validación de code numérico en onSettings.
+  - `app.js`: servicios compartidos (irCodes con URL en settings de app + default PS Broadlink, commandSender, telegram stub hasta Etapa 5).
+  - Assets: ícono del driver recuperado del viejo; imágenes placeholder.
+  - ✅ validate publish OK, 33/33 tests. **Falta:** correr en Homey real y verificar POSTs (checklist en plan-implementacion.md Etapa 3).
 - ⬜ Etapa 4 — Wizard custom (necesita `?marcas=` del Apps Script)
 - ⬜ Etapa 5 — `lib/temp-mirror.js` + Telegram real
 - ⬜ Etapa 6 — Flow cards

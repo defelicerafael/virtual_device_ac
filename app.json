@@ -29,11 +29,340 @@
     "name": "Pantea Smart",
     "email": "fernanpizarro@gmail.com"
   },
+  "drivers": [
+    {
+      "name": {
+        "en": "Air Conditioner",
+        "es": "Aire Acondicionado"
+      },
+      "class": "thermostat",
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [],
+      "images": {
+        "small": "/drivers/ac/assets/images/small.png",
+        "large": "/drivers/ac/assets/images/large.png",
+        "xlarge": "/drivers/ac/assets/images/xlarge.png"
+      },
+      "capabilities": [
+        "onoff",
+        "thermostat_mode",
+        "target_temperature",
+        "measure_temperature",
+        "fan_mode",
+        "swing_on_off",
+        "sleep_on_off",
+        "learning_mode",
+        "button.reload_codes"
+      ],
+      "capabilitiesOptions": {
+        "target_temperature": {
+          "min": 16,
+          "max": 30,
+          "step": 1,
+          "units": {
+            "en": "°C"
+          }
+        },
+        "thermostat_mode": {
+          "values": [
+            {
+              "id": "off",
+              "title": {
+                "en": "Off",
+                "es": "Apagado"
+              }
+            },
+            {
+              "id": "auto",
+              "title": {
+                "en": "Auto",
+                "es": "Auto"
+              }
+            },
+            {
+              "id": "cool",
+              "title": {
+                "en": "Cool",
+                "es": "Frío"
+              }
+            },
+            {
+              "id": "heat",
+              "title": {
+                "en": "Heat",
+                "es": "Calor"
+              }
+            },
+            {
+              "id": "dry",
+              "title": {
+                "en": "Dry",
+                "es": "Secado"
+              }
+            },
+            {
+              "id": "fan",
+              "title": {
+                "en": "Fan",
+                "es": "Ventilador"
+              }
+            }
+          ]
+        },
+        "button.reload_codes": {
+          "maintenanceAction": true,
+          "title": {
+            "en": "Reload codes",
+            "es": "Recargar códigos"
+          },
+          "desc": {
+            "en": "Reload this device's command codes from the code sheet.",
+            "es": "Vuelve a cargar los códigos de comandos de este equipo desde la planilla."
+          }
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Connection",
+            "es": "Conexión"
+          },
+          "children": [
+            {
+              "id": "phm_host",
+              "type": "text",
+              "label": {
+                "en": "Pantea Home Manager host/IP",
+                "es": "Host/IP de Pantea Home Manager"
+              },
+              "value": "panteasmart.local"
+            },
+            {
+              "id": "phm_port",
+              "type": "number",
+              "label": {
+                "en": "Pantea Home Manager port",
+                "es": "Puerto de Pantea Home Manager"
+              },
+              "value": 8123
+            },
+            {
+              "id": "remote_entity",
+              "type": "text",
+              "label": {
+                "en": "Remote entity",
+                "es": "Entidad remote"
+              },
+              "hint": {
+                "en": "Name of the IR remote in Pantea Home Manager (without the 'remote.' prefix).",
+                "es": "Nombre del control IR en Pantea Home Manager (sin el prefijo 'remote.')."
+              },
+              "value": ""
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Equipment",
+            "es": "Equipo"
+          },
+          "children": [
+            {
+              "id": "code",
+              "type": "text",
+              "label": {
+                "en": "Code (code sheet)",
+                "es": "Code (planilla de códigos)"
+              },
+              "hint": {
+                "en": "Numeric code from the code sheet. Leave empty to let the server resolve commands with what this remote has learned.",
+                "es": "Code numérico de la planilla de códigos. Dejar vacío para que el servidor resuelva los comandos con lo aprendido por este control."
+              },
+              "value": ""
+            },
+            {
+              "id": "temp_source",
+              "type": "text",
+              "label": {
+                "en": "Temperature source device",
+                "es": "Dispositivo fuente de temperatura"
+              },
+              "hint": {
+                "en": "Name of the device whose temperature is shown on this tile. Empty: no temperature is shown.",
+                "es": "Nombre del dispositivo cuya temperatura se muestra en este tile. Vacío: no se muestra temperatura."
+              },
+              "value": ""
+            },
+            {
+              "id": "auto_on",
+              "type": "checkbox",
+              "label": {
+                "en": "Turn on when temperature changes",
+                "es": "Encender al cambiar temperatura"
+              },
+              "hint": {
+                "en": "If the unit is off and the temperature is changed, turn it on in the last used mode.",
+                "es": "Si el equipo está apagado y se cambia la temperatura, se enciende en el último modo utilizado."
+              },
+              "value": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Advanced",
+            "es": "Avanzado"
+          },
+          "children": [
+            {
+              "id": "two_step_override",
+              "type": "dropdown",
+              "label": {
+                "en": "Two-step power on",
+                "es": "Encendido en 2 pasos"
+              },
+              "hint": {
+                "en": "Auto: decided by the code sheet (codes with mode-only commands). Without a code, 'Auto' means no.",
+                "es": "Auto: lo decide la planilla (codes con comandos de modo solo). Sin code, 'Auto' equivale a no."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Auto (from code sheet)",
+                    "es": "Auto (según planilla)"
+                  }
+                },
+                {
+                  "id": "yes",
+                  "label": {
+                    "en": "Force yes",
+                    "es": "Forzar sí"
+                  }
+                },
+                {
+                  "id": "no",
+                  "label": {
+                    "en": "Force no",
+                    "es": "Forzar no"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "learned_fan_override",
+              "type": "dropdown",
+              "label": {
+                "en": "Fan speed learned",
+                "es": "Velocidad aprendida"
+              },
+              "hint": {
+                "en": "Auto: decided by the code sheet (rows with fan other than auto). If not learned, 'auto' is always sent.",
+                "es": "Auto: lo decide la planilla (filas con velocidad distinta de auto). Si no está aprendida, se envía siempre 'auto'."
+              },
+              "value": "auto",
+              "values": [
+                {
+                  "id": "auto",
+                  "label": {
+                    "en": "Auto (from code sheet)",
+                    "es": "Auto (según planilla)"
+                  }
+                },
+                {
+                  "id": "yes",
+                  "label": {
+                    "en": "Force yes",
+                    "es": "Forzar sí"
+                  }
+                },
+                {
+                  "id": "no",
+                  "label": {
+                    "en": "Force no",
+                    "es": "Forzar no"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "ac"
+    }
+  ],
   "capabilities": {
+    "fan_mode": {
+      "type": "enum",
+      "title": {
+        "en": "Fan speed",
+        "es": "Velocidad"
+      },
+      "uiComponent": "picker",
+      "getable": true,
+      "setable": true,
+      "values": [
+        {
+          "id": "auto",
+          "title": {
+            "en": "Auto",
+            "es": "Auto"
+          }
+        },
+        {
+          "id": "low",
+          "title": {
+            "en": "Low",
+            "es": "Baja"
+          }
+        },
+        {
+          "id": "medium",
+          "title": {
+            "en": "Medium",
+            "es": "Media"
+          }
+        },
+        {
+          "id": "high",
+          "title": {
+            "en": "High",
+            "es": "Alta"
+          }
+        },
+        {
+          "id": "turbo",
+          "title": {
+            "en": "Turbo",
+            "es": "Turbo"
+          }
+        }
+      ]
+    },
     "learning_mode": {
       "type": "boolean",
       "title": {
-        "en": "Learning"
+        "en": "Learning",
+        "es": "Aprender"
       },
       "getable": true,
       "setable": true,
@@ -43,21 +372,23 @@
     "sleep_on_off": {
       "type": "boolean",
       "title": {
-        "en": "Sleep"
+        "en": "Sleep",
+        "es": "Sleep"
       },
       "getable": true,
       "setable": true,
-      "uiComponent": "button",
+      "uiComponent": "toggle",
       "uiQuickAction": false
     },
     "swing_on_off": {
       "type": "boolean",
       "title": {
-        "en": "Swing"
+        "en": "Swing",
+        "es": "Swing"
       },
       "getable": true,
       "setable": true,
-      "uiComponent": "button",
+      "uiComponent": "toggle",
       "uiQuickAction": false
     }
   }

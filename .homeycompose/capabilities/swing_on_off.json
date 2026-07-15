@@ -1,8 +1,11 @@
 {
   "type": "boolean",
-  "title": { "en": "Swing" },
+  "title": {
+    "en": "Swing",
+    "es": "Swing"
+  },
   "getable": true,
   "setable": true,
-  "uiComponent": "button",
+  "uiComponent": "toggle",
   "uiQuickAction": false
 }
