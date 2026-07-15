@@ -15,6 +15,7 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - [plan-implementacion.md](plan-implementacion.md) — las 8 etapas con su forma de prueba.
 - [ps-broadlink-analisis.md](ps-broadlink-analisis.md) + [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js) — el HomeyScript que la app reemplaza.
 - [planilla-ir.md](planilla-ir.md) — formato real del webservice de códigos IR (relevado en vivo).
+- [referencia/apps-script-webservice.gs](referencia/apps-script-webservice.gs) — el Apps Script del webservice (endpoints ?code= y ?marcas=, y extraerAC1 del proceso de la def. 14).
 
 ### Progreso de etapas
 - ✅ **Etapa 0 — Limpieza de base (2026-07-15):**
