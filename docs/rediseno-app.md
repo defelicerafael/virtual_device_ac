@@ -89,6 +89,8 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
     - **Permite habilitar sleep**: si NO → la capability sleep se quita del tile, y en payload legacy y learning se envía siempre `sleep: "off"`.
     - **Permite cambiar la velocidad del fan**: si NO → la capability de velocidad se quita del tile, y en payload legacy y learning se envía siempre `fan: "auto"`.
     - El **wizard pregunta** estas opciones al dar de alta, y la **configuración del tile permite cambiar** la decisión después.
+    - **Etiquetas (2026-07-15):** los nombres de modo van en inglés como en los controles reales — "Permite modo HEAT / DRY / FAN" y "Permite velocidad FAN".
+    - **UI de sleep (2026-07-15):** `sleep_on_off` se muestra como **botón** (junto al botón "Aprender"), no como toggle en la lista.
 
 22. **Alcance del learning de temperaturas (2026-07-15).** Setting en Avanzado "Aprendizaje de temperaturas": **"Rango completo (16–30)"** [default] → el learn va SIN temperatura y el servidor recorre todo el rango en una sesión; **"Temperatura específica"** → el learn va CON la temperatura vigente del tile, para corregir una temperatura mal aprendida sin repetir toda la sesión. Aplica a los learn de estado (no al comando de encendido de 2 pasos ni al swing, que son claves de modo solo). En un aire no-2-pasos, cambiar el modo con learning activo también dispara el learn con este mismo alcance ("cambio a heat con learning = aprendeme heat", rango o temperatura puntual según el setting).
 

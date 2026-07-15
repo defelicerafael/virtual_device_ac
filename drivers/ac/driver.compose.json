@@ -123,19 +123,19 @@
         {
           "id": "allow_heat",
           "type": "checkbox",
-          "label": { "en": "Supports heat mode", "es": "Permite modo calor" },
+          "label": { "en": "Supports HEAT mode", "es": "Permite modo HEAT" },
           "value": true
         },
         {
           "id": "allow_dry",
           "type": "checkbox",
-          "label": { "en": "Supports dry mode", "es": "Permite modo secado" },
+          "label": { "en": "Supports DRY mode", "es": "Permite modo DRY" },
           "value": true
         },
         {
           "id": "allow_fan_mode",
           "type": "checkbox",
-          "label": { "en": "Supports fan mode", "es": "Permite modo ventilador" },
+          "label": { "en": "Supports FAN mode", "es": "Permite modo FAN" },
           "value": true
         },
         {
@@ -165,7 +165,7 @@
         {
           "id": "allow_fan_speed",
           "type": "checkbox",
-          "label": { "en": "Supports fan speed", "es": "Permite cambiar la velocidad" },
+          "label": { "en": "Supports FAN speed", "es": "Permite velocidad FAN" },
           "hint": {
             "en": "If disabled, the speed control is hidden and 'auto' is always sent.",
             "es": "Si se desactiva, se oculta el control de velocidad y se envía siempre 'auto'."
