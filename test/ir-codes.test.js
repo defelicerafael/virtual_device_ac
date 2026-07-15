@@ -94,9 +94,10 @@ describe('IrCodes con fixtures reales del webservice', () => {
   test('swing: hoy la planilla no tiene filas swing_* en ningún code', async () => {
     const swing = await ir.getSwingCommands(1);
     assert.deepEqual(swing, {
-      auto: null, up: null, middle: null, down: null, off: null,
+      on: null, off: null, auto: null, up: null, middle: null, down: null,
     });
     assert.equal(await ir.getSwingCommand(1, 'up'), null);
+    assert.equal(await ir.getSwingCommand(1, 'on'), null);
   });
 
   test('getSummary describe el code para el wizard', async () => {

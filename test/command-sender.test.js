@@ -13,11 +13,12 @@ for (const code of [1, 2, 5]) {
   FIXTURES[code] = fs.readFileSync(path.join(__dirname, 'fixtures', `code${code}.json`), 'utf8');
 }
 // Fixture sintético: la planilla real todavía no tiene filas swing_* (docs/planilla-ir.md).
-// Sigue el formato exacto del webservice; swing multi-posición (def. 5 v2)
-// con códigos distintos y una posición faltante (middle).
+// Sigue el formato exacto del webservice; swing de ambos tipos (def. 5 v3):
+// on/off + posiciones, con una posición faltante (middle).
 FIXTURES[99] = JSON.stringify([
   { code: 99, mode: 'off', fan: '', temp: '', sleep: '', irCommand: 'OFF99' },
   { code: 99, mode: 'cool', fan: 'auto', temp: 24, sleep: 'off', irCommand: 'COOL99' },
+  { code: 99, mode: 'swing_on', fan: '', temp: '', sleep: '', irCommand: 'SWINGON99' },
   { code: 99, mode: 'swing_auto', fan: '', temp: '', sleep: '', irCommand: 'SWINGAUTO99' },
   { code: 99, mode: 'swing_up', fan: '', temp: '', sleep: '', irCommand: 'SWINGUP99' },
   { code: 99, mode: 'swing_down', fan: '', temp: '', sleep: '', irCommand: 'SWINGDOWN99' },
@@ -202,13 +203,16 @@ describe('CommandSender', () => {
     assert.ok(!hf.waits.includes(2000), 'no llegó al wait del paso 2');
   });
 
-  test('swing por posición → POST command_code de esa posición', async () => {
+  test('swing por clave → POST command_code correcto (posiciones y on/off)', async () => {
     const up = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, 'up');
     const off = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, 'off');
+    const on = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, 'on');
     assert.equal(up.ok, true);
     assert.equal(off.ok, true);
+    assert.equal(on.ok, true);
     assert.equal(h.posts[0].payload.command_code, 'SWINGUP99');
     assert.equal(h.posts[1].payload.command_code, 'SWINGOFF99');
+    assert.equal(h.posts[2].payload.command_code, 'SWINGON99');
   });
 
   test('swing en posición sin código (middle) → skipped, sin POST', async () => {

@@ -30,6 +30,7 @@ class AcDriver extends Homey.Driver {
           allow_fan_mode: true,
           allow_sleep: true,
           allow_fan_speed: true,
+          swing_type: 'onoff',
           two_step_override: 'auto',
           learned_fan_override: 'auto',
         },

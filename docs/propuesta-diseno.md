@@ -21,11 +21,12 @@ Estructura preparada para más tipos de device a futuro: la lógica compartida (
 | `target_temperature` | estándar | 16–30 °C paso 1 | |
 | `measure_temperature` | estándar | — | Solo si hay device fuente (def. 9); se quita si no |
 | `fan_mode` | **custom** | auto/low/medium/high/turbo | def. 11. Nombre `fan_mode` (decidido) |
-| `swing_mode` | **custom** | auto/up/middle/down/off | def. 5 v2 (2026-07-15): swing multi-posición, picker |
+| `swing_on_off` | custom | toggle | def. 5 v3: presente si el equipo usa swing tipo "on/off" |
+| `swing_mode` | **custom** | auto/up/middle/down/off | def. 5 v3: presente si el equipo usa swing "por posición" (picker) |
 | `sleep_on_off` | custom | toggle | def. 5; mismo id que la app vieja. Se quita si "no permite sleep" (def. 21) |
 | `learning_mode` | custom | botón | def. 7; se apaga tras el primer comando |
 
-Capabilities custom: se conservan `sleep_on_off` y `learning_mode` de la app vieja; se agregan `fan_mode` y `swing_mode` (reemplaza a `swing_on_off` tras el cambio a multi-posición). `fan_mode` se quita del tile si "no permite cambiar velocidad" (def. 21).
+Capabilities custom: se conservan `sleep_on_off`, `swing_on_off` y `learning_mode` de la app vieja; se agregan `fan_mode` y `swing_mode`. El **tipo de swing** es configurable por equipo (wizard + settings): "on/off" pone `swing_on_off` en el tile, "por posición" pone `swing_mode` — la otra se quita dinámicamente. `fan_mode` se quita si "no permite cambiar velocidad" (def. 21).
 
 **Funciones configurables por equipo (def. 21, 2026-07-15):** cinco flags por device — permite heat / dry / fan (ocultan modos del picker vía `setCapabilityOptions`, con rechazo en listener como red de seguridad), permite sleep y permite velocidad (quitan la capability). Sin sleep → siempre `sleep:"off"` en legacy/learning; sin velocidad → siempre `fan:"auto"`. El wizard los pregunta; los settings del tile permiten cambiarlos.
 
@@ -93,6 +94,7 @@ Vista custom única:
 5. Device fuente de temperatura (drop-down de devices con `measure_temperature` + opción "Ninguno")
 6. Encender al cambiar temperatura (checkbox, default sí)
 7. Funciones del equipo (def. 21): permite heat / dry / fan / sleep / velocidad (checkboxes, default sí)
+8. Tipo de swing (def. 5 v3): on/off | por posición (default on/off — a confirmar)
 
 Validación en el wizard: si hay code, se consulta el webservice ahí mismo con feedback inmediato: qué comandos tiene ("code 3: 31 comandos — cool/heat, fan auto") **y a qué marcas/modelos aplica** (decidido 2026-07-13; el dato está en la hoja "Marcas" del spreadsheet).
 

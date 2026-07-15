@@ -37,6 +37,8 @@ class AcDevice extends Homey.Device {
     this.registerCapabilityListener('target_temperature', (value) => this._onTemperature(value));
     this.registerCapabilityListener('fan_mode', (value) => this._onFanOrSleep('fan', value));
     this.registerCapabilityListener('sleep_on_off', (value) => this._onFanOrSleep('sleep', value));
+    // Swing según tipo (def. 5 v3): el tile tiene UNA de las dos capabilities.
+    this.registerCapabilityListener('swing_on_off', (value) => this._onSwing(value === true ? 'on' : 'off'));
     this.registerCapabilityListener('swing_mode', (value) => this._onSwing(value));
     this.registerCapabilityListener('learning_mode', (value) => this._onLearning(value));
     this.registerCapabilityListener('button.reload_codes', () => this._onReloadCodes());
@@ -108,10 +110,11 @@ class AcDevice extends Homey.Device {
   }
 
   /**
-   * Swing multi-posición (def. 5 v2): comando propio por posición, solo si
-   * la planilla tiene el código. Con learning activo, aprende esa posición.
+   * Swing (def. 5 v3): comando propio por clave — 'on'/'off' (tipo on/off) o
+   * posición (tipo por posición) — solo si la planilla tiene el código. Con
+   * learning activo, aprende esa clave.
    */
-  async _onSwing(position) {
+  async _onSwing(key) {
     const currentMode = this.getCapabilityValue('thermostat_mode') || 'off';
     if (currentMode === 'off' && !this._learning) {
       this.log('Apagado: swing queda en el tile, no se envía.');
@@ -121,15 +124,15 @@ class AcDevice extends Homey.Device {
     const sender = this.homey.app.commandSender;
     let result;
     if (this._learning) {
-      result = await sender.sendSwingLearn(this._config(), position);
+      result = await sender.sendSwingLearn(this._config(), key);
       this._learning = false;
       await this.setCapabilityValue('learning_mode', false).catch(this.error);
     } else {
-      result = await sender.sendSwing(this._config(), position);
+      result = await sender.sendSwing(this._config(), key);
     }
 
     if (!result.ok) return this._failure(result.error);
-    if (result.skipped) this.log(`Swing ${position} sin código en la planilla: solo queda el estado en el tile.`);
+    if (result.skipped) this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
     await this.setWarning(null).catch(() => {});
     return true;
   }
@@ -208,9 +211,9 @@ class AcDevice extends Homey.Device {
       // Hace falta más de un código distinto: con uno solo (o todos
       // repetidos = toggle) no se puede saber el estado real del equipo.
       if (new Set(available).size < 2) return;
-      const position = this.getCapabilityValue('swing_mode');
-      if (!position || !commands[position]) return;
-      const result = await this.homey.app.commandSender.sendSwing(this._config(), position);
+      const key = this._swingKey();
+      if (!key || !commands[key]) return;
+      const result = await this.homey.app.commandSender.sendSwing(this._config(), key);
       if (!result.ok) this.error('No se pudo reenviar swing tras el encendido:', result.error?.message);
     } catch (err) {
       this.error('Error en swing post-encendido:', err);
@@ -243,6 +246,17 @@ class AcDevice extends Homey.Device {
     };
   }
 
+  /** Clave de swing vigente en el tile según el tipo configurado (def. 5 v3). */
+  _swingKey() {
+    if (this.hasCapability('swing_mode')) {
+      return this.getCapabilityValue('swing_mode');
+    }
+    if (this.hasCapability('swing_on_off')) {
+      return this.getCapabilityValue('swing_on_off') === true ? 'on' : 'off';
+    }
+    return null;
+  }
+
   _assertModeAllowed(mode) {
     const settings = this.getSettings();
     const blocked = (mode === 'heat' && settings.allow_heat === false)
@@ -269,6 +283,11 @@ class AcDevice extends Homey.Device {
     };
     await syncCap('sleep_on_off', settings.allow_sleep !== false);
     await syncCap('fan_mode', settings.allow_fan_speed !== false);
+
+    // Tipo de swing (def. 5 v3): una sola de las dos capabilities presente.
+    const positional = settings.swing_type === 'positions';
+    await syncCap('swing_mode', positional);
+    await syncCap('swing_on_off', !positional);
 
     // Filtrado del picker de modos por device. setCapabilityOptions con
     // `values` puede no estar soportado en todas las versiones: si falla,
@@ -329,7 +348,7 @@ class AcDevice extends Homey.Device {
       this.homey.setTimeout(() => this._syncTempCapability().catch(this.error), 500);
     }
 
-    if (changedKeys.some((key) => key.startsWith('allow_'))) {
+    if (changedKeys.some((key) => key.startsWith('allow_') || key === 'swing_type')) {
       // newSettings todavía no está aplicado dentro de onSettings: diferir.
       this.homey.setTimeout(() => this._syncAllowedFeatures().catch(this.error), 500);
     }

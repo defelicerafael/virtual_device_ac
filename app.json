@@ -51,6 +51,7 @@
         "target_temperature",
         "measure_temperature",
         "fan_mode",
+        "swing_on_off",
         "swing_mode",
         "sleep_on_off",
         "learning_mode",
@@ -245,6 +246,35 @@
                 "es": "Permite modo ventilador"
               },
               "value": true
+            },
+            {
+              "id": "swing_type",
+              "type": "dropdown",
+              "label": {
+                "en": "Swing type",
+                "es": "Tipo de swing"
+              },
+              "hint": {
+                "en": "On/off: a simple toggle. Positions: pick moving or a fixed position from a list.",
+                "es": "On/off: un botón simple. Por posición: elegir de una lista entre moviéndose o una posición fija."
+              },
+              "value": "onoff",
+              "values": [
+                {
+                  "id": "onoff",
+                  "label": {
+                    "en": "On/off",
+                    "es": "On/off"
+                  }
+                },
+                {
+                  "id": "positions",
+                  "label": {
+                    "en": "Positions",
+                    "es": "Por posición"
+                  }
+                }
+              ]
             },
             {
               "id": "allow_sleep",
@@ -488,6 +518,17 @@
           }
         }
       ]
+    },
+    "swing_on_off": {
+      "type": "boolean",
+      "title": {
+        "en": "Swing",
+        "es": "Swing"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle",
+      "uiQuickAction": false
     }
   }
 }
