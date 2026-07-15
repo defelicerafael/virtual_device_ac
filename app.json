@@ -492,7 +492,7 @@
     {
       "name": {
         "en": "Air Conditioner Remote",
-        "es": "Control Remoto de Aire Acondicionado"
+        "es": "Control Remoto A/C"
       },
       "class": "thermostat",
       "platforms": [

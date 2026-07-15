@@ -82,7 +82,7 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 18. **Cache de códigos (2026-07-13).** Alcanza con el botón **"recargar códigos"** (maintenance action en settings del device).
 19. **Flow cards (2026-07-13).** Sí, se necesitan **cards de acción** (lista concreta a definir en la propuesta de diseño).
 
-20. **Sin la palabra "virtual" (2026-07-13; nombre final 2026-07-15).** La palabra "virtual" no aparece en NINGÚN texto visible al usuario. El driver se muestra como **"Control Remoto de Aire Acondicionado"** (es) / **"Air Conditioner Remote"** (en) al agregar el device. Complementa la definición 6 (branding).
+20. **Sin la palabra "virtual" (2026-07-13; nombre final 2026-07-15).** La palabra "virtual" no aparece en NINGÚN texto visible al usuario. El driver se muestra como **"Control Remoto A/C"** (es) / **"Air Conditioner Remote"** (en) al agregar el device. Complementa la definición 6 (branding).
 
 21. **Funciones configurables por equipo (2026-07-15).** Cada device configura qué permite:
     - **Permite modo heat** / **modo dry** / **modo fan**: los modos no permitidos se ocultan del picker de modos (vía `setCapabilityOptions` por device — a verificar en la prueba real; red de seguridad: el listener rechaza modos no permitidos).
