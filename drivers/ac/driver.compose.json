@@ -123,19 +123,19 @@
         {
           "id": "allow_heat",
           "type": "checkbox",
-          "label": { "en": "Supports HEAT mode", "es": "Permite modo HEAT" },
+          "label": { "en": "Has HEAT mode?", "es": "Tiene modo HEAT?" },
           "value": true
         },
         {
           "id": "allow_dry",
           "type": "checkbox",
-          "label": { "en": "Supports DRY mode", "es": "Permite modo DRY" },
+          "label": { "en": "Has DRY mode?", "es": "Tiene modo DRY?" },
           "value": true
         },
         {
           "id": "allow_fan_mode",
           "type": "checkbox",
-          "label": { "en": "Supports FAN mode", "es": "Permite modo FAN" },
+          "label": { "en": "Has FAN mode?", "es": "Tiene modo FAN?" },
           "value": true
         },
         {
@@ -155,7 +155,7 @@
         {
           "id": "allow_sleep",
           "type": "checkbox",
-          "label": { "en": "Supports sleep", "es": "Permite sleep" },
+          "label": { "en": "Has Sleep option?", "es": "Tiene opción Sleep?" },
           "hint": {
             "en": "If disabled, the sleep control is hidden and 'off' is always sent.",
             "es": "Si se desactiva, se oculta el control de sleep y se envía siempre 'off'."
@@ -165,10 +165,10 @@
         {
           "id": "allow_fan_speed",
           "type": "checkbox",
-          "label": { "en": "Supports FAN speed", "es": "Permite velocidad FAN" },
+          "label": { "en": "Allow choosing fan speed?", "es": "Permitir elegir Velocidad?" },
           "hint": {
-            "en": "If disabled, the speed control is hidden and 'auto' is always sent.",
-            "es": "Si se desactiva, se oculta el control de velocidad y se envía siempre 'auto'."
+            "en": "If disabled, fan stays 'auto' in every mode.",
+            "es": "Si no está activado queda Ventilador = auto en todos los modos."
           },
           "value": true
         }
