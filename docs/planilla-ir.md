@@ -4,9 +4,10 @@ Fuente: Google Spreadsheet de Fernán ([link](https://docs.google.com/spreadshee
 
 ## Webservice
 
-- `GET https://script.google.com/macros/s/AKfy.../exec?code={code}` (URL completa en [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js)).
+- `GET https://script.google.com/macros/s/AKfy.../exec?code={code}` (URL completa en [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js); código fuente en [referencia/apps-script-webservice.gs](referencia/apps-script-webservice.gs)).
 - **Público, sin auth** (responde a cualquiera que tenga la URL).
 - Devuelve JSON: array de filas de ese `code`.
+- **`?marcas={code}`** (agregado 2026-07-15, para el wizard): filas de la hoja "Marcas" (cols Code/Marca/Modelo) → `[{"Marca":"Surrey","Modelo":"Inverter Smart (2022)"}, ...]`. Verificado en vivo.
 
 ## Formato de fila
 
