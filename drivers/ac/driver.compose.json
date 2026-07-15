@@ -141,15 +141,16 @@
         {
           "id": "swing_type",
           "type": "dropdown",
-          "label": { "en": "Swing type", "es": "Tipo de swing" },
+          "label": { "en": "Swing", "es": "Swing" },
           "hint": {
-            "en": "On/off: a simple toggle. Positions: pick moving or a fixed position from a list.",
-            "es": "On/off: un botón simple. Por posición: elegir de una lista entre moviéndose o una posición fija."
+            "en": "On/off: a simple toggle. Positions: pick moving or a fixed position from a list. Disabled: no swing control on the tile.",
+            "es": "On/off: un botón simple. Por posición: elegir de una lista entre moviéndose o una posición fija. Desactivado: sin control de swing en el tile."
           },
           "value": "onoff",
           "values": [
             { "id": "onoff", "label": { "en": "On/off", "es": "On/off" } },
-            { "id": "positions", "label": { "en": "Positions", "es": "Por posición" } }
+            { "id": "positions", "label": { "en": "Positions", "es": "Por posición" } },
+            { "id": "none", "label": { "en": "Disabled", "es": "Desactivado" } }
           ]
         },
         {

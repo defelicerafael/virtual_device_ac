@@ -309,10 +309,11 @@ class AcDevice extends Homey.Device {
     await syncCap('sleep_on_off', settings.allow_sleep !== false);
     await syncCap('fan_mode', settings.allow_fan_speed !== false);
 
-    // Tipo de swing (def. 5 v3): una sola de las dos capabilities presente.
-    const positional = settings.swing_type === 'positions';
-    await syncCap('swing_mode', positional);
-    await syncCap('swing_on_off', !positional);
+    // Swing (def. 5 v3): 'onoff' → toggle, 'positions' → picker,
+    // 'none' → sin control de swing en el tile.
+    const swingType = settings.swing_type || 'onoff';
+    await syncCap('swing_mode', swingType === 'positions');
+    await syncCap('swing_on_off', swingType === 'onoff');
 
     // Filtrado del picker de modos por device. setCapabilityOptions con
     // `values` puede no estar soportado en todas las versiones: si falla,

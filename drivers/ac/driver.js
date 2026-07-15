@@ -121,7 +121,7 @@ class AcDriver extends Homey.Driver {
           allow_fan_mode: form.allowFanMode !== false,
           allow_sleep: form.allowSleep !== false,
           allow_fan_speed: form.allowFanSpeed !== false,
-          swing_type: form.swingType === 'positions' ? 'positions' : 'onoff',
+          swing_type: ['onoff', 'positions', 'none'].includes(form.swingType) ? form.swingType : 'onoff',
           two_step_override: 'auto',
           learned_fan_override: 'auto',
           learn_temp_scope: 'range',
