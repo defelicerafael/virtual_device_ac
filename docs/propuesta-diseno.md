@@ -12,7 +12,7 @@ Estructura preparada para más tipos de device a futuro: la lógica compartida (
 
 - Driver id: **`ac`** (decidido 2026-07-13).
 - Nombre visible del driver: **"Control Remoto A/C"** (es) / "Air Conditioner Remote" (en) — la palabra "virtual" no aparece en ningún texto visible al usuario (def. 20).
-- Class: `thermostat`.
+- Class: `thermostat` (decidido 2026-07-15: existe la class `airconditioning` y valida OK, pero `thermostat` tiene el mapeo más sólido a Alexa/Google; revisar después de la prueba de Alexa si conviene migrar).
 
 | Capability | Tipo | Valores / opciones | Notas |
 |---|---|---|---|
