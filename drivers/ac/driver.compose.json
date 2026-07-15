@@ -1,7 +1,7 @@
 {
   "name": {
-    "en": "Air Conditioner",
-    "es": "Aire Acondicionado"
+    "en": "Air Conditioner Remote",
+    "es": "Control Remoto de Aire Acondicionado"
   },
   "class": "thermostat",
   "platforms": [

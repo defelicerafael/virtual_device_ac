@@ -11,7 +11,7 @@ Estructura preparada para más tipos de device a futuro: la lógica compartida (
 ## 2. Driver y capabilities
 
 - Driver id: **`ac`** (decidido 2026-07-13).
-- Nombre visible del driver: **"Aire Acondicionado"** — la palabra "virtual" no aparece en ningún texto visible al usuario (def. 20), ni en el alta del device ni en el nombre por defecto.
+- Nombre visible del driver: **"Control Remoto de Aire Acondicionado"** (es) / "Air Conditioner Remote" (en) — la palabra "virtual" no aparece en ningún texto visible al usuario (def. 20).
 - Class: `thermostat`.
 
 | Capability | Tipo | Valores / opciones | Notas |
