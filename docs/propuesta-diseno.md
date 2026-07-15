@@ -81,7 +81,7 @@ Nombres de módulos y funciones (decididos 2026-07-13):
 - Botón en el device. Activo → el próximo comando va a `ac_learn` y el botón se apaga.
 - Device en 2 pasos: cambio de modo → payload solo-modo (`simple_mode`); cambio de temperatura → payload **sin temp** (el servidor recorre 16–30 solo).
 - Device normal: payload completo a `ac_learn` (como el script), sin temperatura.
-- **Swing (2026-07-15):** con learning activo, cambiar la posición de swing manda a `ac_learn` el payload `{remote_entity, device, swing: "up|middle|down|auto|off"}` para aprender esa posición. **⚠️ Requiere extender el script de `ac_learn` del lado servidor** (hoy no conoce swing) — contrato del payload a confirmar con Fernán.
+- **Swing (contrato de Fernán 2026-07-15):** con learning activo, cambiar el swing manda a `ac_learn` un comando de MODO `swing_<clave>` por el camino `simple_mode` existente: `{remote_entity, device, hvac_mode: "swing_on|swing_off|swing_up|...", simple_mode: true}` → el servidor aprende `ir_{dev}_swing_<clave>` sin cambios de contrato.
 
 ## 7. Wizard de pairing (def. 3 y 17)
 

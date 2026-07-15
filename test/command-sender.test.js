@@ -227,14 +227,15 @@ describe('CommandSender', () => {
     assert.equal(h.posts.length, 0);
   });
 
-  test('learning de swing → ac_learn con la posición (contrato nuevo)', async () => {
+  test('learning de swing → ac_learn como modo swing_<clave> con simple_mode', async () => {
     await h.sender.sendSwingLearn({ ...CONFIG_BASE, code: 99 }, 'middle');
     const { url, payload } = h.posts[0];
     assert.match(url, /ac_learn$/);
     assert.deepEqual(payload, {
       remote_entity: 'remote.escritorio',
       device: 'ac1',
-      swing: 'middle',
+      hvac_mode: 'swing_middle',
+      simple_mode: true,
     });
   });
 
