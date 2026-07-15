@@ -50,13 +50,14 @@ function doGet(e) {
   return json(code) ;
 }
 
+// Hoja "Marcas": col A = Code, col B = Marca, col C = Modelo.
+// Devuelve solo Marca y Modelo de las filas del code pedido.
 function marcasJson_(code) {
   const hoja = SpreadsheetApp.getActive().getSheetByName('Marcas');
-  const [headers, ...filas] = hoja.getDataRange().getValues();
-  const colCode = headers.indexOf('code'); // ajustar al nombre real de la columna
+  const filas = hoja.getDataRange().getValues().slice(1); // saltea el encabezado
   const result = filas
-    .filter(f => String(f[colCode]) === String(code))
-    .map(f => Object.fromEntries(headers.map((h, i) => [h, f[i]])));
+    .filter(f => String(f[0]) === String(code))
+    .map(f => ({ Marca: f[1], Modelo: f[2] }));
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
