@@ -5,7 +5,7 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ## Última actualización: 2026-07-15
 
 ### Fase actual
-**Implementación — Etapas 0–2 completas; Etapas 3 y 4 con CÓDIGO COMPLETO, falta la prueba contra Homey/servidor reales.**
+**Implementación — Etapas 0–2 completas; Etapas 3–6 con CÓDIGO COMPLETO.** Todo lo que queda es la prueba real en Homey/servidor (bloqueada por el push) y la Etapa 7 (cierre/migración).
 
 ⛔ **BLOQUEO para la prueba real:** el push del branch `claude` a `defelicerafael/virtual_device_ac` está denegado — el usuario `fernanpizarro` (única auth en la Mac: gh + SSH) tiene solo lectura en ese repo (sí tiene push en `defelicerafael/panteasmart`). Fernán decidió **pedirle a Rafael** que lo agregue como colaborador con escritura. Cuando esté: push `claude` → agregar a `repos.txt` en ferno (`local|com.panteasmart.devices|git@github.com:defelicerafael/virtual_device_ac.git|claude|`) → `homey-app update` + `run` al Homey `.100` → probar con entidad remote inexistente (los POST se ven en logs de HA sin tocar aires). Todo eso ya está aprobado por Fernán.
 
@@ -45,7 +45,10 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
   - `lib/temp-mirror.js`: suscripción vía HomeyAPI `makeCapabilityInstance` (patrón lights), siembra valor inicial, re-attach reemplaza suscripción, detach en onDeleted/onUninit. Validación en onSettings: nombre inexistente → se rechaza el cambio (si la HomeyAPI está caída no se bloquea).
   - `app.js`: `_telegramChannelConfig()` lee los settings del tile `virtual_telegram` de lights vía HomeyAPI (token / chat cliente / chat soporte) — el TelegramNotifier ya no es stub.
   - 4 tests nuevos con HomeyAPI falsa → **41/41**. Falta probar en Homey real (sensor de verdad + tile de Telegram configurado).
-- ⬜ Etapa 6 — Flow cards
+- 🟡 **Etapa 6 — Flow cards (2026-07-15): código completo, PENDIENTE prueba real.**
+  - `driver.flow.compose.json`: triggers `fan_speed_changed` (token speed) / `swing_changed` (token swing) / `sleep_turned_on|off`; conditions `fan_speed_is` / `swing_is` / `sleep_is_on`; actions `set_fan_speed` / `set_swing_onoff` / `set_swing_position` / `set_sleep`. Las de onoff/modo/temperatura las regala Homey.
+  - Runtime en `driver._registerFlowCards()`: actions vía `triggerCapabilityListener` (mismo camino que el tile, con error amigable si la capability no está por def. 21/5v3); triggers disparados desde `device._triggerFlow()` tras cambios exitosos.
+  - ✅ validate publish OK (es/en completos, titleFormatted incluidos).
 - ⬜ Etapa 7 — Cierre (imágenes reales, checklist defs 1–20, migración San Fran, v2.0.0)
 
 ### Pendiente / dependencias

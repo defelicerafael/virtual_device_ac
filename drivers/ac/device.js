@@ -107,6 +107,7 @@ class AcDevice extends Homey.Device {
     }
     const overrides = trigger === 'fan' ? { fan: value } : { sleep: value ? 'on' : 'off' };
     await this._dispatch(this._state(overrides), trigger);
+    this._triggerFlow(trigger, value);
     return true;
   }
 
@@ -135,6 +136,7 @@ class AcDevice extends Homey.Device {
     if (!result.ok) return this._failure(result.error);
     if (result.skipped) this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
     await this.setWarning(null).catch(() => {});
+    this._triggerFlow('swing', key);
     return true;
   }
 
@@ -247,7 +249,28 @@ class AcDevice extends Homey.Device {
     };
   }
 
+  /** Dispara las flow cards propias tras un cambio exitoso (def. 19). */
+  _triggerFlow(kind, value) {
+    const { driver } = this;
+    try {
+      if (kind === 'fan') {
+        driver.flowFanSpeedChanged?.trigger(this, { speed: String(value) }, {}).catch(this.error);
+      } else if (kind === 'swing') {
+        driver.flowSwingChanged?.trigger(this, { swing: String(value) }, {}).catch(this.error);
+      } else if (kind === 'sleep') {
+        const card = value ? driver.flowSleepOn : driver.flowSleepOff;
+        card?.trigger(this, {}, {}).catch(this.error);
+      }
+    } catch (err) {
+      this.error('No se pudo disparar la flow card:', err);
+    }
+  }
+
   /** Clave de swing vigente en el tile según el tipo configurado (def. 5 v3). */
+  getSwingKey() {
+    return this._swingKey();
+  }
+
   _swingKey() {
     if (this.hasCapability('swing_mode')) {
       return this.getCapabilityValue('swing_mode');

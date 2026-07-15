@@ -1,0 +1,155 @@
+{
+  "triggers": [
+    {
+      "id": "fan_speed_changed",
+      "title": { "en": "Fan speed changed", "es": "Cambió la velocidad" },
+      "tokens": [
+        {
+          "name": "speed",
+          "type": "string",
+          "title": { "en": "Speed", "es": "Velocidad" },
+          "example": { "en": "auto", "es": "auto" }
+        }
+      ]
+    },
+    {
+      "id": "swing_changed",
+      "title": { "en": "Swing changed", "es": "Cambió el swing" },
+      "tokens": [
+        {
+          "name": "swing",
+          "type": "string",
+          "title": { "en": "Swing", "es": "Swing" },
+          "example": { "en": "on", "es": "on" }
+        }
+      ]
+    },
+    {
+      "id": "sleep_turned_on",
+      "title": { "en": "Sleep turned on", "es": "Se activó el sleep" }
+    },
+    {
+      "id": "sleep_turned_off",
+      "title": { "en": "Sleep turned off", "es": "Se desactivó el sleep" }
+    }
+  ],
+  "conditions": [
+    {
+      "id": "fan_speed_is",
+      "title": { "en": "Fan speed !{{is|isn't}}", "es": "La velocidad !{{es|no es}}" },
+      "titleFormatted": { "en": "Fan speed !{{is|isn't}} [[speed]]", "es": "La velocidad !{{es|no es}} [[speed]]" },
+      "args": [
+        {
+          "name": "speed",
+          "type": "dropdown",
+          "title": { "en": "Speed", "es": "Velocidad" },
+          "values": [
+            { "id": "auto", "label": { "en": "Auto", "es": "Auto" } },
+            { "id": "low", "label": { "en": "Low", "es": "Baja" } },
+            { "id": "medium", "label": { "en": "Medium", "es": "Media" } },
+            { "id": "high", "label": { "en": "High", "es": "Alta" } },
+            { "id": "turbo", "label": { "en": "Turbo", "es": "Turbo" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "swing_is",
+      "title": { "en": "Swing !{{is|isn't}}", "es": "El swing !{{es|no es}}" },
+      "titleFormatted": { "en": "Swing !{{is|isn't}} [[swing]]", "es": "El swing !{{es|no es}} [[swing]]" },
+      "args": [
+        {
+          "name": "swing",
+          "type": "dropdown",
+          "title": { "en": "Swing", "es": "Swing" },
+          "values": [
+            { "id": "on", "label": { "en": "On", "es": "Encendido" } },
+            { "id": "off", "label": { "en": "Off", "es": "Apagado" } },
+            { "id": "auto", "label": { "en": "Auto (moving)", "es": "Auto (moviéndose)" } },
+            { "id": "up", "label": { "en": "Up", "es": "Arriba" } },
+            { "id": "middle", "label": { "en": "Middle", "es": "Medio" } },
+            { "id": "down", "label": { "en": "Down", "es": "Abajo" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sleep_is_on",
+      "title": { "en": "Sleep !{{is|isn't}} on", "es": "El sleep !{{está|no está}} activado" }
+    }
+  ],
+  "actions": [
+    {
+      "id": "set_fan_speed",
+      "title": { "en": "Set fan speed", "es": "Cambiar la velocidad" },
+      "titleFormatted": { "en": "Set fan speed to [[speed]]", "es": "Cambiar la velocidad a [[speed]]" },
+      "args": [
+        {
+          "name": "speed",
+          "type": "dropdown",
+          "title": { "en": "Speed", "es": "Velocidad" },
+          "values": [
+            { "id": "auto", "label": { "en": "Auto", "es": "Auto" } },
+            { "id": "low", "label": { "en": "Low", "es": "Baja" } },
+            { "id": "medium", "label": { "en": "Medium", "es": "Media" } },
+            { "id": "high", "label": { "en": "High", "es": "Alta" } },
+            { "id": "turbo", "label": { "en": "Turbo", "es": "Turbo" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set_swing_onoff",
+      "title": { "en": "Turn swing on/off", "es": "Prender/apagar swing" },
+      "titleFormatted": { "en": "Turn swing [[state]]", "es": "Swing [[state]]" },
+      "hint": { "en": "For units with on/off swing.", "es": "Para equipos con swing on/off." },
+      "args": [
+        {
+          "name": "state",
+          "type": "dropdown",
+          "title": { "en": "State", "es": "Estado" },
+          "values": [
+            { "id": "on", "label": { "en": "On", "es": "Encendido" } },
+            { "id": "off", "label": { "en": "Off", "es": "Apagado" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set_swing_position",
+      "title": { "en": "Set swing position", "es": "Cambiar posición del swing" },
+      "titleFormatted": { "en": "Set swing to [[position]]", "es": "Swing en [[position]]" },
+      "hint": { "en": "For units with positional swing.", "es": "Para equipos con swing por posición." },
+      "args": [
+        {
+          "name": "position",
+          "type": "dropdown",
+          "title": { "en": "Position", "es": "Posición" },
+          "values": [
+            { "id": "auto", "label": { "en": "Auto (moving)", "es": "Auto (moviéndose)" } },
+            { "id": "up", "label": { "en": "Up", "es": "Arriba" } },
+            { "id": "middle", "label": { "en": "Middle", "es": "Medio" } },
+            { "id": "down", "label": { "en": "Down", "es": "Abajo" } },
+            { "id": "off", "label": { "en": "Off", "es": "Apagado" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set_sleep",
+      "title": { "en": "Turn sleep on/off", "es": "Activar/desactivar sleep" },
+      "titleFormatted": { "en": "Turn sleep [[state]]", "es": "Sleep [[state]]" },
+      "args": [
+        {
+          "name": "state",
+          "type": "dropdown",
+          "title": { "en": "State", "es": "Estado" },
+          "values": [
+            { "id": "on", "label": { "en": "On", "es": "Activado" } },
+            { "id": "off", "label": { "en": "Off", "es": "Desactivado" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

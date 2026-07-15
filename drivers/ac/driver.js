@@ -6,7 +6,54 @@ const crypto = require('node:crypto');
 class AcDriver extends Homey.Driver {
 
   async onInit() {
+    this._registerFlowCards();
     this.log('AcDriver inicializado');
+  }
+
+  /**
+   * Flow cards propias (def. 19; §8 de la propuesta). Las de onoff /
+   * thermostat_mode / target_temperature las genera Homey solo.
+   */
+  _registerFlowCards() {
+    // Triggers (se disparan desde device.js tras un cambio exitoso).
+    this.flowFanSpeedChanged = this.homey.flow.getDeviceTriggerCard('fan_speed_changed');
+    this.flowSwingChanged = this.homey.flow.getDeviceTriggerCard('swing_changed');
+    this.flowSleepOn = this.homey.flow.getDeviceTriggerCard('sleep_turned_on');
+    this.flowSleepOff = this.homey.flow.getDeviceTriggerCard('sleep_turned_off');
+
+    // Conditions.
+    this.homey.flow.getConditionCard('fan_speed_is')
+      .registerRunListener(async ({ device, speed }) => device.getCapabilityValue('fan_mode') === speed);
+    this.homey.flow.getConditionCard('swing_is')
+      .registerRunListener(async ({ device, swing }) => device.getSwingKey() === swing);
+    this.homey.flow.getConditionCard('sleep_is_on')
+      .registerRunListener(async ({ device }) => device.getCapabilityValue('sleep_on_off') === true);
+
+    // Actions: pasan por triggerCapabilityListener para recorrer el mismo
+    // camino que un toque en el tile (envío incluido).
+    const requireCapability = (device, capability, message) => {
+      if (!device.hasCapability(capability)) throw new Error(message);
+    };
+    this.homey.flow.getActionCard('set_fan_speed')
+      .registerRunListener(async ({ device, speed }) => {
+        requireCapability(device, 'fan_mode', this.homey.__({ en: 'This unit does not allow changing fan speed.', es: 'Este equipo no permite cambiar la velocidad.' }));
+        await device.triggerCapabilityListener('fan_mode', speed);
+      });
+    this.homey.flow.getActionCard('set_swing_onoff')
+      .registerRunListener(async ({ device, state }) => {
+        requireCapability(device, 'swing_on_off', this.homey.__({ en: 'This unit uses positional swing.', es: 'Este equipo usa swing por posición.' }));
+        await device.triggerCapabilityListener('swing_on_off', state === 'on');
+      });
+    this.homey.flow.getActionCard('set_swing_position')
+      .registerRunListener(async ({ device, position }) => {
+        requireCapability(device, 'swing_mode', this.homey.__({ en: 'This unit uses on/off swing.', es: 'Este equipo usa swing on/off.' }));
+        await device.triggerCapabilityListener('swing_mode', position);
+      });
+    this.homey.flow.getActionCard('set_sleep')
+      .registerRunListener(async ({ device, state }) => {
+        requireCapability(device, 'sleep_on_off', this.homey.__({ en: 'This unit does not allow sleep.', es: 'Este equipo no permite sleep.' }));
+        await device.triggerCapabilityListener('sleep_on_off', state === 'on');
+      });
   }
 
   /**
