@@ -57,20 +57,14 @@
       "label": { "en": "Connection", "es": "Conexión" },
       "children": [
         {
-          "id": "phm_host",
-          "type": "text",
+          "id": "phm_host_info",
+          "type": "label",
           "label": { "en": "IP Pantea Home Manager", "es": "IP Pantea Home Manager" },
           "hint": {
-            "en": "IP address (e.g. 192.168.88.101). Hostnames like .local do not work from the app.",
-            "es": "Dirección IP (ej: 192.168.88.101). Los nombres tipo .local no funcionan desde la app."
+            "en": "This value is changed from the app settings (More → Apps → Pantea Smart Devices → Configure), and applies to every unit.",
+            "es": "Este dato se modifica desde la configuración de la app (Más → Apps → Pantea Smart Devices → Configurar) y aplica a todos los equipos."
           },
           "value": ""
-        },
-        {
-          "id": "phm_port",
-          "type": "number",
-          "label": { "en": "Pantea Home Manager port", "es": "Puerto de Pantea Home Manager" },
-          "value": 8123
         },
         {
           "id": "remote_entity",

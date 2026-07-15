@@ -81,15 +81,23 @@
   <input type="text" id="f-name" placeholder="Aire Living">
 
   <h2>Conexión</h2>
-  <div class="row">
-    <div>
-      <label class="field" for="f-host">IP Pantea Home Manager</label>
-      <input type="text" id="f-host" inputmode="decimal" placeholder="192.168.88.101">
+  <div id="phm-configured" style="display:none">
+    <label class="field">IP Pantea Home Manager</label>
+    <div id="phm-value" style="font-size:15px; padding:4px 0"></div>
+    <div class="hint">Este dato se modifica desde la configuración de la app (Más → Apps → Pantea Smart Devices → Configurar).</div>
+  </div>
+  <div id="phm-editable">
+    <div class="row">
+      <div>
+        <label class="field" for="f-host">IP Pantea Home Manager</label>
+        <input type="text" id="f-host" inputmode="decimal" placeholder="192.168.88.101">
+      </div>
+      <div class="small">
+        <label class="field" for="f-port">Puerto</label>
+        <input type="number" id="f-port" value="8123">
+      </div>
     </div>
-    <div class="small">
-      <label class="field" for="f-port">Puerto</label>
-      <input type="number" id="f-port" value="8123">
-    </div>
+    <div class="hint">Queda guardada como configuración de la app: única para todos los equipos.</div>
   </div>
   <label class="field" for="f-remote">Entidad remote</label>
   <input type="text" id="f-remote" placeholder="living">
@@ -125,6 +133,18 @@
 
 <script type="application/javascript">
   const $ = (id) => document.getElementById(id);
+
+  // IP del PHM a nivel app (def. 24): mostrarla de solo lectura si ya está
+  // configurada; si no, el primer alta la pide y la guarda.
+  Homey.emit('get_phm')
+    .then(({ host, port, configured }) => {
+      if (configured) {
+        $('phm-value').textContent = `${host}:${port}`;
+        $('phm-configured').style.display = 'block';
+        $('phm-editable').style.display = 'none';
+      }
+    })
+    .catch(() => { /* sin dato: quedan los campos editables */ });
 
   // Drop-down de sensores con measure_temperature (def. 9).
   Homey.emit('get_temp_devices')

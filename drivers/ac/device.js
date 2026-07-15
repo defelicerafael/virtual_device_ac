@@ -33,6 +33,14 @@ class AcDevice extends Homey.Device {
     // y modos visibles según settings.
     await this._syncAllowedFeatures().catch(this.error);
 
+    // Label informativo de la IP del PHM en los settings del tile (def. 24):
+    // muestra el valor a nivel app y se refresca si cambia.
+    this._syncPhmInfo();
+    this._phmSettingsListener = (key) => {
+      if (key === 'phm_host' || key === 'phm_port') this._syncPhmInfo();
+    };
+    this.homey.settings.on('set', this._phmSettingsListener);
+
     this.registerCapabilityListener('onoff', (value) => this._onOnOff(value));
     this.registerCapabilityListener('thermostat_mode', (value) => this._onMode(value));
     this.registerCapabilityListener('target_temperature', (value) => this._onTemperature(value));
@@ -244,9 +252,15 @@ class AcDevice extends Homey.Device {
 
   _config() {
     const settings = this.getSettings();
+    // IP/puerto del PHM viven a nivel APP (def. 24, un solo lugar). Fallback
+    // a los settings viejos del device para instalaciones previas al cambio.
+    const appHost = String(this.homey.settings.get('phm_host') || '').trim();
+    const appPort = Number(this.homey.settings.get('phm_port')) || 8123;
+    const legacyHost = String(settings.phm_host || '').trim();
+    const legacyPort = Number(settings.phm_port) || 8123;
     return {
-      host: (settings.phm_host || '').trim(),
-      port: Number(settings.phm_port) || 8123,
+      host: appHost || legacyHost,
+      port: appHost !== '' ? appPort : legacyPort,
       remoteEntity: (settings.remote_entity || '').trim(),
       code: String(settings.code ?? '').trim(),
       twoStepOverride: settings.two_step_override || 'auto',
@@ -371,6 +385,16 @@ class AcDevice extends Homey.Device {
     }
   }
 
+  /** Refresca el label de solo lectura con la IP del PHM a nivel app (def. 24). */
+  _syncPhmInfo() {
+    const { host, port } = this._config();
+    const info = host !== ''
+      ? `${host}:${port}`
+      : this.homey.__({ en: 'Not configured', es: 'Sin configurar' });
+    if (this.getSetting('phm_host_info') === info) return;
+    this.setSettings({ phm_host_info: info }).catch(this.error);
+  }
+
   /** Suscripción (o baja) al device fuente según el setting vigente. */
   _attachTempMirror() {
     const source = String(this.getSetting('temp_source') || '').trim();
@@ -386,10 +410,12 @@ class AcDevice extends Homey.Device {
 
   async onDeleted() {
     this.homey.app.tempMirror?.detach(this);
+    if (this._phmSettingsListener) this.homey.settings.removeListener('set', this._phmSettingsListener);
   }
 
   async onUninit() {
     this.homey.app.tempMirror?.detach(this);
+    if (this._phmSettingsListener) this.homey.settings.removeListener('set', this._phmSettingsListener);
   }
 
   async onSettings({ oldSettings, newSettings, changedKeys }) {

@@ -99,6 +99,8 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 
 23. **Warning por comando ausente en la planilla (2026-07-15).** Si el tile tiene code configurado y la clave buscada no existe en la planilla, el envío sale igual por el fallback legacy (def. 8) pero el tile muestra un **warning** con la clave faltante ("Comando no disponible en la planilla: cool_high_24_off"). Sin code configurado no hay warning (el legacy es el diseño, no un faltante). Se limpia en el próximo envío sin faltantes. Aplica también a swing (que no tiene fallback: skipped + warning).
 
+24. **IP del PHM en UN solo lugar (2026-07-15).** La IP y el puerto de Pantea Home Manager viven en la **configuración de la app** (pantalla `settings/index.html`, junto con la URL de la planilla), no por device. El **wizard** la muestra de solo lectura con el aviso "se modifica desde la configuración de la app" — salvo el **primer alta** sin IP configurada, que la pide y la siembra a nivel app. La **config del tile** la muestra como label de solo lectura (`phm_host_info`, refrescado en vivo) con el mismo aviso. Fallback: devices creados antes del cambio siguen usando su setting viejo hasta que se configure la IP a nivel app (que entonces gana).
+
 ## Preguntas abiertas
 4. ~~Campos del wizard~~ → RESUELTO (definición 17).
 5. ~~Retorno HA→Homey~~ → RESUELTO (definición 9): measure_temperature se espeja de otro device de Homey elegido en pairing/settings; sin device fuente, se quita la capability.

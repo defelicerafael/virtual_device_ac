@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    label { display: block; margin: 14px 0 4px; font-weight: 600; font-size: 14px; }
+    input {
+      width: 100%; box-sizing: border-box; padding: 9px 10px; font-size: 15px;
+      border: 1px solid #ccc; border-radius: 8px;
+    }
+    .hint { font-size: 12px; color: #888; margin-top: 4px; }
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; }
+    .row > div.small { flex: 0 0 90px; }
+    h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.4px; color: #666; margin: 22px 0 4px; }
+    button {
+      width: 100%; margin-top: 24px; padding: 12px; font-size: 16px; font-weight: 700;
+      color: #fff; background: #1E3A5F; border: none; border-radius: 10px; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Conexión</h2>
+  <div class="row">
+    <div>
+      <label for="phm-host">IP Pantea Home Manager</label>
+      <input id="phm-host" type="text" placeholder="192.168.88.101">
+    </div>
+    <div class="small">
+      <label for="phm-port">Puerto</label>
+      <input id="phm-port" type="number" placeholder="8123">
+    </div>
+  </div>
+  <div class="hint">Única para todos los equipos de esta app. Usar la dirección IP (los nombres tipo .local no funcionan).</div>
+
+  <h2>Avanzado</h2>
+  <label for="ws-url">URL de la planilla de códigos</label>
+  <input id="ws-url" type="text">
+  <div class="hint">No modificar salvo que cambie la implementación del webservice.</div>
+
+  <button id="save">Guardar</button>
+
+  <script type="text/javascript">
+    function onHomeyReady(Homey) {
+      Homey.get('phm_host', (err, value) => {
+        if (!err && value != null) document.getElementById('phm-host').value = value;
+      });
+      Homey.get('phm_port', (err, value) => {
+        if (!err && value != null) document.getElementById('phm-port').value = value;
+      });
+      Homey.get('webservice_url', (err, value) => {
+        if (!err && value != null) document.getElementById('ws-url').value = value;
+      });
+
+      document.getElementById('save').addEventListener('click', () => {
+        const host = document.getElementById('phm-host').value.trim();
+        const port = parseInt(document.getElementById('phm-port').value, 10) || 8123;
+        const wsUrl = document.getElementById('ws-url').value.trim();
+
+        Homey.set('phm_host', host);
+        Homey.set('phm_port', port);
+        if (wsUrl !== '') Homey.set('webservice_url', wsUrl);
+        Homey.alert('Configuración guardada.', 'info');
+      });
+
+      Homey.ready();
+    }
+  </script>
+</body>
+</html>

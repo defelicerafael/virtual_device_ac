@@ -64,6 +64,15 @@ class AcDriver extends Homey.Driver {
    *  - build_device: valida el formulario y arma el objeto device a crear
    */
   async onPair(session) {
+    // IP/puerto del PHM a nivel app (def. 24): el wizard los muestra de solo
+    // lectura; si todavía no están configurados, el primer alta los pide y
+    // los guarda como configuración de la app.
+    session.setHandler('get_phm', async () => {
+      const host = String(this.homey.settings.get('phm_host') || '').trim();
+      const port = Number(this.homey.settings.get('phm_port')) || 8123;
+      return { host, port, configured: host !== '' };
+    });
+
     session.setHandler('get_temp_devices', async () => {
       try {
         const api = await this.homey.app.getHomeyApi();
@@ -97,21 +106,25 @@ class AcDriver extends Homey.Driver {
       };
 
       const name = required(form.name, 'nombre del equipo');
-      const host = required(form.host, 'host/IP de Pantea Home Manager');
       const remoteEntity = required(form.remoteEntity, 'entidad remote')
         .toLowerCase().replace(/^remote\./, '');
       const code = String(form.code ?? '').trim();
       if (code !== '' && !/^\d+$/.test(code)) {
         throw new Error('El code debe ser un número (o vacío para modo legacy).');
       }
-      const port = Number(form.port) || 8123;
+
+      // Primer alta sin IP configurada a nivel app: la siembra (def. 24).
+      const appHost = String(this.homey.settings.get('phm_host') || '').trim();
+      if (appHost === '') {
+        const host = required(form.host, 'IP de Pantea Home Manager');
+        this.homey.settings.set('phm_host', host);
+        this.homey.settings.set('phm_port', Number(form.port) || 8123);
+      }
 
       return {
         name,
         data: { id: `pantea-ac-${crypto.randomUUID()}` },
         settings: {
-          phm_host: host,
-          phm_port: port,
           remote_entity: remoteEntity,
           code,
           temp_source: String(form.tempSource ?? '').trim(),
