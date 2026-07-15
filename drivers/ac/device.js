@@ -28,12 +28,16 @@ class AcDevice extends Homey.Device {
     // El espejo real del valor llega en Etapa 5; acá se maneja la presencia.
     await this._syncTempCapability().catch(this.error);
 
+    // Funciones permitidas del equipo (def. 21): presencia de capabilities
+    // y modos visibles según settings.
+    await this._syncAllowedFeatures().catch(this.error);
+
     this.registerCapabilityListener('onoff', (value) => this._onOnOff(value));
     this.registerCapabilityListener('thermostat_mode', (value) => this._onMode(value));
     this.registerCapabilityListener('target_temperature', (value) => this._onTemperature(value));
     this.registerCapabilityListener('fan_mode', (value) => this._onFanOrSleep('fan', value));
     this.registerCapabilityListener('sleep_on_off', (value) => this._onFanOrSleep('sleep', value));
-    this.registerCapabilityListener('swing_on_off', (value) => this._onSwing(value));
+    this.registerCapabilityListener('swing_mode', (value) => this._onSwing(value));
     this.registerCapabilityListener('learning_mode', (value) => this._onLearning(value));
     this.registerCapabilityListener('button.reload_codes', () => this._onReloadCodes());
   }
@@ -55,6 +59,9 @@ class AcDevice extends Homey.Device {
   }
 
   async _onMode(value) {
+    // Red de seguridad def. 21: modos no permitidos se rechazan aunque el
+    // filtrado del picker (setCapabilityOptions) no esté disponible.
+    this._assertModeAllowed(value);
     const previousMode = this.getCapabilityValue('thermostat_mode') || 'off';
     if (value !== 'off') {
       this._lastMode = value;
@@ -100,16 +107,29 @@ class AcDevice extends Homey.Device {
     return true;
   }
 
-  /** Swing (def. 5): comando propio, solo si la planilla tiene el código. */
-  async _onSwing(value) {
+  /**
+   * Swing multi-posición (def. 5 v2): comando propio por posición, solo si
+   * la planilla tiene el código. Con learning activo, aprende esa posición.
+   */
+  async _onSwing(position) {
     const currentMode = this.getCapabilityValue('thermostat_mode') || 'off';
-    if (currentMode === 'off') {
+    if (currentMode === 'off' && !this._learning) {
       this.log('Apagado: swing queda en el tile, no se envía.');
       return true;
     }
-    const result = await this.homey.app.commandSender.sendSwing(this._config(), value === true);
+
+    const sender = this.homey.app.commandSender;
+    let result;
+    if (this._learning) {
+      result = await sender.sendSwingLearn(this._config(), position);
+      this._learning = false;
+      await this.setCapabilityValue('learning_mode', false).catch(this.error);
+    } else {
+      result = await sender.sendSwing(this._config(), position);
+    }
+
     if (!result.ok) return this._failure(result.error);
-    if (result.skipped) this.log('Swing sin código en la planilla: solo queda el estado en el tile.');
+    if (result.skipped) this.log(`Swing ${position} sin código en la planilla: solo queda el estado en el tile.`);
     await this.setWarning(null).catch(() => {});
     return true;
   }
@@ -183,10 +203,14 @@ class AcDevice extends Homey.Device {
     try {
       const { code } = this._config();
       if (!code) return;
-      const swing = await this.homey.app.irCodes.getSwingCommands(code);
-      if (!swing.on || !swing.off || swing.on === swing.off) return;
-      const wantOn = this.getCapabilityValue('swing_on_off') === true;
-      const result = await this.homey.app.commandSender.sendSwing(this._config(), wantOn);
+      const commands = await this.homey.app.irCodes.getSwingCommands(code);
+      const available = Object.values(commands).filter((c) => c != null);
+      // Hace falta más de un código distinto: con uno solo (o todos
+      // repetidos = toggle) no se puede saber el estado real del equipo.
+      if (new Set(available).size < 2) return;
+      const position = this.getCapabilityValue('swing_mode');
+      if (!position || !commands[position]) return;
+      const result = await this.homey.app.commandSender.sendSwing(this._config(), position);
       if (!result.ok) this.error('No se pudo reenviar swing tras el encendido:', result.error?.message);
     } catch (err) {
       this.error('Error en swing post-encendido:', err);
@@ -204,16 +228,70 @@ class AcDevice extends Homey.Device {
       code: String(settings.code ?? '').trim(),
       twoStepOverride: settings.two_step_override || 'auto',
       learnedFanOverride: settings.learned_fan_override || 'auto',
+      allowSleep: settings.allow_sleep !== false,
+      allowFanSpeed: settings.allow_fan_speed !== false,
     };
   }
 
   _state(overrides = {}) {
+    const cap = (id) => (this.hasCapability(id) ? this.getCapabilityValue(id) : null);
     return {
-      mode: overrides.mode ?? this.getCapabilityValue('thermostat_mode') ?? 'off',
-      fan: overrides.fan ?? this.getCapabilityValue('fan_mode') ?? 'auto',
-      temp: overrides.temp ?? this.getCapabilityValue('target_temperature') ?? 24,
-      sleep: overrides.sleep ?? (this.getCapabilityValue('sleep_on_off') === true ? 'on' : 'off'),
+      mode: overrides.mode ?? cap('thermostat_mode') ?? 'off',
+      fan: overrides.fan ?? cap('fan_mode') ?? 'auto',
+      temp: overrides.temp ?? cap('target_temperature') ?? 24,
+      sleep: overrides.sleep ?? (cap('sleep_on_off') === true ? 'on' : 'off'),
     };
+  }
+
+  _assertModeAllowed(mode) {
+    const settings = this.getSettings();
+    const blocked = (mode === 'heat' && settings.allow_heat === false)
+      || (mode === 'dry' && settings.allow_dry === false)
+      || (mode === 'fan' && settings.allow_fan_mode === false);
+    if (blocked) {
+      throw new Error(this.homey.__({
+        en: 'This unit does not support that mode.',
+        es: 'Este equipo no permite ese modo.',
+      }));
+    }
+  }
+
+  /**
+   * Def. 21: sincroniza capabilities y modos visibles con las funciones
+   * permitidas del equipo.
+   */
+  async _syncAllowedFeatures() {
+    const settings = this.getSettings();
+
+    const syncCap = async (capability, allowed) => {
+      if (allowed && !this.hasCapability(capability)) await this.addCapability(capability);
+      else if (!allowed && this.hasCapability(capability)) await this.removeCapability(capability);
+    };
+    await syncCap('sleep_on_off', settings.allow_sleep !== false);
+    await syncCap('fan_mode', settings.allow_fan_speed !== false);
+
+    // Filtrado del picker de modos por device. setCapabilityOptions con
+    // `values` puede no estar soportado en todas las versiones: si falla,
+    // queda la red de seguridad de _assertModeAllowed().
+    const allValues = [
+      { id: 'off', title: { en: 'Off', es: 'Apagado' } },
+      { id: 'auto', title: { en: 'Auto', es: 'Auto' } },
+      { id: 'cool', title: { en: 'Cool', es: 'Frío' } },
+      { id: 'heat', title: { en: 'Heat', es: 'Calor' } },
+      { id: 'dry', title: { en: 'Dry', es: 'Secado' } },
+      { id: 'fan', title: { en: 'Fan', es: 'Ventilador' } },
+    ];
+    const values = allValues.filter(({ id }) => {
+      if (id === 'heat') return settings.allow_heat !== false;
+      if (id === 'dry') return settings.allow_dry !== false;
+      if (id === 'fan') return settings.allow_fan_mode !== false;
+      return true;
+    });
+    try {
+      await this.setCapabilityOptions('thermostat_mode', { values });
+    } catch (err) {
+      this.log('setCapabilityOptions(thermostat_mode) no disponible, queda la validación en listener:', err.message);
+    }
   }
 
   /** Setea una capability acompañante sin pasar por su listener (post-éxito). */
@@ -249,6 +327,11 @@ class AcDevice extends Homey.Device {
     if (changedKeys.includes('temp_source')) {
       // La validación contra devices reales y el espejo llegan en Etapa 5.
       this.homey.setTimeout(() => this._syncTempCapability().catch(this.error), 500);
+    }
+
+    if (changedKeys.some((key) => key.startsWith('allow_'))) {
+      // newSettings todavía no está aplicado dentro de onSettings: diferir.
+      this.homey.setTimeout(() => this._syncAllowedFeatures().catch(this.error), 500);
     }
   }
 

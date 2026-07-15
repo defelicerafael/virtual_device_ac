@@ -48,9 +48,9 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 4. **Requisito nuevo — lógica del HomeyScript "PS Broadlink" (2026-07-13).** Como la app no funcionaba bien, hoy el trabajo real lo hace un HomeyScript en el Homey Pro de ferno "San Fran". Fernán pasó el código: copia en [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js), análisis completo en [ps-broadlink-analisis.md](ps-broadlink-analisis.md). Es **indispensable** que la nueva app incorpore esa funcionalidad, en particular el lookup de comandos IR contra el webservice del Google Spreadsheet (`?code={code}` → filas `{mode, fan, temp, sleep, irCommand}`), el cache, el payload `command_code` con fallback legacy, y la secuencia "modo/ON separado". **Hallazgo clave:** en producción hoy los tiles son devices de la app Device Capabilities + Flows + este script — la nueva app reemplaza a los tres.
 
 5. **Swing y sleep (2026-07-13).** Se modelan distinto:
-   - **Swing:** comando separado con **códigos on/off**. En la planilla van como filas con `mode = "swing_on"` / `mode = "swing_off"` (sin temp) — **sin columnas nuevas**, el formato actual las indexa por modo solo y el Apps Script no se toca (confirmado por Fernán 2026-07-13). Si el aire tiene un solo código toggle, se repite el mismo código en ambas filas. En Homey: toggle con estado.
+   - **Swing (ACTUALIZADO 2026-07-15, reemplaza el modelo on/off):** comando separado **multi-posición**: `swing_auto`, `swing_up`, `swing_middle`, `swing_down`, `swing_off`. En la planilla van como filas mode-only (`mode = "swing_up"`, sin temp) — sin columnas nuevas. Permite aprender tanto el swing en movimiento como posiciones fijas que algunos aires tienen. En Homey: capability enum (picker) con estado. Se envía solo la posición que tenga código en la planilla (sin código → queda en el tile).
    - **Sleep:** sigue **dentro de la clave compuesta** `{modo}_{fan}_{temp}_{sleep}` — es parte del código que se envía junto con la temperatura, como hoy. En Homey: toggle con estado; al cambiarlo se reenvía el comando completo.
-   - **Al prender (2026-07-13):** swing y sleep conservan lo vigente en el tile (misma regla que la temperatura). Sleep va implícito en el comando completo de encendido. Para swing: comparar los códigos `swing_on` y `swing_off` de ese aire — si son **diferentes**, después de mandar el encendido se manda el código de swing correspondiente al estado del tile; si son **iguales** (toggle), no se manda nada (no se puede saber el estado real del equipo).
+   - **Al prender (2026-07-13, generalizado 2026-07-15 al modelo multi-posición):** swing y sleep conservan lo vigente en el tile (misma regla que la temperatura). Sleep va implícito en el comando completo de encendido. Para swing: después del encendido se reenvía el código de la **posición vigente del tile**, solo si esa posición tiene código en la planilla y los códigos de swing no son todos iguales (todos iguales = toggle, no se puede saber el estado real). *(Generalización propuesta de la regla on/off original — confirmar.)*
 
 6. **Branding — HA invisible (2026-07-13).** El usuario nunca debe enterarse de que de fondo hay un Home Assistant. En TODOS los textos visibles de la app (wizard de pairing, settings, mensajes de error, nombres de campos) se habla de **"Pantea Home Manager"**: el campo de conexión es "Host/IP de Pantea Home Manager", nunca "Home Assistant IP" como hoy. Aplica la regla general de arquitectura de producto Pantea (Homey es la cara al cliente, HA oculto detrás).
 
@@ -80,6 +80,12 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 19. **Flow cards (2026-07-13).** Sí, se necesitan **cards de acción** (lista concreta a definir en la propuesta de diseño).
 
 20. **Sin la palabra "virtual" (2026-07-13).** La palabra "virtual" no aparece en NINGÚN texto visible al usuario: el driver se muestra como **"Aire Acondicionado"** (no "Virtual Air Conditioner") al agregar el device, y el nombre por defecto del device tampoco la lleva. Complementa la definición 6 (branding).
+
+21. **Funciones configurables por equipo (2026-07-15).** Cada device configura qué permite:
+    - **Permite modo heat** / **modo dry** / **modo fan**: los modos no permitidos se ocultan del picker de modos (vía `setCapabilityOptions` por device — a verificar en la prueba real; red de seguridad: el listener rechaza modos no permitidos).
+    - **Permite habilitar sleep**: si NO → la capability sleep se quita del tile, y en payload legacy y learning se envía siempre `sleep: "off"`.
+    - **Permite cambiar la velocidad del fan**: si NO → la capability de velocidad se quita del tile, y en payload legacy y learning se envía siempre `fan: "auto"`.
+    - El **wizard pregunta** estas opciones al dar de alta, y la **configuración del tile permite cambiar** la decisión después.
 
 ## Preguntas abiertas
 4. ~~Campos del wizard~~ → RESUELTO (definición 17).

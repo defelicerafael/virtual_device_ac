@@ -51,7 +51,7 @@
         "target_temperature",
         "measure_temperature",
         "fan_mode",
-        "swing_on_off",
+        "swing_mode",
         "sleep_on_off",
         "learning_mode",
         "button.reload_codes"
@@ -207,6 +207,68 @@
               "hint": {
                 "en": "If the unit is off and the temperature is changed, turn it on in the last used mode.",
                 "es": "Si el equipo está apagado y se cambia la temperatura, se enciende en el último modo utilizado."
+              },
+              "value": true
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Unit features",
+            "es": "Funciones del equipo"
+          },
+          "children": [
+            {
+              "id": "allow_heat",
+              "type": "checkbox",
+              "label": {
+                "en": "Supports heat mode",
+                "es": "Permite modo calor"
+              },
+              "value": true
+            },
+            {
+              "id": "allow_dry",
+              "type": "checkbox",
+              "label": {
+                "en": "Supports dry mode",
+                "es": "Permite modo secado"
+              },
+              "value": true
+            },
+            {
+              "id": "allow_fan_mode",
+              "type": "checkbox",
+              "label": {
+                "en": "Supports fan mode",
+                "es": "Permite modo ventilador"
+              },
+              "value": true
+            },
+            {
+              "id": "allow_sleep",
+              "type": "checkbox",
+              "label": {
+                "en": "Supports sleep",
+                "es": "Permite sleep"
+              },
+              "hint": {
+                "en": "If disabled, the sleep control is hidden and 'off' is always sent.",
+                "es": "Si se desactiva, se oculta el control de sleep y se envía siempre 'off'."
+              },
+              "value": true
+            },
+            {
+              "id": "allow_fan_speed",
+              "type": "checkbox",
+              "label": {
+                "en": "Supports fan speed",
+                "es": "Permite cambiar la velocidad"
+              },
+              "hint": {
+                "en": "If disabled, the speed control is hidden and 'auto' is always sent.",
+                "es": "Si se desactiva, se oculta el control de velocidad y se envía siempre 'auto'."
               },
               "value": true
             }
@@ -380,16 +442,52 @@
       "uiComponent": "toggle",
       "uiQuickAction": false
     },
-    "swing_on_off": {
-      "type": "boolean",
+    "swing_mode": {
+      "type": "enum",
       "title": {
         "en": "Swing",
         "es": "Swing"
       },
+      "uiComponent": "picker",
       "getable": true,
       "setable": true,
-      "uiComponent": "toggle",
-      "uiQuickAction": false
+      "values": [
+        {
+          "id": "auto",
+          "title": {
+            "en": "Auto (moving)",
+            "es": "Auto (moviéndose)"
+          }
+        },
+        {
+          "id": "up",
+          "title": {
+            "en": "Up",
+            "es": "Arriba"
+          }
+        },
+        {
+          "id": "middle",
+          "title": {
+            "en": "Middle",
+            "es": "Medio"
+          }
+        },
+        {
+          "id": "down",
+          "title": {
+            "en": "Down",
+            "es": "Abajo"
+          }
+        },
+        {
+          "id": "off",
+          "title": {
+            "en": "Off",
+            "es": "Apagado"
+          }
+        }
+      ]
     }
   }
 }

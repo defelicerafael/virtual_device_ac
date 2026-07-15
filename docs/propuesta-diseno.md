@@ -21,11 +21,13 @@ Estructura preparada para más tipos de device a futuro: la lógica compartida (
 | `target_temperature` | estándar | 16–30 °C paso 1 | |
 | `measure_temperature` | estándar | — | Solo si hay device fuente (def. 9); se quita si no |
 | `fan_mode` | **custom** | auto/low/medium/high/turbo | def. 11. Nombre `fan_mode` (decidido) |
-| `swing_on_off` | custom | toggle | def. 5; mismo id que la app vieja |
-| `sleep_on_off` | custom | toggle | def. 5; mismo id que la app vieja |
+| `swing_mode` | **custom** | auto/up/middle/down/off | def. 5 v2 (2026-07-15): swing multi-posición, picker |
+| `sleep_on_off` | custom | toggle | def. 5; mismo id que la app vieja. Se quita si "no permite sleep" (def. 21) |
 | `learning_mode` | custom | botón | def. 7; se apaga tras el primer comando |
 
-Capabilities custom (decidido): se conservan los ids de la app vieja (`swing_on_off`, `sleep_on_off`, `learning_mode`); solo se agrega `fan_mode`.
+Capabilities custom: se conservan `sleep_on_off` y `learning_mode` de la app vieja; se agregan `fan_mode` y `swing_mode` (reemplaza a `swing_on_off` tras el cambio a multi-posición). `fan_mode` se quita del tile si "no permite cambiar velocidad" (def. 21).
+
+**Funciones configurables por equipo (def. 21, 2026-07-15):** cinco flags por device — permite heat / dry / fan (ocultan modos del picker vía `setCapabilityOptions`, con rechazo en listener como red de seguridad), permite sleep y permite velocidad (quitan la capability). Sin sleep → siempre `sleep:"off"` en legacy/learning; sin velocidad → siempre `fan:"auto"`. El wizard los pregunta; los settings del tile permiten cambiarlos.
 
 ## 3. Modelo de estado
 
@@ -77,7 +79,8 @@ Nombres de módulos y funciones (decididos 2026-07-13):
 
 - Botón en el device. Activo → el próximo comando va a `ac_learn` y el botón se apaga.
 - Device en 2 pasos: cambio de modo → payload solo-modo (`simple_mode`); cambio de temperatura → payload **sin temp** (el servidor recorre 16–30 solo).
-- Device normal: payload completo a `ac_learn` (como el script).
+- Device normal: payload completo a `ac_learn` (como el script), sin temperatura.
+- **Swing (2026-07-15):** con learning activo, cambiar la posición de swing manda a `ac_learn` el payload `{remote_entity, device, swing: "up|middle|down|auto|off"}` para aprender esa posición. **⚠️ Requiere extender el script de `ac_learn` del lado servidor** (hoy no conoce swing) — contrato del payload a confirmar con Fernán.
 
 ## 7. Wizard de pairing (def. 3 y 17)
 
@@ -89,6 +92,7 @@ Vista custom única:
 4. Code de planilla (número, **opcional** — vacío = modo legacy)
 5. Device fuente de temperatura (drop-down de devices con `measure_temperature` + opción "Ninguno")
 6. Encender al cambiar temperatura (checkbox, default sí)
+7. Funciones del equipo (def. 21): permite heat / dry / fan / sleep / velocidad (checkboxes, default sí)
 
 Validación en el wizard: si hay code, se consulta el webservice ahí mismo con feedback inmediato: qué comandos tiene ("code 3: 31 comandos — cool/heat, fan auto") **y a qué marcas/modelos aplica** (decidido 2026-07-13; el dato está en la hoja "Marcas" del spreadsheet).
 

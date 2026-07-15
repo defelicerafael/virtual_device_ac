@@ -13,11 +13,14 @@ for (const code of [1, 2, 5]) {
   FIXTURES[code] = fs.readFileSync(path.join(__dirname, 'fixtures', `code${code}.json`), 'utf8');
 }
 // Fixture sintético: la planilla real todavía no tiene filas swing_* (docs/planilla-ir.md).
-// Sigue el formato exacto del webservice; swing con códigos DISTINTOS (def. 5).
+// Sigue el formato exacto del webservice; swing multi-posición (def. 5 v2)
+// con códigos distintos y una posición faltante (middle).
 FIXTURES[99] = JSON.stringify([
   { code: 99, mode: 'off', fan: '', temp: '', sleep: '', irCommand: 'OFF99' },
   { code: 99, mode: 'cool', fan: 'auto', temp: 24, sleep: 'off', irCommand: 'COOL99' },
-  { code: 99, mode: 'swing_on', fan: '', temp: '', sleep: '', irCommand: 'SWINGON99' },
+  { code: 99, mode: 'swing_auto', fan: '', temp: '', sleep: '', irCommand: 'SWINGAUTO99' },
+  { code: 99, mode: 'swing_up', fan: '', temp: '', sleep: '', irCommand: 'SWINGUP99' },
+  { code: 99, mode: 'swing_down', fan: '', temp: '', sleep: '', irCommand: 'SWINGDOWN99' },
   { code: 99, mode: 'swing_off', fan: '', temp: '', sleep: '', irCommand: 'SWINGOFF99' },
 ]);
 
@@ -28,6 +31,8 @@ const CONFIG_BASE = {
   code: '',
   twoStepOverride: 'auto',
   learnedFanOverride: 'auto',
+  allowSleep: true,
+  allowFanSpeed: true,
 };
 
 function makeHarness({ failTimes = 0 } = {}) {
@@ -197,19 +202,70 @@ describe('CommandSender', () => {
     assert.ok(!hf.waits.includes(2000), 'no llegó al wait del paso 2');
   });
 
-  test('swing con códigos en planilla → POST command_code correcto', async () => {
-    const on = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, true);
-    const off = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, false);
-    assert.equal(on.ok, true);
+  test('swing por posición → POST command_code de esa posición', async () => {
+    const up = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, 'up');
+    const off = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, 'off');
+    assert.equal(up.ok, true);
     assert.equal(off.ok, true);
-    assert.equal(h.posts[0].payload.command_code, 'SWINGON99');
+    assert.equal(h.posts[0].payload.command_code, 'SWINGUP99');
     assert.equal(h.posts[1].payload.command_code, 'SWINGOFF99');
   });
 
-  test('swing sin códigos (code 1 real) → skipped, sin POST', async () => {
-    const res = await h.sender.sendSwing({ ...CONFIG_BASE, code: 1 }, true);
+  test('swing en posición sin código (middle) → skipped, sin POST', async () => {
+    const res = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, 'middle');
     assert.deepEqual(res, { ok: true, skipped: true });
     assert.equal(h.posts.length, 0);
+  });
+
+  test('swing sin códigos (code 1 real) → skipped, sin POST', async () => {
+    const res = await h.sender.sendSwing({ ...CONFIG_BASE, code: 1 }, 'auto');
+    assert.deepEqual(res, { ok: true, skipped: true });
+    assert.equal(h.posts.length, 0);
+  });
+
+  test('learning de swing → ac_learn con la posición (contrato nuevo)', async () => {
+    await h.sender.sendSwingLearn({ ...CONFIG_BASE, code: 99 }, 'middle');
+    const { url, payload } = h.posts[0];
+    assert.match(url, /ac_learn$/);
+    assert.deepEqual(payload, {
+      remote_entity: 'remote.escritorio',
+      device: 'ac1',
+      swing: 'middle',
+    });
+  });
+
+  test('def. 21: sin permiso de sleep → sleep off en clave/payload aunque el tile diga on', async () => {
+    await h.sender.sendState(
+      { ...CONFIG_BASE, code: 1, allowSleep: false },
+      { mode: 'cool', fan: 'auto', temp: 24, sleep: 'on' },
+      'temperature',
+    );
+    // cool_auto_24_off existe en el code 1 → salió por planilla
+    assert.ok(h.posts[0].payload.command_code);
+
+    await h.sender.sendState(
+      { ...CONFIG_BASE, allowSleep: false },
+      { mode: 'cool', fan: 'auto', temp: 24, sleep: 'on' },
+      'temperature',
+    );
+    assert.equal(h.posts[1].payload.sleep, 'off', 'legacy también fuerza off');
+  });
+
+  test('def. 21: sin permiso de velocidad → fan auto en payload y learning', async () => {
+    await h.sender.sendState(
+      { ...CONFIG_BASE, allowFanSpeed: false },
+      { mode: 'cool', fan: 'turbo', temp: 24, sleep: 'off' },
+      'fan',
+    );
+    assert.equal(h.posts[0].payload.fan_mode, 'auto');
+
+    await h.sender.sendLearn(
+      { ...CONFIG_BASE, allowFanSpeed: false, allowSleep: false },
+      { mode: 'cool', fan: 'turbo', temp: 24, sleep: 'on' },
+      'temperature',
+    );
+    assert.equal(h.posts[1].payload.fan_mode, 'auto');
+    assert.equal(h.posts[1].payload.sleep, 'off');
   });
 
   test('learning 2 pasos + trigger mode → ac_learn con simple_mode (def. 16)', async () => {

@@ -1,0 +1,17 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Swing",
+    "es": "Swing"
+  },
+  "uiComponent": "picker",
+  "getable": true,
+  "setable": true,
+  "values": [
+    { "id": "auto", "title": { "en": "Auto (moving)", "es": "Auto (moviéndose)" } },
+    { "id": "up", "title": { "en": "Up", "es": "Arriba" } },
+    { "id": "middle", "title": { "en": "Middle", "es": "Medio" } },
+    { "id": "down", "title": { "en": "Down", "es": "Abajo" } },
+    { "id": "off", "title": { "en": "Off", "es": "Apagado" } }
+  ]
+}
