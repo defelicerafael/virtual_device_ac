@@ -59,8 +59,12 @@
         {
           "id": "phm_host",
           "type": "text",
-          "label": { "en": "Host/IP Pantea Home Manager", "es": "Host/IP Pantea Home Manager" },
-          "value": "panteasmart.local"
+          "label": { "en": "IP Pantea Home Manager", "es": "IP Pantea Home Manager" },
+          "hint": {
+            "en": "IP address (e.g. 192.168.88.101). Hostnames like .local do not work from the app.",
+            "es": "Dirección IP (ej: 192.168.88.101). Los nombres tipo .local no funcionan desde la app."
+          },
+          "value": ""
         },
         {
           "id": "phm_port",

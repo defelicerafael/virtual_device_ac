@@ -80,6 +80,7 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
     - Si se modifica la **temperatura** → se envía el learning **SIN temperatura** (payload completo pero sin temp). Del lado del servidor, el script de `ac_learn` se encarga solo de ir aprendiendo **todas las temperaturas de 16 a 30** en una sola sesión. (O sea: UN disparo de learning cubre todo el rango — no hay que repetir por temperatura, y el auto-apagado del botón tras el primer comando no molesta.)
 
 17. **Campos del wizard — confirmados (2026-07-13).** Nombre, host/IP de Pantea Home Manager (+puerto), entidad remote, code de planilla (opcional), device fuente de temperatura, **"Encender al cambiar temperatura"** (al último modo utilizado o seleccionado).
+    - **Ajuste 2026-07-15:** el campo pasa a llamarse **"IP Pantea Home Manager"**, **obligatorio y SIN default** (antes venía `panteasmart.local`, que NO resuelve desde el contenedor de la app — dos devices de prueba seguidos nacieron rotos por eso). Placeholder/hint: `192.168.88.101`.
 18. **Cache de códigos (2026-07-13).** Alcanza con el botón **"recargar códigos"** (maintenance action en settings del device).
 19. **Flow cards (2026-07-13).** Sí, se necesitan **cards de acción** (lista concreta a definir en la propuesta de diseño).
 
