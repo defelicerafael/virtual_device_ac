@@ -5,7 +5,15 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ## Última actualización: 2026-07-15
 
 ### Fase actual
-**Implementación — Etapas 0–2 completas; Etapas 3–6 con CÓDIGO COMPLETO.** Todo lo que queda es la prueba real en Homey/servidor (bloqueada por el push) y la Etapa 7 (cierre/migración).
+**Implementación — Etapas 0–6 completas y PROBADAS EN VIVO (2026-07-15).** Verificado en el Homey San Fran con el device "Prueba AC" (code 1, sensor "Mov Escritorio", entidad `remote.test_claude` inexistente a propósito):
+- Wizard completo: consulta de code en vivo (resumen + **marcas** con el `?marcas=` ya publicado), drop-down de sensores, alta OK.
+- Espejo de temperatura andando (HomeyAPI funcionó incluso en dev-mode).
+- Guards de apagado (fan/sleep/swing quedan en el tile), resolución por planilla (`command_code`).
+- Manejo de fallas completo: reintentos + warning + revert + **Telegram real** (config del tile de lights).
+- **Entrega confirmada**: con host `192.168.88.101`, 9 comandos seguidos al primer intento sin reintentos.
+- Ajustes de UX sobre la marcha: labels "Tiene modo HEAT/DRY/FAN?", "Tiene opción Sleep?", "Permitir elegir Velocidad?"; sleep como botón junto a Aprender; swing con opción "Desactivado"; driver "Control Remoto A/C"; **host = IP obligatoria sin default** (`.local` no resuelve desde el contenedor — verificado empíricamente); versión 2.0.0.
+
+**Falta para el cierre (Etapa 7):** spot-checks pendientes (learning → ac_learn; 2 pasos con code 5; camino legacy sin code; swing con filas swing_* cuando se carguen en la planilla), prueba con `install` (no dev-run), imágenes definitivas, checklist contra las definiciones 1–22, mejora menor (cancelar reintentos supersedidos) y migración de los aires reales de San Fran.
 
 ✅ **Desbloqueado y DESPLEGADO (2026-07-15):** Rafael dio acceso de escritura → branch `claude` pusheado a `defelicerafael/virtual_device_ac` → agregado a `repos.txt` en ferno → `homey-app init` clonó → **`homey-app run` corriendo en el Homey San Fran (192.168.88.100)**: app inicializada, driver `ac` OK, flow cards y capabilities cargadas. Log: `/opt/pantea/logs/homey/com.panteasmart.devices.log`. Falta la prueba funcional de Fernán desde la app de Homey (wizard + comandos con entidad remote inexistente). ⚠️ Recordar gotcha dev-mode: HomeyAPI (drop-down de sensores / espejo de temperatura / config Telegram) puede fallar en `run` por el DNS homeylocal — la prueba definitiva de esas tres es con `install`.
 
