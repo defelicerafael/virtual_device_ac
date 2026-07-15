@@ -8,14 +8,17 @@
     "local"
   ],
   "name": {
-    "en": "Pantea Smart Devices"
+    "en": "Pantea Smart Devices",
+    "es": "Pantea Smart Devices"
   },
   "description": {
-    "en": "Manage Pantea Smart Devices (i.e. Air Conditioner)"
+    "en": "Manage Pantea Smart devices (air conditioners)",
+    "es": "Administra los dispositivos Pantea Smart (aires acondicionados)"
   },
   "category": [
     "climate"
   ],
+  "brandColor": "#1E3A5F",
   "permissions": [],
   "images": {
     "small": "/assets/images/small.png",
@@ -23,89 +26,9 @@
     "xlarge": "/assets/images/xlarge.png"
   },
   "author": {
-    "name": "Rafael Defelice",
-    "email": "defelicerafael@gmail.com"
+    "name": "Pantea Smart",
+    "email": "fernanpizarro@gmail.com"
   },
-  "drivers": [
-    {
-      "id": "virtual_ac",
-      "name": {
-        "en": "Virtual Air Conditioner"
-      },
-      "class": "thermostat",
-      "platforms": [
-        "local"
-      ],
-      "images": {
-        "small": "/drivers/virtual_ac/assets/icon.svg",
-        "large": "/drivers/virtual_ac/assets/icon.svg",
-        "xlarge": "/drivers/virtual_ac/assets/icon.svg"
-      },
-      "connectivity": [],
-      "capabilities": [
-        "onoff",
-        "target_temperature",
-        "measure_temperature",
-        "thermostat_mode",
-        "learning_mode",
-        "swing_on_off",
-        "sleep_on_off"
-      ],
-      "capabilitiesOptions": {
-        "target_temperature": {
-          "min": 16,
-          "max": 30,
-          "step": 1,
-          "units": {
-            "en": "°C"
-          }
-        }
-      },
-      "settings": [
-        {
-          "id": "ha_ip",
-          "type": "text",
-          "label": {
-            "en": "Home Assistant IP"
-          }
-        },
-        {
-          "id": "remote_entity_name",
-          "type": "text",
-          "label": {
-            "en": "Remote Entity Name"
-          }
-        },
-        {
-          "id": "codigo_ac",
-          "type": "text",
-          "label": {
-            "en": "codigo por defecto ac1"
-          }
-        },
-        {
-          "id": "auto_on_temp_change",
-          "type": "checkbox",
-          "label": {
-            "en": "Turn ON when temperature is changed"
-          }
-        }
-      ],
-      "pair": [
-        {
-          "id": "list_devices",
-          "template": "list_devices",
-          "navigation": {
-            "next": "add_devices"
-          }
-        },
-        {
-          "id": "add_devices",
-          "template": "add_devices"
-        }
-      ]
-    }
-  ],
   "capabilities": {
     "learning_mode": {
       "type": "boolean",

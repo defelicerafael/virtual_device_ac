@@ -1,9 +1,11 @@
 {
-  "name": "com.company.myapp",
+  "name": "com.panteasmart.devices",
   "version": "1.0.0",
   "main": "app.js",
+  "author": "Pantea Smart",
   "scripts": {
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
+    "lint": "eslint --ext .js --ignore-path .gitignore .",
+    "test": "node --test test/"
   },
   "devDependencies": {
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",

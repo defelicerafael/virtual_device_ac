@@ -2,13 +2,12 @@
 
 const Homey = require('homey');
 
-module.exports = class MyApp extends Homey.App {
-  async onInit() {
-    try {
-      console.log('MyApp has been initialized');
+class PanteaDevicesApp extends Homey.App {
 
-    } catch (error) {
-      this.error("🚨 Error fatal en `onInit()`:", error);
-    }
+  async onInit() {
+    this.log('Pantea Smart Devices inicializada');
   }
-};
+
+}
+
+module.exports = PanteaDevicesApp;

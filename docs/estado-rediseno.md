@@ -2,52 +2,35 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-07-13
+## Última actualización: 2026-07-15
 
 ### Fase actual
-**Definición de producto** (todavía no se escribió código nuevo).
+**Implementación — Etapa 0 completa.** Siguiente: Etapa 1 (`lib/ir-codes.js`).
 
-### Hecho
-- Relevamiento completo de la app actual, punta a punta. Hallazgos y problemas documentados en [rediseno-app.md](rediseno-app.md).
-- Detectado que el `app.json` compilado no incluye modos dry/fan ni `ha_port` por duplicación de config entre `.homeycompose/app.json` y `driver.compose.json`.
-- Respondidas las preguntas 1 y 2 (on/off restaura último modo pero gana la temperatura vigente del tile; modos +dry/fan; fan_mode con opción "aprendido" por device) → sección "Definiciones tomadas".
-- Apareció requisito nuevo indispensable: incorporar la lógica del HomeyScript "PS Broadlink" (Homey Pro San Fran) que hoy hace el trabajo real, incluida la consulta de códigos a un webservice de Google Spreadsheet.
-- Respondida la pregunta 4: alta solo por instalador → wizard de pairing con vistas custom; `codigo_ac` fijo "ac1" (el código configurable pasa a ser el del lookup en el spreadsheet).
-- **Conseguido y analizado el HomeyScript "PS Broadlink"**: copia en [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js), análisis en [ps-broadlink-analisis.md](ps-broadlink-analisis.md). Hallazgo clave: en producción los tiles son de la app Device Capabilities + Flows + script — la nueva app reemplaza a los tres. Lookup IR: cache → planilla (`command_code`) → fallback legacy; secuencia "modo/ON separado"; learning con botón global; fan_mode incluye turbo.
+### Mapa de documentos
+- [rediseno-app.md](rediseno-app.md) — las 20 definiciones de producto + relevamiento de la app vieja. TODO el detalle de qué hace la app está ahí.
+- [propuesta-diseno.md](propuesta-diseno.md) — diseño APROBADO (arquitectura, capabilities, flujo de comando, lib/, wizard, flow cards, migración).
+- [plan-implementacion.md](plan-implementacion.md) — las 8 etapas con su forma de prueba.
+- [ps-broadlink-analisis.md](ps-broadlink-analisis.md) + [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js) — el HomeyScript que la app reemplaza.
+- [planilla-ir.md](planilla-ir.md) — formato real del webservice de códigos IR (relevado en vivo).
 
-- Definición 5 (completa): swing = comando separado con códigos on/off (`swing_on`/`swing_off`; si el aire es toggle se repite el código); sleep = sigue dentro de la clave compuesta `{modo}_{fan}_{temp}_{sleep}`, parte del código que va con la temperatura.
+### Progreso de etapas
+- ✅ **Etapa 0 — Limpieza de base (2026-07-15):**
+  - `.homeycompose/app.json` solo con metadata (eliminado el bug de config duplicada de drivers/capabilities). Autor Pantea Smart, sin "virtual", `brandColor` #1E3A5F placeholder.
+  - Driver `virtual_ac` borrado (queda en historia git). Capabilities custom conservadas (`swing_on_off`, `sleep_on_off`, `learning_mode`) para reusar ids en Etapa 3.
+  - `package.json` real (+ script `test`), `locales/es.json`, README sin "virtual", `.DS_Store` al gitignore.
+  - Imágenes de app: placeholders PNG generados (las reales van en Etapa 7 — antes NO existían y el manifest las referenciaba).
+  - ✅ `homey app validate --level=publish` PASA (CLI homey 4.0.5 instalada en la Mac — no hace falta ir a ferno para validar).
+- ⬜ Etapa 1 — `lib/ir-codes.js` + unit tests (fixtures reales ya bajados en el scratchpad de la sesión del 13/7; si no están, se re-bajan del webservice con `?code=1..5`).
+- ⬜ Etapa 2 — `lib/command-sender.js` + `lib/telegram.js` + tests
+- ⬜ Etapa 3 — Driver `ac` mínimo (pairing provisorio) probado contra HA real
+- ⬜ Etapa 4 — Wizard custom (necesita `?marcas=` del Apps Script)
+- ⬜ Etapa 5 — `lib/temp-mirror.js` + Telegram real
+- ⬜ Etapa 6 — Flow cards
+- ⬜ Etapa 7 — Cierre (imágenes reales, checklist defs 1–20, migración San Fran, v2.0.0)
 
-- Resuelta la pregunta 3: al prender, swing/sleep conservan lo vigente en el tile; sleep va implícito en el comando completo; swing se reenvía tras el encendido SOLO si `swing_on` ≠ `swing_off` en la planilla (si son iguales = toggle, no se manda).
-- Definición 6 (branding): el usuario NUNCA ve "Home Assistant" — todos los textos de la app dicen "Pantea Home Manager" (campo de conexión: "Host/IP de Pantea Home Manager").
-- Definición 7: learning pasa a ser botón POR DEVICE (reemplaza el botón global "Aprender AC"); activo → el próximo comando va a `ac_learn`.
-- Definiciones 8–11 (ronda AskUserQuestion): fallback legacy sigue vivo; measure_temperature se espeja de un device fuente elegido en pairing (drop-down) / editable en settings con validación, sin fuente → se quita la capability dinámicamente; errores = reintentos + warning + revertir UI + Telegram (reusando config del tile "Envio a Telegram" de lights); fan_mode con turbo.
-- Verificado en lights: driver `virtual_telegram` con settings token/chat cliente/chat soporte como fuente canónica, y uso real de add/removeCapability dinámico (factible).
-
-- Relevada la planilla IR consultando el webservice en vivo → [planilla-ir.md](planilla-ir.md). Code = entero, sirve para varias marcas. Hallazgo: code 5 ya tiene filas de modo-solo → se puede AUTODETECTAR "modo/ON separado" (y quizás "fan_mode aprendido") desde la planilla en vez de flag manual.
-
-- Definiciones 13–15: autodetección desde planilla (modo/ON separado y fan aprendido) + override 3 estados en settings avanzados; swing como filas `mode=swing_on/swing_off` sin columnas nuevas; planilla la mantiene Fernán (learn → archivo integración Broadlink en servidor → spreadsheet); URL del webservice configurable a nivel app con la de PS Broadlink como default. Learning confirmado: se apaga solo tras el primer comando.
-
-- Ampliada def. 13: el code es OPCIONAL — sin code el device es 100% legacy (el servidor resuelve con lo aprendido del remote) y el override de "encendido en 2 pasos" es lo que habilita la secuencia de 2 pasos.
-
-- Def. 16: learning + 2 pasos → cambio de modo aprende solo el comando de modo (resto vacío); cambio de temperatura envía el learning SIN temp y el script de ac_learn del servidor aprende solo todo el rango 16–30 en una sesión (un disparo cubre todo).
-
-- Defs. 17–19: campos del wizard confirmados (con "Encender al cambiar temperatura"); cache con botón "recargar códigos"; Flow cards de acción SÍ.
-- **Escrita la propuesta de diseño completa: [propuesta-diseno.md](propuesta-diseno.md)** (BORRADOR) — arquitectura, capabilities, flujo de comando, lib/, wizard, flow cards, migración. Con puntos [CONSULTAR].
-
-### Fase actual (actualizada)
-**Propuesta de diseño APROBADA (2026-07-13).** Todas las preguntas de producto respondidas; todos los [CONSULTAR] decididos: driver `ac`, capability `fan_mode` + ids viejos, wait 2s fijo, wizard de una vista con info de marcas del code, flow cards de acción + triggers + conditions, nombres de lib/ ok.
-
-- Def. 20: la palabra "virtual" no aparece en ningún texto visible — el driver se muestra "Aire Acondicionado".
-
-- **Escrito el plan de implementación: [plan-implementacion.md](plan-implementacion.md)** — 8 etapas (0 limpieza → 1 ir-codes → 2 command-sender/telegram → 3 driver mínimo → 4 wizard → 5 temp-mirror → 6 flow cards → 7 cierre/migración), cada una con su prueba.
-
-### Pendiente / próximo paso
-- Fernán revisa/aprueba el plan → arrancar por la Etapa 0.
-- ⚠️ Dependencia externa: **extender el Apps Script** para exponer la hoja "Marcas" (verificado que hoy no la devuelve — `?code=Marcas` etc. dan `[]`). Lo hace Fernán, en paralelo; el wizard degrada elegante si no está (lo necesita la Etapa 4).
-- Ofrecido: armar borrador de propuesta de diseño con lo ya definido, marcando lo pendiente como variantes.
-- Con eso: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
-- Con esas respuestas: armar propuesta de diseño (alternativas, consultar nombres de funciones antes de fijarlos — mismo método que lights).
-- Después: definir implementación juntos.
+### Pendiente / dependencias
+- ⚠️ **Fernán: extender el Apps Script** con `?marcas={code}` (hoja "Marcas") — lo consume la Etapa 4; el wizard degrada sin eso.
 
 ### Reglas de trabajo
 - Todo lo aprendido/definido/hecho se guarda en `.md` dentro de este repo (`docs/`).
@@ -55,6 +38,6 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 - Proponer alternativas y consultar nombres antes de fijarlos.
 
 ### Contexto útil
-- Repo git en `Homey/Apps/com.panteasmart.devices`. El rediseño vive en el branch **`claude`** (creado desde `master` el 2026-07-13), igual que en lights. Hay un `app.json` modificado sin commitear previo a este trabajo (solo un texto de label) y dos stashes viejos.
-- Lado HA: webhooks `ac_command` / `ac_learn`, patrón scripts Broadlink (HA fatato 192.168.68.60, RM4 Pro).
-- Debug de apps Homey: SSH a panteasmart-ferno, `/opt/pantea/scripts/homey-app run/log/install` (ojo gotcha DNS homeylocal en dev-mode).
+- Repo git en `Homey/Apps/com.panteasmart.devices`. El rediseño vive en el branch **`claude`**. En `master` quedó un `app.json` modificado sin commitear (previo, solo un label) y dos stashes viejos.
+- Lado servidor: webhooks `ac_command` / `ac_learn`, patrón scripts Broadlink. HA de San Fran (prod actual del script): 192.168.88.101. HA fatato: 192.168.68.60.
+- Debug de apps Homey: SSH a panteasmart-ferno, `/opt/pantea/scripts/homey-app run/log/install` (ojo gotcha DNS homeylocal en dev-mode). Validate: CLI local en la Mac.
