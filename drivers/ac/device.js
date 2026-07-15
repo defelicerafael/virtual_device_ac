@@ -236,6 +236,7 @@ class AcDevice extends Homey.Device {
       learnedFanOverride: settings.learned_fan_override || 'auto',
       allowSleep: settings.allow_sleep !== false,
       allowFanSpeed: settings.allow_fan_speed !== false,
+      learnTempScope: settings.learn_temp_scope || 'range',
     };
   }
 

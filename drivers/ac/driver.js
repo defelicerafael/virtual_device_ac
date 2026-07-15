@@ -124,6 +124,7 @@ class AcDriver extends Homey.Driver {
           swing_type: form.swingType === 'positions' ? 'positions' : 'onoff',
           two_step_override: 'auto',
           learned_fan_override: 'auto',
+          learn_temp_scope: 'range',
         },
       };
     });

@@ -194,6 +194,20 @@
           ]
         },
         {
+          "id": "learn_temp_scope",
+          "type": "dropdown",
+          "label": { "en": "Temperature learning", "es": "Aprendizaje de temperaturas" },
+          "hint": {
+            "en": "Full range: one learning session covers 16-30°. Specific: learns only the temperature currently set on the tile (to fix a badly learned one).",
+            "es": "Rango completo: una sesión de aprendizaje cubre 16-30°. Específica: aprende solo la temperatura seteada en el tile (para corregir una mal aprendida)."
+          },
+          "value": "range",
+          "values": [
+            { "id": "range", "label": { "en": "Full range (16-30)", "es": "Rango completo (16-30)" } },
+            { "id": "single", "label": { "en": "Specific temperature", "es": "Temperatura específica" } }
+          ]
+        },
+        {
           "id": "learned_fan_override",
           "type": "dropdown",
           "label": { "en": "Fan speed learned", "es": "Velocidad aprendida" },

@@ -289,7 +289,7 @@ describe('CommandSender', () => {
     });
   });
 
-  test('learning con trigger temperature → ac_learn SIN temperatura (def. 16)', async () => {
+  test('learning con trigger temperature → ac_learn SIN temperatura (def. 16, alcance rango)', async () => {
     await h.sender.sendLearn(
       { ...CONFIG_BASE, code: 5 },
       { mode: 'heat', fan: 'auto', temp: 20, sleep: 'off' },
@@ -300,6 +300,28 @@ describe('CommandSender', () => {
     assert.equal(payload.temperature, undefined, 'el servidor recorre 16-30 solo');
     assert.equal(payload.hvac_mode, 'heat');
     assert.equal(payload.simple_mode, undefined);
+  });
+
+  test('learning con alcance "temperatura específica" → ac_learn CON la temp del tile (def. 22)', async () => {
+    await h.sender.sendLearn(
+      { ...CONFIG_BASE, learnTempScope: 'single' },
+      { mode: 'cool', fan: 'auto', temp: 23, sleep: 'off' },
+      'temperature',
+    );
+    assert.equal(h.posts[0].payload.temperature, 23);
+
+    // El comando de encendido de 2 pasos NO lleva temperatura ni con 'single'.
+    await h.sender.sendLearn(
+      { ...CONFIG_BASE, code: 5, learnTempScope: 'single' },
+      { mode: 'heat', fan: 'auto', temp: 23, sleep: 'off' },
+      'mode',
+    );
+    assert.deepEqual(h.posts[1].payload, {
+      remote_entity: 'remote.escritorio',
+      device: 'ac1',
+      hvac_mode: 'heat',
+      simple_mode: true,
+    });
   });
 
   test('remote_entity acepta con y sin prefijo remote.', async () => {
