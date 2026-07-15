@@ -1,0 +1,209 @@
+<!-- Wizard de alta de aire acondicionado (defs. 3, 17, 21, 5 v3).
+     Vista custom de pairing: la usa el instalador. Sin la palabra "virtual"
+     ni mención a Home Assistant (defs. 6 y 20). -->
+<style>
+  .pantea-pair {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 0 16px 24px;
+    color: #222;
+  }
+  .pantea-pair h2 {
+    font-size: 15px;
+    margin: 18px 0 8px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .pantea-pair label.field {
+    display: block;
+    margin: 10px 0 2px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .pantea-pair input[type="text"],
+  .pantea-pair input[type="number"],
+  .pantea-pair select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .pantea-pair .hint {
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+  }
+  .pantea-pair .row {
+    display: flex;
+    gap: 10px;
+  }
+  .pantea-pair .row > div { flex: 1; }
+  .pantea-pair .row > div.small { flex: 0 0 90px; }
+  .pantea-pair .check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 14px;
+  }
+  .pantea-pair .check input { width: 18px; height: 18px; }
+  #code-info {
+    font-size: 13px;
+    margin-top: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    display: none;
+    white-space: pre-line;
+  }
+  #code-info.ok { display: block; background: #e8f5e9; color: #1b5e20; }
+  #code-info.warn { display: block; background: #fff3e0; color: #7a4b00; }
+  #add-button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    background: #1E3A5F;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  #add-button:disabled { opacity: 0.5; }
+</style>
+
+<div class="pantea-pair">
+  <h2>Equipo</h2>
+  <label class="field" for="f-name">Nombre</label>
+  <input type="text" id="f-name" placeholder="Aire Living">
+
+  <h2>Conexión</h2>
+  <div class="row">
+    <div>
+      <label class="field" for="f-host">Host/IP de Pantea Home Manager</label>
+      <input type="text" id="f-host" value="panteasmart.local">
+    </div>
+    <div class="small">
+      <label class="field" for="f-port">Puerto</label>
+      <input type="number" id="f-port" value="8123">
+    </div>
+  </div>
+  <label class="field" for="f-remote">Entidad remote</label>
+  <input type="text" id="f-remote" placeholder="living">
+  <div class="hint">Nombre del control IR en Pantea Home Manager (sin el prefijo "remote.").</div>
+
+  <h2>Códigos</h2>
+  <label class="field" for="f-code">Code (planilla de códigos) — opcional</label>
+  <input type="text" id="f-code" inputmode="numeric" placeholder="ej. 1">
+  <div class="hint">Vacío: el servidor resuelve los comandos con lo aprendido por este control.</div>
+  <div id="code-info"></div>
+
+  <h2>Temperatura</h2>
+  <label class="field" for="f-temp-source">Sensor de temperatura ambiente</label>
+  <select id="f-temp-source"><option value="">Ninguno</option></select>
+  <label class="check"><input type="checkbox" id="f-auto-on" checked> Encender al cambiar temperatura</label>
+
+  <h2>Funciones del equipo</h2>
+  <label class="check"><input type="checkbox" id="f-allow-heat" checked> Permite modo calor</label>
+  <label class="check"><input type="checkbox" id="f-allow-dry" checked> Permite modo secado</label>
+  <label class="check"><input type="checkbox" id="f-allow-fan-mode" checked> Permite modo ventilador</label>
+  <label class="check"><input type="checkbox" id="f-allow-sleep" checked> Permite sleep</label>
+  <label class="check"><input type="checkbox" id="f-allow-fan-speed" checked> Permite cambiar la velocidad</label>
+  <label class="field" for="f-swing-type">Tipo de swing</label>
+  <select id="f-swing-type">
+    <option value="onoff" selected>On/off</option>
+    <option value="positions">Por posición</option>
+  </select>
+
+  <button id="add-button">Agregar equipo</button>
+</div>
+
+<script type="application/javascript">
+  const $ = (id) => document.getElementById(id);
+
+  // Drop-down de sensores con measure_temperature (def. 9).
+  Homey.emit('get_temp_devices')
+    .then((names) => {
+      const select = $('f-temp-source');
+      (names || []).forEach((name) => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+    })
+    .catch(() => { /* sin lista: queda solo "Ninguno" */ });
+
+  // Consulta del code en vivo: comandos disponibles + marcas (def. 17 + §7).
+  let codeTimer = null;
+  $('f-code').addEventListener('input', () => {
+    clearTimeout(codeTimer);
+    codeTimer = setTimeout(checkCode, 500);
+  });
+
+  async function checkCode() {
+    const info = $('code-info');
+    const code = $('f-code').value.trim();
+    if (code === '') { info.className = ''; return; }
+    info.className = 'warn';
+    info.textContent = 'Consultando la planilla…';
+    try {
+      const result = await Homey.emit('check_code', { code });
+      if (result.empty) { info.className = ''; return; }
+      if (!result.summary) {
+        info.className = 'warn';
+        info.textContent = `Code ${code}: no se encontró en la planilla de códigos.`;
+        return;
+      }
+      const s = result.summary;
+      const lines = [];
+      lines.push(`Code ${code}: ${s.commands} comandos — modos ${s.modes.join('/')}` +
+        `, velocidades ${s.fans.join('/')}` +
+        (s.sleep ? ', con sleep' : '') +
+        (s.hasSwing ? ', con swing' : '') +
+        (s.twoStep ? ', encendido en 2 pasos' : ''));
+      if (Array.isArray(result.brands) && result.brands.length > 0) {
+        const brands = result.brands
+          .map((row) => Object.values(row).filter((v) => v !== code && String(v).trim() !== '').join(' '))
+          .filter((t) => t.trim() !== '')
+          .join(', ');
+        if (brands) lines.push(`Aplica a: ${brands}`);
+      }
+      info.className = 'ok';
+      info.textContent = lines.join('\n');
+    } catch (err) {
+      info.className = 'warn';
+      info.textContent = (err && err.message) || 'No se pudo consultar la planilla.';
+    }
+  }
+
+  $('add-button').addEventListener('click', async () => {
+    const button = $('add-button');
+    button.disabled = true;
+    try {
+      const device = await Homey.emit('build_device', {
+        name: $('f-name').value,
+        host: $('f-host').value,
+        port: $('f-port').value,
+        remoteEntity: $('f-remote').value,
+        code: $('f-code').value,
+        tempSource: $('f-temp-source').value,
+        autoOn: $('f-auto-on').checked,
+        allowHeat: $('f-allow-heat').checked,
+        allowDry: $('f-allow-dry').checked,
+        allowFanMode: $('f-allow-fan-mode').checked,
+        allowSleep: $('f-allow-sleep').checked,
+        allowFanSpeed: $('f-allow-fan-speed').checked,
+        swingType: $('f-swing-type').value,
+      });
+      await Homey.createDevice(device);
+      await Homey.done();
+    } catch (err) {
+      Homey.alert((err && err.message) || 'No se pudo agregar el equipo.');
+      button.disabled = false;
+    }
+  });
+</script>

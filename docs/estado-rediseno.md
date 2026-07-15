@@ -5,7 +5,9 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ## Última actualización: 2026-07-15
 
 ### Fase actual
-**Implementación — Etapas 0–2 completas; Etapa 3 con CÓDIGO COMPLETO, falta la prueba contra servidor real** (`homey-app run` en ferno + verificar POSTs en HA — coordinar con Fernán contra qué Homey/HA probar).
+**Implementación — Etapas 0–2 completas; Etapas 3 y 4 con CÓDIGO COMPLETO, falta la prueba contra Homey/servidor reales.**
+
+⛔ **BLOQUEO para la prueba real:** el push del branch `claude` a `defelicerafael/virtual_device_ac` está denegado — el usuario `fernanpizarro` (única auth en la Mac: gh + SSH) tiene solo lectura en ese repo (sí tiene push en `defelicerafael/panteasmart`). Fernán decidió **pedirle a Rafael** que lo agregue como colaborador con escritura. Cuando esté: push `claude` → agregar a `repos.txt` en ferno (`local|com.panteasmart.devices|git@github.com:defelicerafael/virtual_device_ac.git|claude|`) → `homey-app update` + `run` al Homey `.100` → probar con entidad remote inexistente (los POST se ven en logs de HA sin tocar aires). Todo eso ya está aprobado por Fernán.
 
 ### Mapa de documentos
 - [rediseno-app.md](rediseno-app.md) — las 20 definiciones de producto + relevamiento de la app vieja. TODO el detalle de qué hace la app está ahí.
@@ -35,7 +37,10 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
   - `app.js`: servicios compartidos (irCodes con URL en settings de app + default PS Broadlink, commandSender, telegram stub hasta Etapa 5).
   - Assets: ícono del driver recuperado del viejo; imágenes placeholder.
   - ✅ validate publish OK, 33/33 tests. **Falta:** correr en Homey real y verificar POSTs (checklist en plan-implementacion.md Etapa 3).
-- ⬜ Etapa 4 — Wizard custom (necesita `?marcas=` del Apps Script)
+- 🟡 **Etapa 4 — Wizard custom (2026-07-15): código completo, PENDIENTE prueba real.**
+  - Permiso `homey:manager:api` + dep `homey-api@^3` (patrón de lights); `app.getHomeyApi()` lazy con degradación (gotcha DNS homeylocal en dev-mode).
+  - Pairing con vista custom única `drivers/ac/pair/setup.html`: nombre, host/IP PHM (+puerto), entidad remote (normaliza prefijo `remote.`), code opcional con **consulta en vivo** (resumen de comandos + marcas si el Apps Script ya soporta `?marcas=` — degrada sin eso), drop-down de sensores con `measure_temperature` (HomeyAPI, degrada a "Ninguno"), auto-on, 5 funciones del equipo, tipo de swing. `driver.onPair` con handlers `get_temp_devices` / `check_code` / `build_device` (valida y arma el device con uuid). `.homeyignore` para docs/ y test/.
+  - ✅ validate publish OK (warning esperado por el permiso api), 37/37 tests. **Falta:** prueba de alta real en el Homey.
 - ⬜ Etapa 5 — `lib/temp-mirror.js` + Telegram real
 - ⬜ Etapa 6 — Flow cards
 - ⬜ Etapa 7 — Cierre (imágenes reales, checklist defs 1–20, migración San Fran, v2.0.0)

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "app.js",
   "author": "Pantea Smart",
+  "dependencies": {
+    "homey-api": "^3.11.1"
+  },
   "scripts": {
     "lint": "eslint --ext .js --ignore-path .gitignore .",
     "test": "node --test test/"
