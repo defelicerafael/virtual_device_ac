@@ -111,8 +111,8 @@ describe('CommandSender', () => {
     assert.ok(h.posts[0].payload.command_code);
   });
 
-  test('override learnedFan=yes con fan inexistente en planilla → cae a legacy con el fan pedido', async () => {
-    await h.sender.sendState(
+  test('override learnedFan=yes con fan inexistente en planilla → cae a legacy con el fan pedido y reporta missing', async () => {
+    const res = await h.sender.sendState(
       { ...CONFIG_BASE, code: 2, learnedFanOverride: 'yes' },
       { mode: 'cool', fan: 'high', temp: 24, sleep: 'off' },
       'fan',
@@ -120,6 +120,25 @@ describe('CommandSender', () => {
     const { payload } = h.posts[0];
     assert.equal(payload.command_code, undefined);
     assert.equal(payload.fan_mode, 'high');
+    assert.deepEqual(res.missing, ['cool_high_24_off'], 'con code, la clave ausente se reporta (warning en tile)');
+  });
+
+  test('sin code, comando por legacy NO reporta missing (es el diseño, no un faltante)', async () => {
+    const res = await h.sender.sendState(
+      CONFIG_BASE,
+      { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' },
+      'temperature',
+    );
+    assert.deepEqual(res.missing, []);
+  });
+
+  test('con code y comando presente → missing vacío', async () => {
+    const res = await h.sender.sendState(
+      { ...CONFIG_BASE, code: 1 },
+      { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' },
+      'temperature',
+    );
+    assert.deepEqual(res.missing, []);
   });
 
   test('apagado → comando off de la planilla', async () => {
@@ -215,16 +234,21 @@ describe('CommandSender', () => {
     assert.equal(h.posts[2].payload.command_code, 'SWINGON99');
   });
 
-  test('swing en posición sin código (middle) → skipped, sin POST', async () => {
+  test('swing en posición sin código (middle) → skipped + missing, sin POST', async () => {
     const res = await h.sender.sendSwing({ ...CONFIG_BASE, code: 99 }, 'middle');
-    assert.deepEqual(res, { ok: true, skipped: true });
+    assert.deepEqual(res, { ok: true, skipped: true, missing: ['swing_middle'] });
     assert.equal(h.posts.length, 0);
   });
 
-  test('swing sin códigos (code 1 real) → skipped, sin POST', async () => {
+  test('swing sin códigos (code 1 real) → skipped + missing, sin POST', async () => {
     const res = await h.sender.sendSwing({ ...CONFIG_BASE, code: 1 }, 'auto');
-    assert.deepEqual(res, { ok: true, skipped: true });
+    assert.deepEqual(res, { ok: true, skipped: true, missing: ['swing_auto'] });
     assert.equal(h.posts.length, 0);
+  });
+
+  test('swing sin code configurado → skipped SIN missing', async () => {
+    const res = await h.sender.sendSwing(CONFIG_BASE, 'auto');
+    assert.deepEqual(res, { ok: true, skipped: true, missing: [] });
   });
 
   test('learning de swing → ac_learn como modo swing_<clave> con simple_mode', async () => {

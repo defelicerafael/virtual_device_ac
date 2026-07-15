@@ -135,7 +135,7 @@ class AcDevice extends Homey.Device {
 
     if (!result.ok) return this._failure(result.error);
     if (result.skipped) this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
-    await this.setWarning(null).catch(() => {});
+    await this._warnMissing(result.missing);
     this._triggerFlow('swing', key);
     return true;
   }
@@ -181,8 +181,25 @@ class AcDevice extends Homey.Device {
     }
 
     if (!result.ok) return this._failure(result.error);
-    await this.setWarning(null).catch(() => {});
+    await this._warnMissing(result.missing);
     return result;
+  }
+
+  /**
+   * Aviso de comandos ausentes en la planilla (pedido de Fernán 2026-07-15):
+   * con code configurado y clave inexistente, el envío sale igual por el
+   * camino legacy, pero el tile muestra qué comando falta. Sin faltantes,
+   * se limpia el warning.
+   */
+  async _warnMissing(missing) {
+    if (Array.isArray(missing) && missing.length > 0) {
+      await this.setWarning(this.homey.__({
+        en: `Command not available in the code sheet: ${missing.join(', ')}`,
+        es: `Comando no disponible en la planilla: ${missing.join(', ')}`,
+      })).catch(() => {});
+    } else {
+      await this.setWarning(null).catch(() => {});
+    }
   }
 
   /** Def. 10: warning + Telegram + throw (el throw revierte la UI). */

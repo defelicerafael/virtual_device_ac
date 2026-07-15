@@ -96,6 +96,8 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 
 22. **Alcance del learning de temperaturas (2026-07-15).** Setting en Avanzado "Aprendizaje de temperaturas": **"Rango completo (16–30)"** [default] → el learn va SIN temperatura y el servidor recorre todo el rango en una sesión; **"Temperatura específica"** → el learn va CON la temperatura vigente del tile, para corregir una temperatura mal aprendida sin repetir toda la sesión. Aplica a los learn de estado (no al comando de encendido de 2 pasos ni al swing, que son claves de modo solo). En un aire no-2-pasos, cambiar el modo con learning activo también dispara el learn con este mismo alcance ("cambio a heat con learning = aprendeme heat", rango o temperatura puntual según el setting).
 
+23. **Warning por comando ausente en la planilla (2026-07-15).** Si el tile tiene code configurado y la clave buscada no existe en la planilla, el envío sale igual por el fallback legacy (def. 8) pero el tile muestra un **warning** con la clave faltante ("Comando no disponible en la planilla: cool_high_24_off"). Sin code configurado no hay warning (el legacy es el diseño, no un faltante). Se limpia en el próximo envío sin faltantes. Aplica también a swing (que no tiene fallback: skipped + warning).
+
 ## Preguntas abiertas
 4. ~~Campos del wizard~~ → RESUELTO (definición 17).
 5. ~~Retorno HA→Homey~~ → RESUELTO (definición 9): measure_temperature se espeja de otro device de Homey elegido en pairing/settings; sin device fuente, se quita la capability.
