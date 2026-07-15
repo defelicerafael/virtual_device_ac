@@ -5,7 +5,7 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ## Última actualización: 2026-07-15
 
 ### Fase actual
-**Implementación — Etapa 0 completa.** Siguiente: Etapa 1 (`lib/ir-codes.js`).
+**Implementación — Etapas 0 y 1 completas.** Siguiente: Etapa 2 (`lib/command-sender.js` + `lib/telegram.js`).
 
 ### Mapa de documentos
 - [rediseno-app.md](rediseno-app.md) — las 20 definiciones de producto + relevamiento de la app vieja. TODO el detalle de qué hace la app está ahí.
@@ -21,7 +21,7 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
   - `package.json` real (+ script `test`), `locales/es.json`, README sin "virtual", `.DS_Store` al gitignore.
   - Imágenes de app: placeholders PNG generados (las reales van en Etapa 7 — antes NO existían y el manifest las referenciaba).
   - ✅ `homey app validate --level=publish` PASA (CLI homey 4.0.5 instalada en la Mac — no hace falta ir a ferno para validar).
-- ⬜ Etapa 1 — `lib/ir-codes.js` + unit tests (fixtures reales ya bajados en el scratchpad de la sesión del 13/7; si no están, se re-bajan del webservice con `?code=1..5`).
+- ✅ **Etapa 1 — `lib/ir-codes.js` (2026-07-15):** módulo Node puro (fetch/URL/log inyectados). API: `getFullCommand`, `getModeCommand`, `getSwingCommands`, `hasModeOnlyRows` (autodetección 2 pasos), `hasLearnedFan`, `getSummary` (wizard), `getBrands` (degrada a []), `reload`/`clearCache`. Cache en memoria por code. Errores de red/parseo → getters null (camino legacy); `reload` propaga. **13 unit tests en verde** (`npm test`, fixtures reales en `test/fixtures/code1..5.json`) + probado contra el webservice VIVO (summary code 5 twoStep:true, cool_turbo_22_off code 1, modo-solo heat code 5, brands degrada).
 - ⬜ Etapa 2 — `lib/command-sender.js` + `lib/telegram.js` + tests
 - ⬜ Etapa 3 — Driver `ac` mínimo (pairing provisorio) probado contra HA real
 - ⬜ Etapa 4 — Wizard custom (necesita `?marcas=` del Apps Script)
