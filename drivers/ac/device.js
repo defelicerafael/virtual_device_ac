@@ -24,9 +24,10 @@ class AcDevice extends Homey.Device {
       await this.setCapabilityValue('onoff', false).catch(this.error);
     }
 
-    // measure_temperature solo si hay device fuente (def. 9).
-    // El espejo real del valor llega en Etapa 5; acá se maneja la presencia.
+    // measure_temperature solo si hay device fuente (def. 9): presencia de
+    // la capability + suscripción al device fuente vía HomeyAPI.
     await this._syncTempCapability().catch(this.error);
+    this._attachTempMirror();
 
     // Funciones permitidas del equipo (def. 21): presencia de capabilities
     // y modos visibles según settings.
@@ -328,7 +329,26 @@ class AcDevice extends Homey.Device {
     }
   }
 
+  /** Suscripción (o baja) al device fuente según el setting vigente. */
+  _attachTempMirror() {
+    const source = String(this.getSetting('temp_source') || '').trim();
+    const mirror = this.homey.app.tempMirror;
+    if (source === '') {
+      mirror.detach(this);
+      return;
+    }
+    mirror.attach(this, source).catch(this.error);
+  }
+
   // -------------------- settings --------------------
+
+  async onDeleted() {
+    this.homey.app.tempMirror?.detach(this);
+  }
+
+  async onUninit() {
+    this.homey.app.tempMirror?.detach(this);
+  }
 
   async onSettings({ oldSettings, newSettings, changedKeys }) {
     this.log('Settings cambiados:', changedKeys.join(', '));
@@ -344,8 +364,24 @@ class AcDevice extends Homey.Device {
     }
 
     if (changedKeys.includes('temp_source')) {
-      // La validación contra devices reales y el espejo llegan en Etapa 5.
-      this.homey.setTimeout(() => this._syncTempCapability().catch(this.error), 500);
+      // Def. 9: si se carga un nombre, tiene que ser un device real con
+      // measure_temperature — si no, se rechaza el cambio.
+      const source = String(newSettings.temp_source || '').trim();
+      if (source !== '') {
+        const found = await this.homey.app.tempMirror.findSourceByName(source)
+          .catch(() => undefined); // HomeyAPI caída: no validar (undefined ≠ null)
+        if (found === null) {
+          throw new Error(this.homey.__({
+            en: `No device named "${source}" with temperature was found.`,
+            es: `No se encontró un dispositivo "${source}" con temperatura.`,
+          }));
+        }
+      }
+      this.homey.setTimeout(() => {
+        this._syncTempCapability()
+          .then(() => this._attachTempMirror())
+          .catch(this.error);
+      }, 500);
     }
 
     if (changedKeys.some((key) => key.startsWith('allow_') || key === 'swing_type')) {

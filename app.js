@@ -5,6 +5,7 @@ const { HomeyAPI } = require('homey-api');
 const IrCodes = require('./lib/ir-codes');
 const CommandSender = require('./lib/command-sender');
 const TelegramNotifier = require('./lib/telegram');
+const TempMirror = require('./lib/temp-mirror');
 
 // URL del webservice de la planilla (def. 15): configurable en settings de
 // app, con la URL histórica de PS Broadlink.js como default.
@@ -29,15 +30,45 @@ class PanteaDevicesApp extends Homey.App {
       error: this.error.bind(this),
     });
 
-    // La config real (tile "Envio a Telegram" de lights vía HomeyAPI) se
-    // cablea en Etapa 5; hasta entonces el notifier loguea y no envía.
+    // Config del canal: el tile "Envio a Telegram" de com.panteasmart.lights
+    // es la fuente canónica (def. 10); se leen sus settings vía HomeyAPI.
     this.telegram = new TelegramNotifier({
-      getChannelConfig: async () => null,
+      getChannelConfig: () => this._telegramChannelConfig(),
+      log: this.log.bind(this),
+      error: this.error.bind(this),
+    });
+
+    this.tempMirror = new TempMirror({
+      getHomeyApi: () => this.getHomeyApi(),
       log: this.log.bind(this),
       error: this.error.bind(this),
     });
 
     this.log('Pantea Smart Devices inicializada');
+  }
+
+  async onUninit() {
+    this.tempMirror?.destroyAll();
+  }
+
+  async _telegramChannelConfig() {
+    try {
+      const api = await this.getHomeyApi();
+      const devices = await api.devices.getDevices();
+      const tile = Object.values(devices).find(
+        (device) => String(device.driverId || '').includes('virtual_telegram'),
+      );
+      if (!tile) return null;
+      const settings = tile.settings || {};
+      return {
+        token: settings.telegram_token,
+        chatId: settings.telegram_chat_id,
+        supportChatId: settings.telegram_support_chat_id,
+      };
+    } catch (err) {
+      this.error('No se pudo leer la config de Telegram del tile de lights:', err.message || err);
+      return null;
+    }
   }
 
   /**

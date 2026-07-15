@@ -41,7 +41,10 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
   - Permiso `homey:manager:api` + dep `homey-api@^3` (patrón de lights); `app.getHomeyApi()` lazy con degradación (gotcha DNS homeylocal en dev-mode).
   - Pairing con vista custom única `drivers/ac/pair/setup.html`: nombre, host/IP PHM (+puerto), entidad remote (normaliza prefijo `remote.`), code opcional con **consulta en vivo** (resumen de comandos + marcas si el Apps Script ya soporta `?marcas=` — degrada sin eso), drop-down de sensores con `measure_temperature` (HomeyAPI, degrada a "Ninguno"), auto-on, 5 funciones del equipo, tipo de swing. `driver.onPair` con handlers `get_temp_devices` / `check_code` / `build_device` (valida y arma el device con uuid). `.homeyignore` para docs/ y test/.
   - ✅ validate publish OK (warning esperado por el permiso api), 37/37 tests. **Falta:** prueba de alta real en el Homey.
-- ⬜ Etapa 5 — `lib/temp-mirror.js` + Telegram real
+- 🟡 **Etapa 5 — temp-mirror + Telegram real (2026-07-15): código completo, PENDIENTE prueba real.**
+  - `lib/temp-mirror.js`: suscripción vía HomeyAPI `makeCapabilityInstance` (patrón lights), siembra valor inicial, re-attach reemplaza suscripción, detach en onDeleted/onUninit. Validación en onSettings: nombre inexistente → se rechaza el cambio (si la HomeyAPI está caída no se bloquea).
+  - `app.js`: `_telegramChannelConfig()` lee los settings del tile `virtual_telegram` de lights vía HomeyAPI (token / chat cliente / chat soporte) — el TelegramNotifier ya no es stub.
+  - 4 tests nuevos con HomeyAPI falsa → **41/41**. Falta probar en Homey real (sensor de verdad + tile de Telegram configurado).
 - ⬜ Etapa 6 — Flow cards
 - ⬜ Etapa 7 — Cierre (imágenes reales, checklist defs 1–20, migración San Fran, v2.0.0)
 
