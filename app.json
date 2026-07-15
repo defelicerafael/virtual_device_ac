@@ -595,8 +595,8 @@
               "id": "phm_host",
               "type": "text",
               "label": {
-                "en": "Pantea Home Manager host/IP",
-                "es": "Host/IP de Pantea Home Manager"
+                "en": "Host/IP Pantea Home Manager",
+                "es": "Host/IP Pantea Home Manager"
               },
               "value": "panteasmart.local"
             },
