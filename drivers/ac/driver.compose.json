@@ -188,8 +188,8 @@
           "id": "allow_heat",
           "type": "checkbox",
           "label": {
-            "en": "Has HEAT mode?",
-            "es": "Tiene modo HEAT?"
+            "en": "Has Heat mode?",
+            "es": "Tiene modo Heat?"
           },
           "value": true
         },
@@ -197,8 +197,8 @@
           "id": "allow_dry",
           "type": "checkbox",
           "label": {
-            "en": "Has DRY mode?",
-            "es": "Tiene modo DRY?"
+            "en": "Has Dry mode?",
+            "es": "Tiene modo Dry?"
           },
           "value": false
         },
@@ -206,8 +206,8 @@
           "id": "allow_fan_mode",
           "type": "checkbox",
           "label": {
-            "en": "Has FAN mode?",
-            "es": "Tiene modo FAN?"
+            "en": "Has Fan mode?",
+            "es": "Tiene modo Fan?"
           },
           "value": false
         },
