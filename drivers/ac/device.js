@@ -63,6 +63,11 @@ class AcDevice extends Homey.Device {
     this.registerCapabilityListener('swing_mode', (value) => this._onSwing(value));
     this.registerCapabilityListener('learning_mode', (value) => this._onLearning(value));
     this.registerCapabilityListener('button.reload_codes', () => this._onReloadCodes());
+
+    // Disponibilidad explícita: tras un ciclo de desinstalación/reinstalación
+    // (p. ej. el uninstall-on-quit de homey app run), Homey puede dejar el
+    // device marcado como no disponible aunque el init haya sido exitoso.
+    await this.setAvailable().catch(this.error);
   }
 
   // -------------------- listeners --------------------
