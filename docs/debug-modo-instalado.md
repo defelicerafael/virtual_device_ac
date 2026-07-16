@@ -1,6 +1,20 @@
 # Debug: devices "no disponibles" en modo instalado (2026-07-16)
 
-Registro completo de la investigación. Estado al cierre: **NO RESUELTO — el fix de `setAvailable()` no alcanzó; próximo paso: REINICIAR EL HOMEY** (decisión de Fernán pendiente, ver última sección).
+## ✅ RESUELTO (2026-07-16, tarde) — causa raíz y moraleja
+
+**Causa raíz:** el `"discovery": "phm"` agregado al `driver.compose.json` en la def. 25 (IP pre-llenada en el wizard vía discovery mDNS-SD). **Declarar una estrategia de discovery en un driver ata la DISPONIBILIDAD de sus devices al resultado del discovery** (patrón Homey para dispositivos LAN: "si el discovery no te encuentra, estás offline"). Nuestra estrategia busca el servicio del PHM (`_home-assistant._tcp`), no a los devices — los ids jamás matchean → el core marcó "no disponible" a TODOS los devices del driver, en `run` y en `install`, con `onInit` OK y `setAvailable()` impotente (el estado del discovery pisa todo). Ni reinicio de app ni reboot del Homey lo curaban.
+
+**Por qué culpamos al modo instalado:** el commit del discovery entró casi al mismo tiempo que el primer `install`, y la premisa "en run funciona" era de ANTES del commit. La prueba que destrabó todo: correr en `run` con el código actual → también roto; y "Prueba Zombie" (device nuevo) nacía no-disponible → sistémico, no registros dañados.
+
+**El fix (commit 3282c6b):** quitar `"discovery"` del driver; la estrategia queda declarada a nivel app (`.homeycompose/discovery/phm.json`) y el wizard la consulta vía `this.homey.discovery.getStrategy('phm')`. Def. 25 intacta, disponibilidad libre. **Verificado en vivo:** los 5 devices `available: true` con la app INSTALADA en San Fran; fix desplegado también a jx y segun.
+
+**Moraleja para el futuro:** `"discovery"` en un driver es SOLO para devices que el discovery realmente encuentra (con `onDiscoveryResult` matcheando ids). Para usos auxiliares (detectar un servidor en la red), definir la estrategia a nivel app y consultarla por el manager, sin asociarla al driver.
+
+---
+
+## Registro histórico de la investigación (previo a la resolución)
+
+Estado intermedio que llegó a decir: NO RESUELTO — el fix de `setAvailable()` no alcanzó; próximo paso: reiniciar el Homey. (El reboot se hizo y tampoco alcanzó, coherente con la causa real.)
 
 ## Síntoma
 

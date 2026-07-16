@@ -1,12 +1,5 @@
 'use strict';
 
-// ============ DIAGNÓSTICO TEMPORAL (quitar tras resolver el crash) ============
-const reportDiag = require('./lib/diag');
-process.on('uncaughtException', (err) => reportDiag('uncaughtException', err));
-process.on('unhandledRejection', (err) => reportDiag('unhandledRejection', err));
-reportDiag('boot', 'app.js evaluándose');
-// ============ FIN DIAGNÓSTICO TEMPORAL
-
 const Homey = require('homey');
 const { HomeyAPI } = require('homey-api');
 const IrCodes = require('./lib/ir-codes');
@@ -52,7 +45,6 @@ class PanteaDevicesApp extends Homey.App {
     });
 
     this.log('Pantea Smart Devices inicializada');
-    reportDiag('onInit', 'OK - app inicializada');
   }
 
   async onUninit() {

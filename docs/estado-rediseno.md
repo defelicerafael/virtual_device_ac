@@ -4,8 +4,8 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 
 ## Última actualización: 2026-07-16
 
-### ⚠️ PROBLEMA ACTIVO — LEER PRIMERO
-**Los aires de San Fran están "no disponibles" en modo instalado.** Investigación completa, causa acorralada y próximos pasos EN ORDEN en **[debug-modo-instalado.md](debug-modo-instalado.md)** — el paso 1 es reiniciar el Homey San Fran (decisión de Fernán pendiente al cierre de la sesión del 16/7). Regla nueva de oro: **nunca `homey-app run`/`stop` sobre una app que se quiere instalada** (el quit desinstala la app y borra sus settings de app). Hay código de DIAGNÓSTICO TEMPORAL en el branch a revertir cuando se cierre (detalle en el mismo doc).
+### ✅ Problema "no disponibles" RESUELTO (2026-07-16)
+Causa raíz: `"discovery"` declarado en el driver ataba la disponibilidad de los devices al discovery mDNS (ids que jamás matchean → todos offline, en run e install). Fix: estrategia a nivel app consultada vía `homey.discovery.getStrategy('phm')` (def. 25 intacta). **Verificado: 5/5 devices disponibles con la app INSTALADA; desplegado en los 3 Homeys; diagnóstico temporal revertido.** Historia completa y moraleja en [debug-modo-instalado.md](debug-modo-instalado.md). Reglas que quedan: nunca `run`/`stop` sobre una app que se quiere instalada (el quit desinstala y borra settings de app); `"discovery"` en un driver SOLO si el discovery encuentra a los devices de verdad.
 
 ### Fase actual
 **Implementación — Etapas 0–6 completas y PROBADAS EN VIVO (2026-07-15).** Verificado en el Homey San Fran con el device "Prueba AC" (code 1, sensor "Mov Escritorio", entidad `remote.test_claude` inexistente a propósito):
