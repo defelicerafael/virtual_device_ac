@@ -1,5 +1,23 @@
 'use strict';
 
+// ============ DIAGNÓSTICO TEMPORAL (quitar tras resolver el crash en modo
+// instalado): reporta errores fatales a un listener en la Pi de San Fran.
+function reportDiag(tag, err) {
+  try {
+    const body = `[${tag}] ${(err && (err.stack || err.message)) || String(err)}`;
+    const req = require('http').request({
+      host: '192.168.88.101', port: 9999, method: 'POST', path: '/',
+      headers: { 'Content-Length': Buffer.byteLength(body) },
+    });
+    req.on('error', () => {});
+    req.end(body);
+  } catch (_) { /* nunca romper por el diagnóstico */ }
+}
+process.on('uncaughtException', (err) => reportDiag('uncaughtException', err));
+process.on('unhandledRejection', (err) => reportDiag('unhandledRejection', err));
+reportDiag('boot', 'app.js evaluándose');
+// ============ FIN DIAGNÓSTICO TEMPORAL
+
 const Homey = require('homey');
 const { HomeyAPI } = require('homey-api');
 const IrCodes = require('./lib/ir-codes');
@@ -45,6 +63,7 @@ class PanteaDevicesApp extends Homey.App {
     });
 
     this.log('Pantea Smart Devices inicializada');
+    reportDiag('onInit', 'OK - app inicializada');
   }
 
   async onUninit() {
