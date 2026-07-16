@@ -101,6 +101,8 @@ App de Homey que permite dar de alta tantos devices como el usuario quiera; cada
 
 24. **IP del PHM en UN solo lugar (2026-07-15).** La IP y el puerto de Pantea Home Manager viven en la **configuración de la app** (pantalla `settings/index.html`, junto con la URL de la planilla), no por device. El **wizard** la muestra de solo lectura con el aviso "se modifica desde la configuración de la app" — salvo el **primer alta** sin IP configurada, que la pide y la siembra a nivel app. La **config del tile** la muestra como label de solo lectura (`phm_host_info`, refrescado en vivo) con el mismo aviso. Fallback: devices creados antes del cambio siguen usando su setting viejo hasta que se configure la IP a nivel app (que entonces gana).
 
+25. **IP por defecto vía discovery (2026-07-15).** El driver tiene una estrategia de discovery mDNS-SD (`.homeycompose/discovery/phm.json`, servicio `home-assistant`) que corre en el **core de Homey** (fuera del contenedor — por eso funciona donde la resolución `.local` directa falla). En el primer alta sin IP configurada: si el discovery detectó el PHM, el campo IP pasa a ser **opcional** con la leyenda "si se deja vacía, se usa el valor por defecto de la instalación" — **sin mostrar cuál es ni mencionar jamás el servicio descubierto** (def. 6: el usuario no debe saber que hay un Home Assistant detrás; el nombre del servicio solo existe dentro del manifest). Sin detección, la IP sigue siendo obligatoria.
+
 ## Preguntas abiertas
 4. ~~Campos del wizard~~ → RESUELTO (definición 17).
 5. ~~Retorno HA→Homey~~ → RESUELTO (definición 9): measure_temperature se espeja de otro device de Homey elegido en pairing/settings; sin device fuente, se quita la capability.

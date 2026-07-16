@@ -499,6 +499,7 @@
         "local"
       ],
       "connectivity": [],
+      "discovery": "phm",
       "images": {
         "small": "/drivers/ac/assets/images/small.png",
         "large": "/drivers/ac/assets/images/large.png",
@@ -1011,6 +1012,16 @@
       "setable": true,
       "uiComponent": "button",
       "uiQuickAction": false
+    }
+  },
+  "discovery": {
+    "phm": {
+      "type": "mdns-sd",
+      "mdns-sd": {
+        "name": "home-assistant",
+        "protocol": "tcp"
+      },
+      "id": "{{txt.uuid}}"
     }
   }
 }

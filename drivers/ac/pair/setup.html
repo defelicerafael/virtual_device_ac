@@ -97,7 +97,7 @@
         <input type="number" id="f-port" value="8123">
       </div>
     </div>
-    <div class="hint">Queda guardada como configuración de la app: única para todos los equipos.</div>
+    <div class="hint" id="phm-hint">Queda guardada como configuración de la app: única para todos los equipos.</div>
   </div>
   <label class="field" for="f-remote">Entidad remote</label>
   <input type="text" id="f-remote" placeholder="living">
@@ -137,11 +137,15 @@
   // IP del PHM a nivel app (def. 24): mostrarla de solo lectura si ya está
   // configurada; si no, el primer alta la pide y la guarda.
   Homey.emit('get_phm')
-    .then(({ host, port, configured }) => {
+    .then(({ host, port, configured, hasDefault }) => {
       if (configured) {
         $('phm-value').textContent = `${host}:${port}`;
         $('phm-configured').style.display = 'block';
         $('phm-editable').style.display = 'none';
+      } else if (hasDefault) {
+        // Hay un valor por defecto detectado (def. 25): la IP pasa a ser
+        // opcional. A propósito no se muestra cuál es.
+        $('phm-hint').textContent = 'Opcional: si se deja vacía, se usa el valor por defecto de la instalación. Queda como configuración de la app, única para todos los equipos.';
       }
     })
     .catch(() => { /* sin dato: quedan los campos editables */ });

@@ -11,6 +11,26 @@ class AcDriver extends Homey.Driver {
   }
 
   /**
+   * IP por defecto del PHM vía discovery del core de Homey (def. 25). El
+   * discovery corre FUERA del contenedor de la app, por eso funciona donde
+   * la resolución mDNS directa falla. Nunca se muestra al usuario ni se
+   * menciona el servicio descubierto (def. 6).
+   * @returns {{host: string, port: number}|null}
+   */
+  _discoverPhmDefault() {
+    try {
+      const strategy = this.getDiscoveryStrategy();
+      const results = Object.values(strategy.getDiscoveryResults() || {});
+      const found = results.find((result) => result && result.address);
+      if (!found) return null;
+      return { host: String(found.address), port: Number(found.port) || 8123 };
+    } catch (err) {
+      this.log('Discovery del PHM no disponible:', err.message || err);
+      return null;
+    }
+  }
+
+  /**
    * Flow cards propias (def. 19; §8 de la propuesta). Las de onoff /
    * thermostat_mode / target_temperature las genera Homey solo.
    */
@@ -70,7 +90,10 @@ class AcDriver extends Homey.Driver {
     session.setHandler('get_phm', async () => {
       const host = String(this.homey.settings.get('phm_host') || '').trim();
       const port = Number(this.homey.settings.get('phm_port')) || 8123;
-      return { host, port, configured: host !== '' };
+      // hasDefault: hay un valor detectado para usar si dejan la IP vacía.
+      // A propósito NO se envía cuál es (def. 25).
+      const hasDefault = host === '' && this._discoverPhmDefault() != null;
+      return { host, port, configured: host !== '', hasDefault };
     });
 
     session.setHandler('get_temp_devices', async () => {
@@ -114,11 +137,20 @@ class AcDriver extends Homey.Driver {
       }
 
       // Primer alta sin IP configurada a nivel app: la siembra (def. 24).
+      // Si el instalador la deja vacía, se usa el valor detectado por
+      // discovery (def. 25); sin detección, la IP es obligatoria.
       const appHost = String(this.homey.settings.get('phm_host') || '').trim();
       if (appHost === '') {
-        const host = required(form.host, 'IP de Pantea Home Manager');
+        let host = String(form.host ?? '').trim();
+        let port = Number(form.port) || 0;
+        if (host === '') {
+          const discovered = this._discoverPhmDefault();
+          if (!discovered) throw new Error('Falta completar: IP de Pantea Home Manager.');
+          host = discovered.host;
+          port = port || discovered.port;
+        }
         this.homey.settings.set('phm_host', host);
-        this.homey.settings.set('phm_port', Number(form.port) || 8123);
+        this.homey.settings.set('phm_port', port || 8123);
       }
 
       return {
