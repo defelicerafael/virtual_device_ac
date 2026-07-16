@@ -121,8 +121,8 @@
             "es": "Entidad remote"
           },
           "hint": {
-            "en": "Name of the IR remote in Pantea Home Manager (without the 'remote.' prefix).",
-            "es": "Nombre del control IR en Pantea Home Manager (sin el prefijo 'remote.')."
+            "en": "Name of the IR remote in Pantea Home Manager, always lowercase (without the 'remote.' prefix).",
+            "es": "Nombre del control IR en Pantea Home Manager, SIEMPRE en minúsculas (sin el prefijo 'remote.')."
           },
           "value": ""
         }

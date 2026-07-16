@@ -436,6 +436,16 @@ class AcDevice extends Homey.Device {
       }
     }
 
+    if (changedKeys.includes('remote_entity')) {
+      const remote = String(newSettings.remote_entity ?? '').trim();
+      if (remote !== remote.toLowerCase()) {
+        throw new Error(this.homey.__({
+          en: 'The remote entity must be all lowercase (e.g. "living", not "Living").',
+          es: 'La entidad remote va siempre en minúsculas (ej: "living", no "Living").',
+        }));
+      }
+    }
+
     if (changedKeys.includes('temp_source')) {
       // Def. 9: si se carga un nombre, tiene que ser un device real con
       // measure_temperature — si no, se rechaza el cambio.

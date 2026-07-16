@@ -104,8 +104,8 @@
     <div class="hint" id="phm-hint">Queda guardada como configuración de la app: única para todos los equipos.</div>
   </div>
   <label class="field" for="f-remote">Entidad remote</label>
-  <input type="text" id="f-remote" placeholder="living">
-  <div class="hint">Nombre del control IR en Pantea Home Manager (sin el prefijo "remote.").</div>
+  <input type="text" id="f-remote" placeholder="living" autocapitalize="none" autocorrect="off" spellcheck="false">
+  <div class="hint">Nombre del control IR en Pantea Home Manager, <strong>siempre en minúsculas</strong> (sin el prefijo "remote."). Las mayúsculas se convierten automáticamente.</div>
 
   <h2>Códigos</h2>
   <label class="field" for="f-code">Code (planilla de códigos) — opcional</label>
@@ -137,6 +137,18 @@
 
 <script type="application/javascript">
   const $ = (id) => document.getElementById(id);
+
+  // La entidad remote va SIEMPRE en minúsculas (las entidades del PHM lo
+  // son): conversión automática mientras se escribe.
+  $('f-remote').addEventListener('input', (event) => {
+    const el = event.target;
+    if (el.value !== el.value.toLowerCase()) {
+      const pos = el.selectionStart;
+      el.value = el.value.toLowerCase();
+      el.setSelectionRange(pos, pos);
+    }
+  });
+
 
   // IP del PHM a nivel app (def. 24): mostrarla de solo lectura si ya está
   // configurada; si no, el primer alta la pide y la guarda.
