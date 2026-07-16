@@ -30,6 +30,15 @@ Con la app **instalada** (`homey-app install`) en San Fran, todos los aires apar
 
 Con `setAvailable()` desplegado: el boot completo reporta OK (app + driver + 4 devices `onInit OK`), `setAvailable()` no tira error… **y los devices siguen `available: false`**. Conclusión refinada: el registro de devices del core quedó vinculado a una **sesión zombie** de la app (por los ciclos run→uninstall→install del mismo día) y ni siquiera el `setAvailable()` del proceso vivo lo pisa.
 
+## Intentos intermedios descartados (2026-07-16, 2ª sesión)
+
+Antes de reiniciar el Homey completo probé palancas menos invasivas — **ninguna funcionó**:
+- **Reiniciar SOLO la app** (Ajustes → app → Reiniciar): los 4 devices siguen `available: false`. → El desync NO está en el proceso de la app; está en el registro de devices del core.
+- **disable/enable de la app por HomeyScript** (`Homey.apps.disableApp/enableApp`): bloqueado, `Missing Scopes`.
+- **Toggle "Activado" en la UI de la app**: no deja apagarlo (vuelve solo a ON — permisos).
+
+Conclusión: agotadas las vías de software desde afuera. **Falta reiniciar el Homey completo** (única palanca que toca el registro del core).
+
 ## Pendiente al retomar (EN ORDEN)
 
 1. **Reiniciar el Homey San Fran** (Fernán: app → Ajustes → General → Reiniciar; o vía HomeyScript `Homey.system.reboot()`). Tras el reboot, verificar disponibilidad de los 4 aires (script de abajo). La hipótesis fuerte es que el reboot limpia el desync.
