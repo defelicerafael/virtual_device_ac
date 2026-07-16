@@ -2,7 +2,10 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-07-15
+## Última actualización: 2026-07-16
+
+### ⚠️ PROBLEMA ACTIVO — LEER PRIMERO
+**Los aires de San Fran están "no disponibles" en modo instalado.** Investigación completa, causa acorralada y próximos pasos EN ORDEN en **[debug-modo-instalado.md](debug-modo-instalado.md)** — el paso 1 es reiniciar el Homey San Fran (decisión de Fernán pendiente al cierre de la sesión del 16/7). Regla nueva de oro: **nunca `homey-app run`/`stop` sobre una app que se quiere instalada** (el quit desinstala la app y borra sus settings de app). Hay código de DIAGNÓSTICO TEMPORAL en el branch a revertir cuando se cierre (detalle en el mismo doc).
 
 ### Fase actual
 **Implementación — Etapas 0–6 completas y PROBADAS EN VIVO (2026-07-15).** Verificado en el Homey San Fran con el device "Prueba AC" (code 1, sensor "Mov Escritorio", entidad `remote.test_claude` inexistente a propósito):
@@ -24,12 +27,23 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 
 ✅ **Desbloqueado y DESPLEGADO (2026-07-15):** Rafael dio acceso de escritura → branch `claude` pusheado a `defelicerafael/virtual_device_ac` → agregado a `repos.txt` en ferno → `homey-app init` clonó → **`homey-app run` corriendo en el Homey San Fran (192.168.88.100)**: app inicializada, driver `ac` OK, flow cards y capabilities cargadas. Log: `/opt/pantea/logs/homey/com.panteasmart.devices.log`. Falta la prueba funcional de Fernán desde la app de Homey (wizard + comandos con entidad remote inexistente). ⚠️ Recordar gotcha dev-mode: HomeyAPI (drop-down de sensores / espejo de temperatura / config Telegram) puede fallar en `run` por el DNS homeylocal — la prueba definitiva de esas tres es con `install`.
 
+### Sesión 2026-07-16 (resumen)
+- **Def. 25:** IP por defecto vía discovery mDNS-SD del core (`discovery/phm.json`) — primer alta con IP opcional si hay detección, sin revelar el servicio (branding def. 6).
+- Defaults del wizard: solo HEAT tildado; DRY/FAN/Sleep/Velocidad destildados. Labels sin mayúsculas forzadas ("Tiene modo Heat?" etc.), `text-transform: none` en el wizard.
+- Swing on/off como botón (junto a Sleep y Aprender). Swing con opción "Desactivado". Def. 23 (warning por comando ausente). Def. 24 (IP a nivel app + pantalla de settings de app).
+- **Migración San Fran avanzada por Fernán:** Aire Escritorio, Aire Estar, Aire Cocina y Aire Cuarto en la app nueva. **Alexa por voz verificada** (el episodio "puse 25° Aire Cocina y se prendió el del escritorio" era la entidad remote mal cargada — corregida).
+- **PS Heating actualizado y CARGADO** (soporte Pantea AC: sin onoff, setpoint entero 16-30, respeta allow_heat) — copia en `Homey/HomeyScript/PS Heating_20260715.js` del Drive.
+- Apps Script: `?marcas=` publicado y verificado (el wizard ya muestra "Aplica a: ..."). Copia en [referencia/apps-script-webservice.gs](referencia/apps-script-webservice.gs).
+- Arreglado `panteasmart.local` en la LAN (conflicto mDNS histórico; avahi renombrado — restart lo recuperó; ver memoria/gotcha). Confirmado empíricamente: los contenedores de apps NO resuelven `.local` → IP siempre.
+- Instalada la app en los 3 Homeys; luego el ciclo run/stop desató el problema activo de arriba (ver [debug-modo-instalado.md](debug-modo-instalado.md)).
+
 ### Mapa de documentos
 - [rediseno-app.md](rediseno-app.md) — las 20 definiciones de producto + relevamiento de la app vieja. TODO el detalle de qué hace la app está ahí.
 - [propuesta-diseno.md](propuesta-diseno.md) — diseño APROBADO (arquitectura, capabilities, flujo de comando, lib/, wizard, flow cards, migración).
 - [plan-implementacion.md](plan-implementacion.md) — las 8 etapas con su forma de prueba.
 - [ps-broadlink-analisis.md](ps-broadlink-analisis.md) + [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js) — el HomeyScript que la app reemplaza.
 - [planilla-ir.md](planilla-ir.md) — formato real del webservice de códigos IR (relevado en vivo).
+- [debug-modo-instalado.md](debug-modo-instalado.md) — ⚠️ investigación del problema ACTIVO (devices no disponibles en modo instalado) con los próximos pasos en orden.
 - [referencia/apps-script-webservice.gs](referencia/apps-script-webservice.gs) — el Apps Script del webservice (endpoints ?code= y ?marcas=, y extraerAC1 del proceso de la def. 14).
 
 ### Progreso de etapas
