@@ -23,11 +23,17 @@ class AcDriver extends Homey.Driver {
    * discovery corre FUERA del contenedor de la app, por eso funciona donde
    * la resolución mDNS directa falla. Nunca se muestra al usuario ni se
    * menciona el servicio descubierto (def. 6).
+   *
+   * ⚠️ La estrategia se consulta por el MANAGER, no se declara en el driver
+   * ("discovery" en driver.compose.json): declararla ata la DISPONIBILIDAD
+   * de los devices al discovery — como los ids jamás matchean, el core los
+   * marca "no disponibles" a todos (bug 2026-07-16, ver
+   * docs/debug-modo-instalado.md).
    * @returns {{host: string, port: number}|null}
    */
   _discoverPhmDefault() {
     try {
-      const strategy = this.getDiscoveryStrategy();
+      const strategy = this.homey.discovery.getStrategy('phm');
       const results = Object.values(strategy.getDiscoveryResults() || {});
       const found = results.find((result) => result && result.address);
       if (!found) return null;

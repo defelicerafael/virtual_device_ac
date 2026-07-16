@@ -499,7 +499,6 @@
         "local"
       ],
       "connectivity": [],
-      "discovery": "phm",
       "images": {
         "small": "/drivers/ac/assets/images/small.png",
         "large": "/drivers/ac/assets/images/large.png",
