@@ -2,12 +2,20 @@
 
 const Homey = require('homey');
 const crypto = require('node:crypto');
+const reportDiag = require('../../lib/diag'); // DIAGNÓSTICO TEMPORAL
 
 class AcDriver extends Homey.Driver {
 
   async onInit() {
-    this._registerFlowCards();
+    reportDiag('driver', 'onInit start'); // DIAGNÓSTICO TEMPORAL
+    try {
+      this._registerFlowCards();
+    } catch (err) {
+      reportDiag('driver:_registerFlowCards', err); // DIAGNÓSTICO TEMPORAL
+      throw err;
+    }
     this.log('AcDriver inicializado');
+    reportDiag('driver', 'onInit OK'); // DIAGNÓSTICO TEMPORAL
   }
 
   /**

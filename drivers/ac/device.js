@@ -1,6 +1,7 @@
 'use strict';
 
 const Homey = require('homey');
+const reportDiag = require('../../lib/diag'); // DIAGNÓSTICO TEMPORAL
 
 /**
  * Aire acondicionado Pantea. Orquesta las reglas de negocio (definiciones
@@ -15,6 +16,17 @@ const Homey = require('homey');
 class AcDevice extends Homey.Device {
 
   async onInit() {
+    reportDiag('device', `onInit start: ${this.getName()}`); // DIAGNÓSTICO TEMPORAL
+    try {
+      await this._onInitInner();
+      reportDiag('device', `onInit OK: ${this.getName()}`); // DIAGNÓSTICO TEMPORAL
+    } catch (err) {
+      reportDiag(`device:${this.getName()}`, err); // DIAGNÓSTICO TEMPORAL
+      throw err;
+    }
+  }
+
+  async _onInitInner() {
     this.log('AC inicializado:', this.getName());
 
     this._learning = false;
