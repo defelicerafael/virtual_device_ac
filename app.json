@@ -691,7 +691,7 @@
                 "en": "Has DRY mode?",
                 "es": "Tiene modo DRY?"
               },
-              "value": true
+              "value": false
             },
             {
               "id": "allow_fan_mode",
@@ -700,7 +700,7 @@
                 "en": "Has FAN mode?",
                 "es": "Tiene modo FAN?"
               },
-              "value": true
+              "value": false
             },
             {
               "id": "swing_type",
@@ -749,7 +749,7 @@
                 "en": "If disabled, the sleep control is hidden and 'off' is always sent.",
                 "es": "Si se desactiva, se oculta el control de sleep y se envía siempre 'off'."
               },
-              "value": true
+              "value": false
             },
             {
               "id": "allow_fan_speed",
@@ -762,7 +762,7 @@
                 "en": "If disabled, fan stays 'auto' in every mode.",
                 "es": "Si no está activado queda Ventilador = auto en todos los modos."
               },
-              "value": true
+              "value": false
             }
           ]
         },

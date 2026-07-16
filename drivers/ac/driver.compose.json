@@ -31,21 +31,62 @@
       "min": 16,
       "max": 30,
       "step": 1,
-      "units": { "en": "°C" }
+      "units": {
+        "en": "°C"
+      }
     },
     "thermostat_mode": {
       "values": [
-        { "id": "off", "title": { "en": "Off", "es": "Apagado" } },
-        { "id": "auto", "title": { "en": "Auto", "es": "Auto" } },
-        { "id": "cool", "title": { "en": "Cool", "es": "Frío" } },
-        { "id": "heat", "title": { "en": "Heat", "es": "Calor" } },
-        { "id": "dry", "title": { "en": "Dry", "es": "Secado" } },
-        { "id": "fan", "title": { "en": "Fan", "es": "Ventilador" } }
+        {
+          "id": "off",
+          "title": {
+            "en": "Off",
+            "es": "Apagado"
+          }
+        },
+        {
+          "id": "auto",
+          "title": {
+            "en": "Auto",
+            "es": "Auto"
+          }
+        },
+        {
+          "id": "cool",
+          "title": {
+            "en": "Cool",
+            "es": "Frío"
+          }
+        },
+        {
+          "id": "heat",
+          "title": {
+            "en": "Heat",
+            "es": "Calor"
+          }
+        },
+        {
+          "id": "dry",
+          "title": {
+            "en": "Dry",
+            "es": "Secado"
+          }
+        },
+        {
+          "id": "fan",
+          "title": {
+            "en": "Fan",
+            "es": "Ventilador"
+          }
+        }
       ]
     },
     "button.reload_codes": {
       "maintenanceAction": true,
-      "title": { "en": "Reload codes", "es": "Recargar códigos" },
+      "title": {
+        "en": "Reload codes",
+        "es": "Recargar códigos"
+      },
       "desc": {
         "en": "Reload this device's command codes from the code sheet.",
         "es": "Vuelve a cargar los códigos de comandos de este equipo desde la planilla."
@@ -55,12 +96,18 @@
   "settings": [
     {
       "type": "group",
-      "label": { "en": "Connection", "es": "Conexión" },
+      "label": {
+        "en": "Connection",
+        "es": "Conexión"
+      },
       "children": [
         {
           "id": "phm_host_info",
           "type": "label",
-          "label": { "en": "IP Pantea Home Manager", "es": "IP Pantea Home Manager" },
+          "label": {
+            "en": "IP Pantea Home Manager",
+            "es": "IP Pantea Home Manager"
+          },
           "hint": {
             "en": "This value is changed from the app settings (More → Apps → Pantea Smart Devices → Configure), and applies to every unit.",
             "es": "Este dato se modifica desde la configuración de la app (Más → Apps → Pantea Smart Devices → Configurar) y aplica a todos los equipos."
@@ -70,7 +117,10 @@
         {
           "id": "remote_entity",
           "type": "text",
-          "label": { "en": "Remote entity", "es": "Entidad remote" },
+          "label": {
+            "en": "Remote entity",
+            "es": "Entidad remote"
+          },
           "hint": {
             "en": "Name of the IR remote in Pantea Home Manager (without the 'remote.' prefix).",
             "es": "Nombre del control IR en Pantea Home Manager (sin el prefijo 'remote.')."
@@ -81,12 +131,18 @@
     },
     {
       "type": "group",
-      "label": { "en": "Equipment", "es": "Equipo" },
+      "label": {
+        "en": "Equipment",
+        "es": "Equipo"
+      },
       "children": [
         {
           "id": "code",
           "type": "text",
-          "label": { "en": "Code (code sheet)", "es": "Code (planilla de códigos)" },
+          "label": {
+            "en": "Code (code sheet)",
+            "es": "Code (planilla de códigos)"
+          },
           "hint": {
             "en": "Numeric code from the code sheet. Leave empty to let the server resolve commands with what this remote has learned.",
             "es": "Code numérico de la planilla de códigos. Dejar vacío para que el servidor resuelva los comandos con lo aprendido por este control."
@@ -96,7 +152,10 @@
         {
           "id": "temp_source",
           "type": "text",
-          "label": { "en": "Temperature source device", "es": "Dispositivo fuente de temperatura" },
+          "label": {
+            "en": "Temperature source device",
+            "es": "Dispositivo fuente de temperatura"
+          },
           "hint": {
             "en": "Name of the device whose temperature is shown on this tile. Empty: no temperature is shown.",
             "es": "Nombre del dispositivo cuya temperatura se muestra en este tile. Vacío: no se muestra temperatura."
@@ -106,7 +165,10 @@
         {
           "id": "auto_on",
           "type": "checkbox",
-          "label": { "en": "Turn on when temperature changes", "es": "Encender al cambiar temperatura" },
+          "label": {
+            "en": "Turn on when temperature changes",
+            "es": "Encender al cambiar temperatura"
+          },
           "hint": {
             "en": "If the unit is off and the temperature is changed, turn it on in the last used mode.",
             "es": "Si el equipo está apagado y se cambia la temperatura, se enciende en el último modo utilizado."
@@ -117,109 +179,208 @@
     },
     {
       "type": "group",
-      "label": { "en": "Unit features", "es": "Funciones del equipo" },
+      "label": {
+        "en": "Unit features",
+        "es": "Funciones del equipo"
+      },
       "children": [
         {
           "id": "allow_heat",
           "type": "checkbox",
-          "label": { "en": "Has HEAT mode?", "es": "Tiene modo HEAT?" },
+          "label": {
+            "en": "Has HEAT mode?",
+            "es": "Tiene modo HEAT?"
+          },
           "value": true
         },
         {
           "id": "allow_dry",
           "type": "checkbox",
-          "label": { "en": "Has DRY mode?", "es": "Tiene modo DRY?" },
-          "value": true
+          "label": {
+            "en": "Has DRY mode?",
+            "es": "Tiene modo DRY?"
+          },
+          "value": false
         },
         {
           "id": "allow_fan_mode",
           "type": "checkbox",
-          "label": { "en": "Has FAN mode?", "es": "Tiene modo FAN?" },
-          "value": true
+          "label": {
+            "en": "Has FAN mode?",
+            "es": "Tiene modo FAN?"
+          },
+          "value": false
         },
         {
           "id": "swing_type",
           "type": "dropdown",
-          "label": { "en": "Swing", "es": "Swing" },
+          "label": {
+            "en": "Swing",
+            "es": "Swing"
+          },
           "hint": {
             "en": "On/off: a simple toggle. Positions: pick moving or a fixed position from a list. Disabled: no swing control on the tile.",
             "es": "On/off: un botón simple. Por posición: elegir de una lista entre moviéndose o una posición fija. Desactivado: sin control de swing en el tile."
           },
           "value": "onoff",
           "values": [
-            { "id": "onoff", "label": { "en": "On/off", "es": "On/off" } },
-            { "id": "positions", "label": { "en": "Positions", "es": "Por posición" } },
-            { "id": "none", "label": { "en": "Disabled", "es": "Desactivado" } }
+            {
+              "id": "onoff",
+              "label": {
+                "en": "On/off",
+                "es": "On/off"
+              }
+            },
+            {
+              "id": "positions",
+              "label": {
+                "en": "Positions",
+                "es": "Por posición"
+              }
+            },
+            {
+              "id": "none",
+              "label": {
+                "en": "Disabled",
+                "es": "Desactivado"
+              }
+            }
           ]
         },
         {
           "id": "allow_sleep",
           "type": "checkbox",
-          "label": { "en": "Has Sleep option?", "es": "Tiene opción Sleep?" },
+          "label": {
+            "en": "Has Sleep option?",
+            "es": "Tiene opción Sleep?"
+          },
           "hint": {
             "en": "If disabled, the sleep control is hidden and 'off' is always sent.",
             "es": "Si se desactiva, se oculta el control de sleep y se envía siempre 'off'."
           },
-          "value": true
+          "value": false
         },
         {
           "id": "allow_fan_speed",
           "type": "checkbox",
-          "label": { "en": "Allow choosing fan speed?", "es": "Permitir elegir Velocidad?" },
+          "label": {
+            "en": "Allow choosing fan speed?",
+            "es": "Permitir elegir Velocidad?"
+          },
           "hint": {
             "en": "If disabled, fan stays 'auto' in every mode.",
             "es": "Si no está activado queda Ventilador = auto en todos los modos."
           },
-          "value": true
+          "value": false
         }
       ]
     },
     {
       "type": "group",
-      "label": { "en": "Advanced", "es": "Avanzado" },
+      "label": {
+        "en": "Advanced",
+        "es": "Avanzado"
+      },
       "children": [
         {
           "id": "two_step_override",
           "type": "dropdown",
-          "label": { "en": "Two-step power on", "es": "Encendido en 2 pasos" },
+          "label": {
+            "en": "Two-step power on",
+            "es": "Encendido en 2 pasos"
+          },
           "hint": {
             "en": "Auto: decided by the code sheet (codes with mode-only commands). Without a code, 'Auto' means no.",
             "es": "Auto: lo decide la planilla (codes con comandos de modo solo). Sin code, 'Auto' equivale a no."
           },
           "value": "auto",
           "values": [
-            { "id": "auto", "label": { "en": "Auto (from code sheet)", "es": "Auto (según planilla)" } },
-            { "id": "yes", "label": { "en": "Force yes", "es": "Forzar sí" } },
-            { "id": "no", "label": { "en": "Force no", "es": "Forzar no" } }
+            {
+              "id": "auto",
+              "label": {
+                "en": "Auto (from code sheet)",
+                "es": "Auto (según planilla)"
+              }
+            },
+            {
+              "id": "yes",
+              "label": {
+                "en": "Force yes",
+                "es": "Forzar sí"
+              }
+            },
+            {
+              "id": "no",
+              "label": {
+                "en": "Force no",
+                "es": "Forzar no"
+              }
+            }
           ]
         },
         {
           "id": "learn_temp_scope",
           "type": "dropdown",
-          "label": { "en": "Temperature learning", "es": "Aprendizaje de temperaturas" },
+          "label": {
+            "en": "Temperature learning",
+            "es": "Aprendizaje de temperaturas"
+          },
           "hint": {
             "en": "Full range: one learning session covers 16-30°. Specific: learns only the temperature currently set on the tile (to fix a badly learned one).",
             "es": "Rango completo: una sesión de aprendizaje cubre 16-30°. Específica: aprende solo la temperatura seteada en el tile (para corregir una mal aprendida)."
           },
           "value": "range",
           "values": [
-            { "id": "range", "label": { "en": "Full range (16-30)", "es": "Rango completo (16-30)" } },
-            { "id": "single", "label": { "en": "Specific temperature", "es": "Temperatura específica" } }
+            {
+              "id": "range",
+              "label": {
+                "en": "Full range (16-30)",
+                "es": "Rango completo (16-30)"
+              }
+            },
+            {
+              "id": "single",
+              "label": {
+                "en": "Specific temperature",
+                "es": "Temperatura específica"
+              }
+            }
           ]
         },
         {
           "id": "learned_fan_override",
           "type": "dropdown",
-          "label": { "en": "Fan speed learned", "es": "Velocidad aprendida" },
+          "label": {
+            "en": "Fan speed learned",
+            "es": "Velocidad aprendida"
+          },
           "hint": {
             "en": "Auto: decided by the code sheet (rows with fan other than auto). If not learned, 'auto' is always sent.",
             "es": "Auto: lo decide la planilla (filas con velocidad distinta de auto). Si no está aprendida, se envía siempre 'auto'."
           },
           "value": "auto",
           "values": [
-            { "id": "auto", "label": { "en": "Auto (from code sheet)", "es": "Auto (según planilla)" } },
-            { "id": "yes", "label": { "en": "Force yes", "es": "Forzar sí" } },
-            { "id": "no", "label": { "en": "Force no", "es": "Forzar no" } }
+            {
+              "id": "auto",
+              "label": {
+                "en": "Auto (from code sheet)",
+                "es": "Auto (según planilla)"
+              }
+            },
+            {
+              "id": "yes",
+              "label": {
+                "en": "Force yes",
+                "es": "Forzar sí"
+              }
+            },
+            {
+              "id": "no",
+              "label": {
+                "en": "Force no",
+                "es": "Forzar no"
+              }
+            }
           ]
         }
       ]
