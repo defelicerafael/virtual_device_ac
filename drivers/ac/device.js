@@ -413,6 +413,12 @@ class AcDevice extends Homey.Device {
     await syncCap('sleep_on_off', settings.allow_sleep !== false);
     await syncCap('fan_mode', settings.allow_fan_speed !== false);
 
+    // Learning (def. 7, rev. 2026-07-18): el botón "Aprender" es tarea del
+    // instalador. Solo se muestra si NO hay code de planilla configurado; con
+    // code, el usuario final nunca lo ve.
+    const hasCode = String(settings.code ?? '').trim() !== '';
+    await syncCap('learning_mode', !hasCode);
+
     // Swing (def. 5 v3): 'onoff' → toggle, 'positions' → picker,
     // 'none' → sin control de swing en el tile.
     const swingType = settings.swing_type || 'onoff';
@@ -535,8 +541,9 @@ class AcDevice extends Homey.Device {
       }, 500);
     }
 
-    if (changedKeys.some((key) => key.startsWith('allow_') || key === 'swing_type')) {
+    if (changedKeys.some((key) => key.startsWith('allow_') || key === 'swing_type' || key === 'code')) {
       // newSettings todavía no está aplicado dentro de onSettings: diferir.
+      // (code afecta la visibilidad del botón "Aprender", def. 7 rev.)
       this.homey.setTimeout(() => this._syncAllowedFeatures().catch(this.error), 500);
     }
   }
