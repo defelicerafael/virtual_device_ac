@@ -1,0 +1,91 @@
+ac_command:
+  alias: "Comando para AC (por nombre o por código b64)"
+  fields:
+    remote_entity:
+      description: "Entidad en HA del dispositivo Broadlink (remote)"
+      example: "remote.cuarto"
+    device:
+      description: "Nombre del dispositivo (si usás comandos aprendidos por nombre)"
+      example: "ac1"
+    command_code:
+      description: "Código base64 (Jg... o b64:Jg...)"
+      example: "JgAuAYuOETMREhA1..."
+    hvac_mode:
+      description: "HVAC (cool, heat, auto, dry, fan_only, off)"
+      example: "cool"
+    temperature:
+      description: "Temperatura (16-30)"
+      example: "24"
+    fan_mode:
+      description: "Fan Mode (auto, high, med, low)"
+      example: "auto"
+    sleep:
+      description: "Sleep/Swing (on, off)"
+      example: "off"
+    simple_mode:
+      description: "Si es true, manda solo el comando de modo ir_{dev}_{hvac}"
+      example: "false"
+
+  # Devuelve response_variable {ok, reason} (def. 26 de com.panteasmart.devices):
+  #   ok:false, reason:remote_unavailable  -> el control (Broadlink) está caído.
+  #   ok:true                              -> el comando se despachó al control.
+  # El pre-chequeo del estado del remote cubre el caso dominante (Broadlink
+  # sin red). continue_on_error evita que un comando no aprendido rompa la
+  # respuesta (ese caso lo detecta la app por la planilla, def. 23).
+  sequence:
+    - variables:
+        remote_entity_full: "{{ remote_entity | default('remote.nombre_broadlink') }}"
+        remote_ok: "{{ states(remote_entity_full) not in ['unavailable', 'unknown', 'none', 'None'] }}"
+
+    - if:
+        - condition: template
+          value_template: "{{ not remote_ok }}"
+      then:
+        - variables:
+            result: "{{ {'ok': false, 'reason': 'remote_unavailable'} }}"
+        - stop: "Control (remote) no disponible"
+          response_variable: result
+
+    - choose:
+        - conditions: "{{ (command_code | default('') | trim) != '' }}"
+          sequence:
+            - action: remote.send_command
+              continue_on_error: true
+              target:
+                entity_id: "{{ remote_entity_full }}"
+              data:
+                command: >-
+                  {% set code = (command_code | trim) %}
+                  {% if code[0:4] == 'b64:' %}
+                    {{ code }}
+                  {% else %}
+                    b64:{{ code }}
+                  {% endif %}
+      default:
+        - action: remote.send_command
+          continue_on_error: true
+          target:
+            entity_id: "{{ remote_entity_full }}"
+          data:
+            device: "{{ device | default('ac1') }}"
+            command: >-
+              {% set dev = device | default('ac1') %}
+              {% set hvac = hvac_mode | default('auto') %}
+              {% set t = temperature | default(24) | int %}
+              {% set fan = fan_mode | default('auto') %}
+              {% set slp = sleep | default('off') %}
+              {% set simple = (simple_mode | default(false) | string | lower) == 'true' %}
+              {% if hvac == 'off' %}
+                ir_{{ dev }}_off
+              {% elif simple %}
+                ir_{{ dev }}_{{ hvac }}
+              {% else %}
+                ir_{{ dev }}_{{ hvac }}_{{ fan }}_{{ t }}_{{ slp }}
+              {% endif %}
+
+    - variables:
+        result: "{{ {'ok': true} }}"
+    - stop: "Comando despachado"
+      response_variable: result
+
+  mode: parallel
