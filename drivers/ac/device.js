@@ -148,7 +148,7 @@ class AcDevice extends Homey.Device {
     }
 
     if (!result.ok) return this._failure(result.error);
-    if (result.remoteDown) { await this._warnRemoteDown(result.detail); this._triggerFlow('swing', key); return true; }
+    if (result.remoteDown) return this._warnRemoteDown(result.detail); // lanza → revierte el swing
     if (result.skipped) this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
     await this._warnMissing(result.missing);
     this._triggerFlow('swing', key);
@@ -230,21 +230,37 @@ class AcDevice extends Homey.Device {
    */
   async _warnRemoteDown(detail) {
     const { remoteEntity } = this._config();
-    const warning = this.homey.__({
-      en: 'The remote control is not responding. Try "Reconnect control" (device settings) or check its power/Wi-Fi.',
-      es: 'El control no responde. Probá "Reconectar control" (config. del equipo) o revisá su energía/Wi-Fi.',
-    });
-    // Re-emitimos el warning en cada envío fallido (transición null→texto) para
-    // que también reaparezca al mandar el comando, no solo al (re)abrir el tile.
+    const suffix = (remoteEntity ? ` — ${remoteEntity}` : '') + (detail ? ` (${detail})` : '');
+
+    // Banner persistente en el tile (transición null→texto para re-emitir en
+    // cada envío fallido, no solo al reabrir el tile).
     await this.setWarning(null).catch(() => {});
-    await this.setWarning(warning).catch(() => {});
+    await this.setWarning(this.homey.__({
+      en: 'The remote control is not responding. The change was NOT applied. Try "Reconnect control" (device settings) or check its power/Wi-Fi.',
+      es: 'El control no responde. El cambio NO se aplicó. Probá "Reconectar control" (config. del equipo) o revisá su energía/Wi-Fi.',
+    })).catch(() => {});
+
+    // Telegram con la entidad del remote no disponible (pedido Fernán 2026-07-18).
     this.homey.app.telegram.notifyFailure(
       this.getName(),
-      this.homey.__({ en: 'IR remote not responding', es: 'El control IR no responde' })
-        + (remoteEntity ? ` — ${remoteEntity}` : '')
-        + (detail ? ` (${detail})` : ''),
+      this.homey.__({ en: 'IR remote not responding', es: 'El control IR no responde' }) + suffix,
     ).catch(this.error);
-    return true;
+
+    // Notificación en el timeline de Homey (campanita) — feedback bien visible.
+    this.homey.notifications.createNotification({
+      excerpt: this.homey.__({
+        en: `⚠️ ${this.getName()}: the remote control is not responding. The change was not applied.`,
+        es: `⚠️ ${this.getName()}: el control no responde. El cambio no se aplicó.`,
+      }),
+    }).catch(this.error);
+
+    // Def. 26 (rev. 2026-07-18): el aire físico NO cambió (el control IR no
+    // disparó), así que revertimos el tile — el listener LANZA y Homey vuelve
+    // el valor al anterior. El "pegar la vuelta" es el feedback visible.
+    throw new Error(this.homey.__({
+      en: 'The remote control is not responding. The change was not applied.',
+      es: 'El control no responde. El cambio no se aplicó.',
+    }));
   }
 
   /**

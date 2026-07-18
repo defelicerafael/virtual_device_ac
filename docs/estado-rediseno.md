@@ -2,10 +2,11 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-07-18 (sesión tarde: deploy jx + sync de lockfiles)
+## Última actualización: 2026-07-18 (sesión tarde: deploy jx + sync lockfiles + revisión def. 26 revert/timeline v2.0.2)
 
 ### 🔜 PENDIENTES AL RETOMAR (lo próximo, en orden de valor)
-1. **Prueba de aceptación del feedback (def. 26) en San Fran** — Fernán, celular: tocar "Prueba Zombie" (remote `test_claude` inexistente) → debe aparecer "El control no responde… Reconectar control" + Telegram, SIN que el tile revierta; y probar el botón "Reconectar control". Es lo único que falta para dar la def. 26 por cerrada. (Feedback ACTIVO solo en San Fran, que tiene su token propio de ferno cargado.)
+1. **Prueba de aceptación del feedback (def. 26) en San Fran — RE-PROBAR con v2.0.2.** Fernán, celular, "Prueba Zombie" (remote `test_claude` inexistente). **Cambiar el MODO** (a Cool), NO solo la temperatura (con el equipo en OFF y sin auto-on, la temperatura no envía y queda muda — def. 1). Esperado ahora: el tile **REVIERTE** al valor anterior (revisión 2026-07-18, feedback Fernán) + banner "El control no responde… El cambio no se aplicó" + **notificación en el timeline (campanita)** + Telegram **con la entidad** (`— remote.test_claude`). Botón "Reconectar control" en ⚙️ Ajustes del equipo → sección "Mantenimiento" (NO en el tile), junto a "Recargar códigos". (Feedback ACTIVO solo en San Fran, token propio de ferno cargado.)
+   - **v2.0.2 instalada en San Fran (ferno) el 2026-07-18 tarde.** Los otros 3 Homeys siguen en 2.0.1 (o menos) — actualizar cuando se confirme la prueba.
 2. ✅ **Deploy en jx (Sta Barbara OK) HECHO** (2026-07-18 tarde): SSH volvió; `update --no-install` (fast-forward a `ada108e`) + `install --last` → app con def. 26/27 instalada, SYNC=OK, DIRTY=NO. Queda en modo webhook hasta cargar su token propio (default base da 401 → webhook, no rompe). El Homey resolvió como "Sta Barbara OK" en `192.168.68.104` (la IP `.101` del estado estaba stale).
 3. **Activar feedback en fatato** (casa con aires IR reales, la más útil): (a) actualizar su `ac_command.yaml` (ruta real verificada: `/opt/pantea/homeassistant/config/scripts/ac_command.yaml`, hoy en versión BASE sin `response_variable`) con el `response_variable` (referencia lista en `docs/referencia/ha-script-ac_command.yaml`; en ferno ya está aplicado, copiar igual con backup), y (b) cargar el token propio de fatato en los settings de la app (o re-clonar de la base para heredar el token default). El token de cada casa se crea en su HA (Perfil → Tokens de larga duración).
 4. **Spot-checks restantes** con "Prueba Zombie": encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
