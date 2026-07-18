@@ -2,12 +2,12 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-07-18
+## Última actualización: 2026-07-18 (sesión tarde: deploy jx + sync de lockfiles)
 
 ### 🔜 PENDIENTES AL RETOMAR (lo próximo, en orden de valor)
 1. **Prueba de aceptación del feedback (def. 26) en San Fran** — Fernán, celular: tocar "Prueba Zombie" (remote `test_claude` inexistente) → debe aparecer "El control no responde… Reconectar control" + Telegram, SIN que el tile revierta; y probar el botón "Reconectar control". Es lo único que falta para dar la def. 26 por cerrada. (Feedback ACTIVO solo en San Fran, que tiene su token propio de ferno cargado.)
-2. **Reintentar deploy en jx** (Sta Barbara OK): quedó sin la def. 26/27 porque su SSH daba timeout. Cuando `ssh pantea@panteasmart-jx` responda: `homey-app update com.panteasmart.devices --no-install` + `homey-app install ... --last`.
-3. **Activar feedback en fatato** (casa con aires IR reales, la más útil): (a) actualizar su `config/scripts/ac_command.yaml` con el `response_variable` (referencia lista en `docs/referencia/ha-script-ac_command.yaml`; en ferno ya está aplicado, copiar igual con backup), y (b) cargar el token propio de fatato en los settings de la app (o re-clonar de la base para heredar el token default). El token de cada casa se crea en su HA (Perfil → Tokens de larga duración).
+2. ✅ **Deploy en jx (Sta Barbara OK) HECHO** (2026-07-18 tarde): SSH volvió; `update --no-install` (fast-forward a `ada108e`) + `install --last` → app con def. 26/27 instalada, SYNC=OK, DIRTY=NO. Queda en modo webhook hasta cargar su token propio (default base da 401 → webhook, no rompe). El Homey resolvió como "Sta Barbara OK" en `192.168.68.104` (la IP `.101` del estado estaba stale).
+3. **Activar feedback en fatato** (casa con aires IR reales, la más útil): (a) actualizar su `ac_command.yaml` (ruta real verificada: `/opt/pantea/homeassistant/config/scripts/ac_command.yaml`, hoy en versión BASE sin `response_variable`) con el `response_variable` (referencia lista en `docs/referencia/ha-script-ac_command.yaml`; en ferno ya está aplicado, copiar igual con backup), y (b) cargar el token propio de fatato en los settings de la app (o re-clonar de la base para heredar el token default). El token de cada casa se crea en su HA (Perfil → Tokens de larga duración).
 4. **Spot-checks restantes** con "Prueba Zombie": encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
 5. **Migrar Living y Playroom** en San Fran (los 2 aires DC que faltan) → retirar el HomeyScript "PS Broadlink" cuando no queden tiles DC.
 6. **Cierre (Etapa 7):** imágenes definitivas de la app (hoy placeholders azules), checklist final contra las 27 definiciones, mejora menor (cancelar reintentos supersedidos).
@@ -30,7 +30,9 @@ Causa raíz: `"discovery"` declarado en el driver ataba la disponibilidad de los
 
 ### ✅ Feedback de remote caído + Reconectar control — IMPLEMENTADO (2026-07-18, def. 26)
 Código completo en la app (52 tests, validate publish OK): setting `ha_token` a nivel app; con token, `ac_command` va por REST `?return_response` y el device distingue red-caída (revierte) de remote-caído (warning "El control no responde… Reconectar control" + Telegram, sin revertir); botón maintenance `button.reconnect` que hace `reload_config_entry` del Broadlink. Sin token = webhook clásico (no rompe nada). Detalle completo en [rediseno-app.md](rediseno-app.md) def. 26.
-⚠️ **jx (Sta Barbara OK) quedó SIN el deploy de def. 26/27** (2026-07-18): el SSH a `panteasmart-jx` da timeout (server o su Tailscale caído — no es la app). Sigue con la versión anterior. Reintentar `homey-app update+install` en jx cuando vuelva a estar accesible. ferno/segun/fatato quedaron actualizados.
+✅ **jx (Sta Barbara OK) YA tiene el deploy de def. 26/27** (2026-07-18 tarde): el SSH volvió; `update --no-install` + `install --last` → HEAD `ada108e`, SYNC=OK, DIRTY=NO. Los **4 Homeys** quedan con def. 26/27 instalada. (jx en webhook hasta cargar su token.)
+
+**Sync de lockfiles (2026-07-18 tarde):** `package-lock.json` de **devices** sincronizado a 2.0.0 (`ada108e`, pusheado) — resolvía el DIRTY que aparecía en cada install (el lock había quedado en 1.0.0 tras el bump). Regla nueva en memoria: al bumpear versión de una app Homey, usar `npm version` para sincronizar el lock. También sincronizado el lock de **lights** a 3.0.0 (commit LOCAL sin push en su branch `claude`, a pedido de Fernán). ferno sigue mostrando DIRTY en su clone hasta su próximo `homey-app update` (se limpia solo). Falsos positivos: los forks HA Community no declaran `version` top-level.
 
 **Token por defecto (def. 27, 2026-07-18):** `DEFAULT_HA_TOKEN` en `app.js` con el token de la IMAGEN BASE (creado prendiendo el HA de la base 192.168.88.194, que se volvió a bajar y dejar como estaba). Se siembra en `ha_token` si la casa no tiene uno → los clones futuros lo heredan (firstboot no regenera auth). **Hallazgo: las 4 casas actuales tienen auth propia (el token base da 401 en todas)** → el default es para instalaciones NUEVAS; las viejas caen a webhook por el fallback 401→webhook (con cache `_tokenRejected`, no degrada). San Fran conserva su token propio de ferno (feedback activo ahí). Para activar feedback en una casa vieja: cargar SU token + tener el script con response_variable.
 
