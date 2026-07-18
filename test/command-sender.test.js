@@ -359,7 +359,7 @@ describe('CommandSender', () => {
 });
 
 // ---- Feedback del remote vía REST return_response (def. 26) ----
-function makeTokenHarness({ serviceResponse = { ok: true }, failTimes = 0, reloadOk = true } = {}) {
+function makeTokenHarness({ serviceResponse = { ok: true }, failTimes = 0, reloadOk = true, serviceStatus = 200 } = {}) {
   const posts = [];
   let failsLeft = failTimes;
   const fetchFn = async (url, opts) => {
@@ -370,7 +370,8 @@ function makeTokenHarness({ serviceResponse = { ok: true }, failTimes = 0, reloa
         return { ok: reloadOk, text: async () => '' };
       }
       if (url.includes('?return_response')) {
-        return { ok: true, json: async () => ({ service_response: serviceResponse }) };
+        if (serviceStatus !== 200) return { ok: false, status: serviceStatus, text: async () => '' };
+        return { ok: true, status: 200, json: async () => ({ service_response: serviceResponse }) };
       }
       return { ok: true, text: async () => '' };
     }
@@ -437,5 +438,42 @@ describe('CommandSender — feedback del remote (def. 26)', () => {
     const h = makeTokenHarness();
     const res = await h.sender.reloadBroadlink({ ...CONFIG_BASE });
     assert.equal(res.ok, false);
+  });
+
+  test('token rechazado (401) → fallback al webhook, NO revierte (def. 27)', async () => {
+    const h = makeTokenHarness({ serviceStatus: 401 });
+    const res = await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    assert.equal(res.ok, true, 'no rompe: cae al webhook');
+    assert.equal(res.remoteDown, undefined);
+    // Se intentó el REST y luego el webhook clásico.
+    assert.ok(h.posts.some((p) => p.url.includes('?return_response')));
+    assert.ok(h.posts.some((p) => p.url.endsWith('/api/webhook/ac_command')));
+  });
+
+  test('401 no se reintenta 3 veces (es config, no transitorio)', async () => {
+    const h = makeTokenHarness({ serviceStatus: 401 });
+    await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    const restPosts = h.posts.filter((p) => p.url.includes('?return_response'));
+    assert.equal(restPosts.length, 1);
+  });
+
+  test('tras un 401, los siguientes comandos van directo al webhook (def. 27)', async () => {
+    const h = makeTokenHarness({ serviceStatus: 401 });
+    await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    await h.sender.sendState(CONFIG_TOKEN, { mode: 'heat', fan: 'auto', temp: 22, sleep: 'off' }, 'temperature');
+    await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 20, sleep: 'off' }, 'temperature');
+    const restPosts = h.posts.filter((p) => p.url.includes('?return_response'));
+    assert.equal(restPosts.length, 1, 'solo el primer comando probó el REST');
+    const webhookPosts = h.posts.filter((p) => p.url.endsWith('/api/webhook/ac_command'));
+    assert.equal(webhookPosts.length, 3, 'los 3 comandos salieron por webhook');
+  });
+
+  test('resetTokenState reactiva el intento REST', async () => {
+    const h = makeTokenHarness({ serviceStatus: 401 });
+    await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    h.sender.resetTokenState();
+    await h.sender.sendState(CONFIG_TOKEN, { mode: 'heat', fan: 'auto', temp: 22, sleep: 'off' }, 'temperature');
+    const restPosts = h.posts.filter((p) => p.url.includes('?return_response'));
+    assert.equal(restPosts.length, 2, 'tras reset, vuelve a probar el REST');
   });
 });

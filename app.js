@@ -11,11 +11,22 @@ const TempMirror = require('./lib/temp-mirror');
 // app, con la URL histórica de PS Broadlink.js como default.
 const DEFAULT_WEBSERVICE_URL = 'https://script.google.com/macros/s/AKfycbwdO-s-kH9uKtYq8UG9p03kVUjKLVflvxUdaprqTP4hPZh0CsguVQgnC3wZaq5kxq5Q/exec?code=';
 
+// Token de acceso de HA por defecto (def. 26/27): long-lived token creado en
+// la IMAGEN BASE. Como firstboot NO regenera la auth de HA, todos los clones
+// heredan esta misma auth y este token es válido en cada casa → no hace falta
+// cargarlo por instalación. Se puede pisar por casa desde los settings de la
+// app (p. ej. si se rota la credencial). Editable/rotable acá.
+const DEFAULT_HA_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiMGM3NjNmYmRjZGE0Y2E0OWE0OTdhMDk2ZjA1OTlkMyIsImlhdCI6MTc4NDM0NjcxNSwiZXhwIjoyMDk5NzA2NzE1fQ.69wQyK55hZvyPVtkAHEEFsa27Q77c2FMgy33PYcvArQ';
+
 class PanteaDevicesApp extends Homey.App {
 
   async onInit() {
     if (!this.homey.settings.get('webservice_url')) {
       this.homey.settings.set('webservice_url', DEFAULT_WEBSERVICE_URL);
+    }
+    // Sembrar el token base si no hay uno configurado en esta casa (def. 27).
+    if (this.homey.settings.get('ha_token') == null) {
+      this.homey.settings.set('ha_token', DEFAULT_HA_TOKEN);
     }
 
     this.irCodes = new IrCodes({
@@ -42,6 +53,13 @@ class PanteaDevicesApp extends Homey.App {
       getHomeyApi: () => this.getHomeyApi(),
       log: this.log.bind(this),
       error: this.error.bind(this),
+    });
+
+    // Si se cambia el token en los settings de la app, reevaluar el estado
+    // de "token rechazado" del sender (def. 27) — el nuevo token puede ser
+    // válido donde el anterior no lo era.
+    this.homey.settings.on('set', (key) => {
+      if (key === 'ha_token') this.commandSender.resetTokenState();
     });
 
     this.log('Pantea Smart Devices inicializada');
