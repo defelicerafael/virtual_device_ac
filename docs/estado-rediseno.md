@@ -2,7 +2,15 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-07-16
+## Última actualización: 2026-07-18
+
+### 🔜 PENDIENTES AL RETOMAR (lo próximo, en orden de valor)
+1. **Prueba de aceptación del feedback (def. 26) en San Fran** — Fernán, celular: tocar "Prueba Zombie" (remote `test_claude` inexistente) → debe aparecer "El control no responde… Reconectar control" + Telegram, SIN que el tile revierta; y probar el botón "Reconectar control". Es lo único que falta para dar la def. 26 por cerrada. (Feedback ACTIVO solo en San Fran, que tiene su token propio de ferno cargado.)
+2. **Reintentar deploy en jx** (Sta Barbara OK): quedó sin la def. 26/27 porque su SSH daba timeout. Cuando `ssh pantea@panteasmart-jx` responda: `homey-app update com.panteasmart.devices --no-install` + `homey-app install ... --last`.
+3. **Activar feedback en fatato** (casa con aires IR reales, la más útil): (a) actualizar su `config/scripts/ac_command.yaml` con el `response_variable` (referencia lista en `docs/referencia/ha-script-ac_command.yaml`; en ferno ya está aplicado, copiar igual con backup), y (b) cargar el token propio de fatato en los settings de la app (o re-clonar de la base para heredar el token default). El token de cada casa se crea en su HA (Perfil → Tokens de larga duración).
+4. **Spot-checks restantes** con "Prueba Zombie": encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
+5. **Migrar Living y Playroom** en San Fran (los 2 aires DC que faltan) → retirar el HomeyScript "PS Broadlink" cuando no queden tiles DC.
+6. **Cierre (Etapa 7):** imágenes definitivas de la app (hoy placeholders azules), checklist final contra las 27 definiciones, mejora menor (cancelar reintentos supersedidos).
 
 ### ✅ Problema "no disponibles" RESUELTO (2026-07-16)
 Causa raíz: `"discovery"` declarado en el driver ataba la disponibilidad de los devices al discovery mDNS (ids que jamás matchean → todos offline, en run e install). Fix: estrategia a nivel app consultada vía `homey.discovery.getStrategy('phm')` (def. 25 intacta). **Verificado: 5/5 devices disponibles con la app INSTALADA; desplegado en los 3 Homeys; diagnóstico temporal revertido.** Historia completa y moraleja en [debug-modo-instalado.md](debug-modo-instalado.md). Reglas que quedan: nunca `run`/`stop` sobre una app que se quiere instalada (el quit desinstala y borra settings de app); `"discovery"` en un driver SOLO si el discovery encuentra a los devices de verdad.
