@@ -229,13 +229,20 @@ class AcDevice extends Homey.Device {
    * de usar "Reconectar control". Sin throw.
    */
   async _warnRemoteDown(detail) {
-    await this.setWarning(this.homey.__({
+    const { remoteEntity } = this._config();
+    const warning = this.homey.__({
       en: 'The remote control is not responding. Try "Reconnect control" (device settings) or check its power/Wi-Fi.',
       es: 'El control no responde. Probá "Reconectar control" (config. del equipo) o revisá su energía/Wi-Fi.',
-    })).catch(() => {});
+    });
+    // Re-emitimos el warning en cada envío fallido (transición null→texto) para
+    // que también reaparezca al mandar el comando, no solo al (re)abrir el tile.
+    await this.setWarning(null).catch(() => {});
+    await this.setWarning(warning).catch(() => {});
     this.homey.app.telegram.notifyFailure(
       this.getName(),
-      this.homey.__({ en: 'IR remote not responding', es: 'El control IR no responde' }) + (detail ? ` (${detail})` : ''),
+      this.homey.__({ en: 'IR remote not responding', es: 'El control IR no responde' })
+        + (remoteEntity ? ` — ${remoteEntity}` : '')
+        + (detail ? ` (${detail})` : ''),
     ).catch(this.error);
     return true;
   }
