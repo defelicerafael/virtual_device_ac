@@ -22,6 +22,8 @@ Causa raíz: `"discovery"` declarado en el driver ataba la disponibilidad de los
 
 ### ✅ Feedback de remote caído + Reconectar control — IMPLEMENTADO (2026-07-18, def. 26)
 Código completo en la app (52 tests, validate publish OK): setting `ha_token` a nivel app; con token, `ac_command` va por REST `?return_response` y el device distingue red-caída (revierte) de remote-caído (warning "El control no responde… Reconectar control" + Telegram, sin revertir); botón maintenance `button.reconnect` que hace `reload_config_entry` del Broadlink. Sin token = webhook clásico (no rompe nada). Detalle completo en [rediseno-app.md](rediseno-app.md) def. 26.
+⚠️ **jx (Sta Barbara OK) quedó SIN el deploy de def. 26/27** (2026-07-18): el SSH a `panteasmart-jx` da timeout (server o su Tailscale caído — no es la app). Sigue con la versión anterior. Reintentar `homey-app update+install` en jx cuando vuelva a estar accesible. ferno/segun/fatato quedaron actualizados.
+
 **Token por defecto (def. 27, 2026-07-18):** `DEFAULT_HA_TOKEN` en `app.js` con el token de la IMAGEN BASE (creado prendiendo el HA de la base 192.168.88.194, que se volvió a bajar y dejar como estaba). Se siembra en `ha_token` si la casa no tiene uno → los clones futuros lo heredan (firstboot no regenera auth). **Hallazgo: las 4 casas actuales tienen auth propia (el token base da 401 en todas)** → el default es para instalaciones NUEVAS; las viejas caen a webhook por el fallback 401→webhook (con cache `_tokenRejected`, no degrada). San Fran conserva su token propio de ferno (feedback activo ahí). Para activar feedback en una casa vieja: cargar SU token + tener el script con response_variable.
 
 **Progreso 2026-07-18 (verificado en vivo):**
