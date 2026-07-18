@@ -357,3 +357,85 @@ describe('CommandSender', () => {
     assert.equal(h.posts[0].payload.remote_entity, 'remote.living');
   });
 });
+
+// ---- Feedback del remote vía REST return_response (def. 26) ----
+function makeTokenHarness({ serviceResponse = { ok: true }, failTimes = 0, reloadOk = true } = {}) {
+  const posts = [];
+  let failsLeft = failTimes;
+  const fetchFn = async (url, opts) => {
+    if (opts && opts.method === 'POST') {
+      if (failsLeft > 0) { failsLeft--; throw new Error('ECONNREFUSED'); }
+      posts.push({ url, headers: opts.headers || {}, payload: JSON.parse(opts.body) });
+      if (url.includes('/reload_config_entry')) {
+        return { ok: reloadOk, text: async () => '' };
+      }
+      if (url.includes('?return_response')) {
+        return { ok: true, json: async () => ({ service_response: serviceResponse }) };
+      }
+      return { ok: true, text: async () => '' };
+    }
+    const match = /[?&]code=(\w+)$/.exec(url);
+    return { ok: true, text: async () => (match && FIXTURES[match[1]]) || '[]' };
+  };
+  const irCodes = new IrCodes({ getBaseUrl: () => 'https://ws.example/exec?code=', fetchFn });
+  const sender = new CommandSender({ irCodes, fetchFn, waitFn: async () => {} });
+  return { sender, posts };
+}
+
+const CONFIG_TOKEN = { ...CONFIG_BASE, code: 1, haToken: 'TOK123' };
+
+describe('CommandSender — feedback del remote (def. 26)', () => {
+  test('con token: ac_command va por REST services con return_response y Bearer', async () => {
+    const h = makeTokenHarness({ serviceResponse: { ok: true } });
+    const res = await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    assert.equal(res.ok, true);
+    assert.equal(res.remoteDown, undefined);
+    const { url, headers } = h.posts[0];
+    assert.equal(url, 'http://192.168.88.101:8123/api/services/script/ac_command?return_response');
+    assert.equal(headers.Authorization, 'Bearer TOK123');
+  });
+
+  test('con token y remote caído: ok:true + remoteDown (no revierte)', async () => {
+    const h = makeTokenHarness({ serviceResponse: { ok: false, reason: 'remote_unavailable' } });
+    const res = await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    assert.equal(res.ok, true);
+    assert.equal(res.remoteDown, true);
+    assert.equal(res.detail, 'remote_unavailable');
+  });
+
+  test('remote caído NO se reintenta 3 veces (respuesta válida, no transitoria)', async () => {
+    const h = makeTokenHarness({ serviceResponse: { ok: false, reason: 'remote_unavailable' } });
+    await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    assert.equal(h.posts.length, 1);
+  });
+
+  test('sin token: sigue usando el webhook clásico (sin feedback)', async () => {
+    const h = makeTokenHarness({ serviceResponse: { ok: false } });
+    const res = await h.sender.sendState({ ...CONFIG_BASE, code: 1 }, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    assert.equal(res.ok, true);
+    assert.equal(res.remoteDown, undefined);
+    assert.match(h.posts[0].url, /\/api\/webhook\/ac_command$/);
+  });
+
+  test('falla de transporte con token → ok:false (revierte)', async () => {
+    const h = makeTokenHarness({ failTimes: 99 });
+    const res = await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    assert.equal(res.ok, false);
+  });
+
+  test('reloadBroadlink: POST a reload_config_entry con la entidad y Bearer', async () => {
+    const h = makeTokenHarness({ reloadOk: true });
+    const res = await h.sender.reloadBroadlink(CONFIG_TOKEN);
+    assert.equal(res.ok, true);
+    const post = h.posts.find((p) => p.url.includes('/reload_config_entry'));
+    assert.equal(post.url, 'http://192.168.88.101:8123/api/services/homeassistant/reload_config_entry');
+    assert.equal(post.payload.entity_id, 'remote.escritorio');
+    assert.equal(post.headers.Authorization, 'Bearer TOK123');
+  });
+
+  test('reloadBroadlink sin token → ok:false', async () => {
+    const h = makeTokenHarness();
+    const res = await h.sender.reloadBroadlink({ ...CONFIG_BASE });
+    assert.equal(res.ok, false);
+  });
+});

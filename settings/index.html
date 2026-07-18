@@ -35,6 +35,10 @@
   </div>
   <div class="hint">Única para todos los equipos de esta app. Usar la dirección IP (los nombres tipo .local no funcionan).</div>
 
+  <label for="ha-token">Token de acceso</label>
+  <input id="ha-token" type="password" placeholder="(opcional)" autocomplete="off">
+  <div class="hint">Token de acceso de larga duración de Pantea Home Manager. Habilita el aviso cuando un control no responde y el botón "Reconectar control". Si se deja vacío, los comandos se envían igual pero sin ese aviso.</div>
+
   <h2>Avanzado</h2>
   <label for="ws-url">URL de la planilla de códigos</label>
   <input id="ws-url" type="text">
@@ -53,15 +57,20 @@
       Homey.get('webservice_url', (err, value) => {
         if (!err && value != null) document.getElementById('ws-url').value = value;
       });
+      Homey.get('ha_token', (err, value) => {
+        if (!err && value != null) document.getElementById('ha-token').value = value;
+      });
 
       document.getElementById('save').addEventListener('click', () => {
         const host = document.getElementById('phm-host').value.trim();
         const port = parseInt(document.getElementById('phm-port').value, 10) || 8123;
         const wsUrl = document.getElementById('ws-url').value.trim();
+        const haToken = document.getElementById('ha-token').value.trim();
 
         Homey.set('phm_host', host);
         Homey.set('phm_port', port);
         if (wsUrl !== '') Homey.set('webservice_url', wsUrl);
+        Homey.set('ha_token', haToken);
         Homey.alert('Configuración guardada.', 'info');
       });
 

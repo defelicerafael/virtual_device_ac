@@ -51,6 +51,7 @@ class AcDevice extends Homey.Device {
     this.registerCapabilityListener('swing_mode', (value) => this._onSwing(value));
     this.registerCapabilityListener('learning_mode', (value) => this._onLearning(value));
     this.registerCapabilityListener('button.reload_codes', () => this._onReloadCodes());
+    this.registerCapabilityListener('button.reconnect', () => this._onReconnect());
 
     // Disponibilidad explícita: tras un ciclo de desinstalación/reinstalación
     // (p. ej. el uninstall-on-quit de homey app run), Homey puede dejar el
@@ -147,6 +148,7 @@ class AcDevice extends Homey.Device {
     }
 
     if (!result.ok) return this._failure(result.error);
+    if (result.remoteDown) { await this._warnRemoteDown(result.detail); this._triggerFlow('swing', key); return true; }
     if (result.skipped) this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
     await this._warnMissing(result.missing);
     this._triggerFlow('swing', key);
@@ -174,6 +176,27 @@ class AcDevice extends Homey.Device {
     return true;
   }
 
+  /** Maintenance action "Reconectar control" (def. 26): recarga el Broadlink en el PHM. */
+  async _onReconnect() {
+    const config = this._config();
+    if (!config.haToken) {
+      throw new Error(this.homey.__({
+        en: 'This action needs the Pantea Home Manager token (app settings).',
+        es: 'Esta acción necesita el token de Pantea Home Manager (configuración de la app).',
+      }));
+    }
+    const result = await this.homey.app.commandSender.reloadBroadlink(config);
+    if (!result.ok) {
+      throw new Error(this.homey.__({
+        en: 'Could not reconnect the control. Check its power/Wi-Fi.',
+        es: 'No se pudo reconectar el control. Revisá su energía/Wi-Fi.',
+      }));
+    }
+    await this.setWarning(null).catch(() => {});
+    this.log('Reconexión del control solicitada al PHM.');
+    return true;
+  }
+
   // -------------------- núcleo de envío --------------------
 
   /**
@@ -194,8 +217,27 @@ class AcDevice extends Homey.Device {
     }
 
     if (!result.ok) return this._failure(result.error);
+    if (result.remoteDown) return this._warnRemoteDown(result.detail);
     await this._warnMissing(result.missing);
     return result;
+  }
+
+  /**
+   * Def. 26: HA recibió el comando pero el control IR (Broadlink) no
+   * respondió. NO se revierte el tile (el comando llegó al servidor; el
+   * estado es válido) — se avisa en el tile + Telegram, con la instrucción
+   * de usar "Reconectar control". Sin throw.
+   */
+  async _warnRemoteDown(detail) {
+    await this.setWarning(this.homey.__({
+      en: 'The remote control is not responding. Try "Reconnect control" (device settings) or check its power/Wi-Fi.',
+      es: 'El control no responde. Probá "Reconectar control" (config. del equipo) o revisá su energía/Wi-Fi.',
+    })).catch(() => {});
+    this.homey.app.telegram.notifyFailure(
+      this.getName(),
+      this.homey.__({ en: 'IR remote not responding', es: 'El control IR no responde' }) + (detail ? ` (${detail})` : ''),
+    ).catch(this.error);
+    return true;
   }
 
   /**
@@ -273,6 +315,9 @@ class AcDevice extends Homey.Device {
       allowSleep: settings.allow_sleep !== false,
       allowFanSpeed: settings.allow_fan_speed !== false,
       learnTempScope: settings.learn_temp_scope || 'range',
+      // Token de HA a nivel app (def. 26): habilita el feedback del remote
+      // (return_response) y el botón Reconectar. Vacío = webhook clásico.
+      haToken: String(this.homey.settings.get('ha_token') || '').trim(),
     };
   }
 

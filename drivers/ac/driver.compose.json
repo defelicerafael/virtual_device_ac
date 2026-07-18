@@ -23,7 +23,8 @@
     "swing_mode",
     "sleep_on_off",
     "learning_mode",
-    "button.reload_codes"
+    "button.reload_codes",
+    "button.reconnect"
   ],
   "capabilitiesOptions": {
     "target_temperature": {
@@ -89,6 +90,17 @@
       "desc": {
         "en": "Reload this device's command codes from the code sheet.",
         "es": "Vuelve a cargar los códigos de comandos de este equipo desde la planilla."
+      }
+    },
+    "button.reconnect": {
+      "maintenanceAction": true,
+      "title": {
+        "en": "Reconnect control",
+        "es": "Reconectar control"
+      },
+      "desc": {
+        "en": "Try to reconnect the IR control if it stopped responding.",
+        "es": "Intenta reconectar el control IR si dejó de responder."
       }
     }
   },
