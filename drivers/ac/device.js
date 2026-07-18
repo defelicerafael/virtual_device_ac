@@ -33,6 +33,14 @@ class AcDevice extends Homey.Device {
     // y modos visibles según settings.
     await this._syncAllowedFeatures().catch(this.error);
 
+    // Migración (def. 26): button.reconnect se agregó al manifest después de
+    // que se crearan los primeros devices. Homey NO añade capabilities nuevas
+    // a los devices existentes → hay que agregarlo a mano para que aparezca
+    // "Reconectar control" en Mantenimiento.
+    if (!this.hasCapability('button.reconnect')) {
+      await this.addCapability('button.reconnect').catch(this.error);
+    }
+
     // Label informativo de la IP del PHM en los settings del tile (def. 24):
     // muestra el valor a nivel app y se refresca si cambia.
     this._syncPhmInfo();
