@@ -155,8 +155,8 @@ class AcDevice extends Homey.Device {
       result = await sender.sendSwing(this._config(), key);
     }
 
-    if (!result.ok) return this._failure(result.error);
-    if (result.remoteDown) return this._warnRemoteDown(result.detail); // lanza → revierte el swing
+    if (!result.ok) return this._failure(result);
+    if (result.remoteDown) return this._warnRemoteDown(result.reason);
     if (result.skipped) this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
     await this._warnMissing(result.missing);
     this._triggerFlow('swing', key);
@@ -224,51 +224,58 @@ class AcDevice extends Homey.Device {
       result = await sender.sendState(config, state, trigger);
     }
 
-    if (!result.ok) return this._failure(result.error);
-    if (result.remoteDown) return this._warnRemoteDown(result.detail);
+    if (!result.ok) return this._failure(result);
+    if (result.remoteDown) return this._warnRemoteDown(result.reason);
     await this._warnMissing(result.missing);
     return result;
   }
 
   /**
-   * Def. 26: HA recibió el comando pero el control IR (Broadlink) no
-   * respondió. NO se revierte el tile (el comando llegó al servidor; el
-   * estado es válido) — se avisa en el tile + Telegram, con la instrucción
-   * de usar "Reconectar control". Sin throw.
+   * Feedback unificado de falla (def. 26 rev. 2026-07-18): banner persistente
+   * (transición null→texto para re-emitir en cada envío fallido, no solo al
+   * reabrir el tile) + Telegram con detalle + notificación en el timeline de
+   * Homey (campanita). NO lanza: el caller decide si revierte.
    */
-  async _warnRemoteDown(detail) {
-    const { remoteEntity } = this._config();
-    const suffix = (remoteEntity ? ` — ${remoteEntity}` : '') + (detail ? ` (${detail})` : '');
-
-    // Banner persistente en el tile (transición null→texto para re-emitir en
-    // cada envío fallido, no solo al reabrir el tile).
+  async _notifyFail(message, detail) {
     await this.setWarning(null).catch(() => {});
-    await this.setWarning(this.homey.__({
-      en: 'The remote control is not responding. The change was NOT applied. Try "Reconnect control" (device settings) or check its power/Wi-Fi.',
-      es: 'El control no responde. El cambio NO se aplicó. Probá "Reconectar control" (config. del equipo) o revisá su energía/Wi-Fi.',
-    })).catch(() => {});
-
-    // Telegram con la entidad del remote no disponible (pedido Fernán 2026-07-18).
+    await this.setWarning(message).catch(() => {});
     this.homey.app.telegram.notifyFailure(
       this.getName(),
-      this.homey.__({ en: 'IR remote not responding', es: 'El control IR no responde' }) + suffix,
+      message + (detail ? ` (${detail})` : ''),
     ).catch(this.error);
-
-    // Notificación en el timeline de Homey (campanita) — feedback bien visible.
     this.homey.notifications.createNotification({
-      excerpt: this.homey.__({
-        en: `⚠️ ${this.getName()}: the remote control is not responding. The change was not applied.`,
-        es: `⚠️ ${this.getName()}: el control no responde. El cambio no se aplicó.`,
-      }),
+      excerpt: `⚠️ ${this.getName()}: ${message}`,
     }).catch(this.error);
+  }
 
-    // Def. 26 (rev. 2026-07-18): el aire físico NO cambió (el control IR no
-    // disparó), así que revertimos el tile — el listener LANZA y Homey vuelve
-    // el valor al anterior. El "pegar la vuelta" es el feedback visible.
-    throw new Error(this.homey.__({
-      en: 'The remote control is not responding. The change was not applied.',
-      es: 'El control no responde. El cambio no se aplicó.',
-    }));
+  /**
+   * Def. 26 (rev. 2026-07-18): HA recibió el comando pero el control IR no
+   * respondió → el aire físico NO cambió, así que revertimos (throw) con un
+   * mensaje según el motivo que devolvió el script:
+   *   remote_not_found   → la entidad remote no existe en el PHM.
+   *   remote_unavailable → la entidad existe pero está sin conexión.
+   */
+  async _warnRemoteDown(reason) {
+    const { remoteEntity } = this._config();
+    const entity = remoteEntity ? ` (${remoteEntity})` : '';
+    const byReason = {
+      remote_not_found: {
+        en: `The configured control does not exist in Pantea Home Manager${entity}. Check the device settings.`,
+        es: `El control configurado no existe en Pantea Home Manager${entity}. Revisá la configuración del equipo.`,
+      },
+      remote_unavailable: {
+        en: `The control is offline / not responding${entity}. Try "Reconnect control" (device settings) or check its power/Wi-Fi.`,
+        es: `El control está sin conexión / no responde${entity}. Probá "Reconectar control" (config. del equipo) o revisá su energía/Wi-Fi.`,
+      },
+    };
+    const message = this.homey.__(byReason[reason] || {
+      en: `The remote control is not responding${entity}. The change was not applied.`,
+      es: `El control no responde${entity}. El cambio no se aplicó.`,
+    });
+    await this._notifyFail(message, reason);
+    // El listener LANZA → Homey revierte el valor (el "pegar la vuelta" es el
+    // feedback visible principal).
+    throw new Error(message);
   }
 
   /**
@@ -288,18 +295,35 @@ class AcDevice extends Homey.Device {
     }
   }
 
-  /** Def. 10: warning + Telegram + throw (el throw revierte la UI). */
-  async _failure(error) {
-    const detail = (error && error.message) || 'sin respuesta';
-    await this.setWarning(this.homey.__({
-      en: 'Could not send the command to the unit.',
-      es: 'No se pudo enviar el comando al equipo.',
-    })).catch(() => {});
-    this.homey.app.telegram.notifyFailure(this.getName(), detail).catch(this.error);
-    throw new Error(this.homey.__({
-      en: 'Could not reach Pantea Home Manager. Please try again.',
-      es: 'No se pudo comunicar con Pantea Home Manager. Probá de nuevo.',
-    }));
+  /**
+   * Def. 10 (mensajes por motivo, rev. 2026-07-18): no se pudo enviar el
+   * comando al PHM (falla de transporte). banner + Telegram + timeline + throw
+   * (el throw revierte la UI). El motivo lo clasifica command-sender.
+   */
+  async _failure(result) {
+    const reason = (result && result.reason) || 'no_connection';
+    const detail = (result && result.error && result.error.message) || '';
+    const byReason = {
+      no_connection: {
+        en: 'No connection to Pantea Home Manager. Check it is powered on and on the network.',
+        es: 'No hay conexión con Pantea Home Manager. Revisá que esté encendido y en la red.',
+      },
+      service_missing: {
+        en: 'The command service is not set up in Pantea Home Manager.',
+        es: 'El servicio de comandos no está configurado en Pantea Home Manager.',
+      },
+      server_error: {
+        en: 'Pantea Home Manager could not process the command (server error).',
+        es: 'Pantea Home Manager no pudo procesar el comando (error del servidor).',
+      },
+      http_error: {
+        en: 'Pantea Home Manager rejected the command.',
+        es: 'Pantea Home Manager rechazó el comando.',
+      },
+    };
+    const message = this.homey.__(byReason[reason] || byReason.no_connection);
+    await this._notifyFail(message, detail);
+    throw new Error(message);
   }
 
   /**

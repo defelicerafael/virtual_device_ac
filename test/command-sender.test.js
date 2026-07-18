@@ -401,7 +401,14 @@ describe('CommandSender — feedback del remote (def. 26)', () => {
     const res = await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
     assert.equal(res.ok, true);
     assert.equal(res.remoteDown, true);
-    assert.equal(res.detail, 'remote_unavailable');
+    assert.equal(res.reason, 'remote_unavailable');
+  });
+
+  test('remote_not_found se propaga como reason (mensaje específico en el device)', async () => {
+    const h = makeTokenHarness({ serviceResponse: { ok: false, reason: 'remote_not_found' } });
+    const res = await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    assert.equal(res.remoteDown, true);
+    assert.equal(res.reason, 'remote_not_found');
   });
 
   test('remote caído NO se reintenta 3 veces (respuesta válida, no transitoria)', async () => {
@@ -418,10 +425,18 @@ describe('CommandSender — feedback del remote (def. 26)', () => {
     assert.match(h.posts[0].url, /\/api\/webhook\/ac_command$/);
   });
 
-  test('falla de transporte con token → ok:false (revierte)', async () => {
+  test('falla de transporte con token → ok:false + reason no_connection (red caída)', async () => {
     const h = makeTokenHarness({ failTimes: 99 });
     const res = await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
     assert.equal(res.ok, false);
+    assert.equal(res.reason, 'no_connection');
+  });
+
+  test('servicio inexistente (404) → reason service_missing', async () => {
+    const h = makeTokenHarness({ serviceStatus: 404 });
+    const res = await h.sender.sendState(CONFIG_TOKEN, { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' }, 'temperature');
+    assert.equal(res.ok, false);
+    assert.equal(res.reason, 'service_missing');
   });
 
   test('reloadBroadlink: POST a reload_config_entry con la entidad y Bearer', async () => {
