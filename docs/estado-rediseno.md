@@ -5,11 +5,15 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ## Última actualización: 2026-07-19 (def. 26 ACEPTADA por Fernán — v2.0.7 en San Fran)
 
 ### 🔜 PENDIENTES AL RETOMAR (lo próximo, en orden de valor)
-1. **Replicar v2.0.7 a los otros 3 Homeys** (jx/segun/fatato — hoy en versiones previas): `homey-app update com.panteasmart.devices --no-install` + `install --last` en cada server. Sin riesgo: sin token siguen en webhook clásico; los mensajes/migraciones nuevas aplican igual.
-2. **Activar feedback en fatato** (casa con aires IR reales, la más útil): (a) actualizar su `ac_command.yaml` (ruta real verificada: `/opt/pantea/homeassistant/config/scripts/ac_command.yaml`, hoy en versión BASE sin `response_variable`; archivo de root → sudo) con el canónico `docs/referencia/ha-script-ac_command.yaml` (backup + check_config + reload/restart consultando), y (b) cargar el token propio de fatato en los settings de la app. El token de cada casa se crea en su HA (Perfil → Tokens de larga duración). Ídem jx/segun si se quiere feedback ahí.
-3. **Spot-checks restantes** con "Prueba Zombie": encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
-4. **Migrar Living y Playroom** en San Fran (los 2 aires DC que faltan) → retirar el HomeyScript "PS Broadlink" cuando no queden tiles DC.
-5. **Cierre (Etapa 7):** imágenes definitivas de la app (hoy placeholders azules), checklist final contra las 27 definiciones, mejora menor (cancelar reintentos supersedidos).
+1. **Fernán: cargar el token propio de fatato** en los settings de la app (Homey Talar) para ACTIVAR su feedback — todo lo demás de fatato ya está (v2.0.7 + script enriquecido activo). El token se crea en su HA (192.168.68.60 = el server panteasmart-fatato, verificado por IP) → Perfil → Tokens de larga duración. Ídem jx/segun si se quiere feedback ahí.
+2. **Spot-checks restantes** con "Prueba Zombie": encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
+3. **Migrar Living y Playroom** en San Fran (los 2 aires DC que faltan) → retirar el HomeyScript "PS Broadlink" cuando no queden tiles DC.
+4. **Cierre (Etapa 7):** imágenes definitivas de la app (hoy placeholders azules), checklist final contra las 27 definiciones, mejora menor (cancelar reintentos supersedidos).
+
+### ✅ Rollout v2.0.7 + script COMPLETO (2026-07-19)
+- **App v2.0.7 instalada en los 4 Homeys**: San Fran, Sta Barbara OK (jx), Cerrillos (segun), Talar (fatato).
+- **Script `ac_command` enriquecido** (not_found vs unavailable) **ACTIVO en ferno y fatato** (fatato: backup `.bak-20260719-011441`, check_config OK, HA reiniciado y verificado vivo sin errores) **+ imagen base**. Falta en jx/segun (sin apuro: sin token no se consulta la respuesta).
+- Verificado por IP: `panteasmart-fatato` = **192.168.68.60** = el PHM que apuntan los tiles de Talar. El script enriquecido quedó en el HA correcto.
 
 ### ✅ Def. 26 ACEPTADA (2026-07-19, prueba en vivo de Fernán con v2.0.7 en San Fran)
 Los 7 checks pasaron con "Prueba Zombie" (remote `test_claude` inexistente): (1) toast/warning al enviar, (2) mensaje "No se encuentra la entidad remote.test_claude en Pantea Home Manager…", (3) revert del tile, (4) campanita/timeline, (5) Telegram con entidad, (6) "Aprender" desaparece con code y reaparece sin, (7) "Reconectar control" en Ajustes→Maintenance con el mismo mensaje detallado por motivo.
