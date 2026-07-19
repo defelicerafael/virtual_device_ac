@@ -257,11 +257,16 @@ class AcDevice extends Homey.Device {
    */
   async _warnRemoteDown(reason) {
     const { remoteEntity } = this._config();
-    const entity = remoteEntity ? ` (${remoteEntity})` : '';
+    // El setting guarda el nombre pelado; en los mensajes va la entidad
+    // completa (remote.X), igual que la manda command-sender al servidor.
+    const entityFull = remoteEntity
+      ? (remoteEntity.startsWith('remote.') ? remoteEntity : `remote.${remoteEntity}`)
+      : '';
+    const entity = entityFull ? ` (${entityFull})` : '';
     const byReason = {
       remote_not_found: {
-        en: `The configured control does not exist in Pantea Home Manager${entity}. Check the device settings.`,
-        es: `El control configurado no existe en Pantea Home Manager${entity}. Revisá la configuración del equipo.`,
+        en: `The entity ${entityFull || '(not set)'} was not found in Pantea Home Manager. Check the device settings.`,
+        es: `No se encuentra la entidad ${entityFull || '(sin configurar)'} en Pantea Home Manager. Revisá la configuración del equipo.`,
       },
       remote_unavailable: {
         en: `The control is offline / not responding${entity}. Try "Reconnect control" (device settings) or check its power/Wi-Fi.`,
