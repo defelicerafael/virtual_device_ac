@@ -27,19 +27,30 @@ ac_command:
       example: "false"
 
   # Devuelve response_variable {ok, reason} (def. 26 de com.panteasmart.devices):
-  #   ok:false, reason:remote_unavailable  -> el control (Broadlink) está caído.
+  #   ok:false, reason:remote_not_found    -> la entidad remote no existe en HA.
+  #   ok:false, reason:remote_unavailable  -> la entidad existe pero está sin conexión.
   #   ok:true                              -> el comando se despachó al control.
-  # El pre-chequeo del estado del remote cubre el caso dominante (Broadlink
-  # sin red). continue_on_error evita que un comando no aprendido rompa la
-  # respuesta (ese caso lo detecta la app por la planilla, def. 23).
+  # El pre-chequeo distingue "no existe" (no está registrada) de "sin conexión"
+  # (registrada pero unavailable/unknown). continue_on_error evita que un comando
+  # no aprendido rompa la respuesta (ese caso lo detecta la app por la planilla).
   sequence:
     - variables:
         remote_entity_full: "{{ remote_entity | default('remote.nombre_broadlink') }}"
-        remote_ok: "{{ states(remote_entity_full) not in ['unavailable', 'unknown', 'none', 'None'] }}"
+        remote_exists: "{{ remote_entity_full in (states | map(attribute='entity_id') | list) }}"
+        remote_state: "{{ states(remote_entity_full) }}"
 
     - if:
         - condition: template
-          value_template: "{{ not remote_ok }}"
+          value_template: "{{ not remote_exists }}"
+      then:
+        - variables:
+            result: "{{ {'ok': false, 'reason': 'remote_not_found'} }}"
+        - stop: "Control (remote) inexistente"
+          response_variable: result
+
+    - if:
+        - condition: template
+          value_template: "{{ remote_state in ['unavailable', 'unknown', 'none', 'None'] }}"
       then:
         - variables:
             result: "{{ {'ok': false, 'reason': 'remote_unavailable'} }}"
