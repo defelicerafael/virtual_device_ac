@@ -195,10 +195,28 @@ class AcDevice extends Homey.Device {
     }
     const result = await this.homey.app.commandSender.reloadBroadlink(config);
     if (!result.ok) {
-      throw new Error(this.homey.__({
-        en: 'Could not reconnect the control. Check its power/Wi-Fi.',
-        es: 'No se pudo reconectar el control. Revisá su energía/Wi-Fi.',
-      }));
+      // Mismos motivos/mensajes que el envío de comandos (pedido Fernán
+      // 2026-07-19: el botón tiene que dar el mismo detalle).
+      const entityFull = this._entityFull();
+      const byReason = {
+        remote_not_found: {
+          en: `The entity ${entityFull || '(not set)'} was not found in Pantea Home Manager. Check the device settings.`,
+          es: `No se encuentra la entidad ${entityFull || '(sin configurar)'} en Pantea Home Manager. Revisá la configuración del equipo.`,
+        },
+        no_connection: {
+          en: 'No connection to Pantea Home Manager. Check it is powered on and on the network.',
+          es: 'No hay conexión con Pantea Home Manager. Revisá que esté encendido y en la red.',
+        },
+        token_rejected: {
+          en: 'The Pantea Home Manager token was rejected. Check the app settings.',
+          es: 'El token de Pantea Home Manager fue rechazado. Revisá la configuración de la app.',
+        },
+        reload_failed: {
+          en: `Could not reconnect the control${entityFull ? ` (${entityFull})` : ''}. Check its power/Wi-Fi.`,
+          es: `No se pudo reconectar el control${entityFull ? ` (${entityFull})` : ''}. Revisá su energía/Wi-Fi.`,
+        },
+      };
+      throw new Error(this.homey.__(byReason[result.reason] || byReason.reload_failed));
     }
     await this.setWarning(null).catch(() => {});
     this.log('Reconexión del control solicitada al PHM.');
@@ -255,13 +273,18 @@ class AcDevice extends Homey.Device {
    *   remote_not_found   → la entidad remote no existe en el PHM.
    *   remote_unavailable → la entidad existe pero está sin conexión.
    */
-  async _warnRemoteDown(reason) {
+  /**
+   * Entidad remote completa (remote.X) para mensajes: el setting guarda el
+   * nombre pelado; acá se normaliza igual que command-sender al enviar.
+   */
+  _entityFull() {
     const { remoteEntity } = this._config();
-    // El setting guarda el nombre pelado; en los mensajes va la entidad
-    // completa (remote.X), igual que la manda command-sender al servidor.
-    const entityFull = remoteEntity
-      ? (remoteEntity.startsWith('remote.') ? remoteEntity : `remote.${remoteEntity}`)
-      : '';
+    if (!remoteEntity) return '';
+    return remoteEntity.startsWith('remote.') ? remoteEntity : `remote.${remoteEntity}`;
+  }
+
+  async _warnRemoteDown(reason) {
+    const entityFull = this._entityFull();
     const entity = entityFull ? ` (${entityFull})` : '';
     const byReason = {
       remote_not_found: {

@@ -359,15 +359,20 @@ describe('CommandSender', () => {
 });
 
 // ---- Feedback del remote vía REST return_response (def. 26) ----
-function makeTokenHarness({ serviceResponse = { ok: true }, failTimes = 0, reloadOk = true, serviceStatus = 200 } = {}) {
+function makeTokenHarness({ serviceResponse = { ok: true }, failTimes = 0, reloadOk = true, serviceStatus = 200, stateStatus = 200 } = {}) {
   const posts = [];
   let failsLeft = failTimes;
   const fetchFn = async (url, opts) => {
+    if (url.includes('/api/states/')) {
+      // Pre-chequeo de existencia de la entidad (reloadBroadlink).
+      if (failsLeft > 0) { failsLeft--; throw new Error('ECONNREFUSED'); }
+      return { ok: stateStatus === 200, status: stateStatus, text: async () => '' };
+    }
     if (opts && opts.method === 'POST') {
       if (failsLeft > 0) { failsLeft--; throw new Error('ECONNREFUSED'); }
       posts.push({ url, headers: opts.headers || {}, payload: JSON.parse(opts.body) });
       if (url.includes('/reload_config_entry')) {
-        return { ok: reloadOk, text: async () => '' };
+        return { ok: reloadOk, status: reloadOk ? 200 : 500, text: async () => '' };
       }
       if (url.includes('?return_response')) {
         if (serviceStatus !== 200) return { ok: false, status: serviceStatus, text: async () => '' };
@@ -449,10 +454,34 @@ describe('CommandSender — feedback del remote (def. 26)', () => {
     assert.equal(post.headers.Authorization, 'Bearer TOK123');
   });
 
-  test('reloadBroadlink sin token → ok:false', async () => {
+  test('reloadBroadlink sin token → ok:false + reason no_token', async () => {
     const h = makeTokenHarness();
     const res = await h.sender.reloadBroadlink({ ...CONFIG_BASE });
     assert.equal(res.ok, false);
+    assert.equal(res.reason, 'no_token');
+  });
+
+  test('reloadBroadlink con entidad inexistente (404 en states) → remote_not_found', async () => {
+    const h = makeTokenHarness({ stateStatus: 404 });
+    const res = await h.sender.reloadBroadlink(CONFIG_TOKEN);
+    assert.equal(res.ok, false);
+    assert.equal(res.reason, 'remote_not_found');
+    // No debe llegar a llamar al reload.
+    assert.equal(h.posts.find((p) => p.url.includes('/reload_config_entry')), undefined);
+  });
+
+  test('reloadBroadlink sin conexión → no_connection', async () => {
+    const h = makeTokenHarness({ failTimes: 99 });
+    const res = await h.sender.reloadBroadlink(CONFIG_TOKEN);
+    assert.equal(res.ok, false);
+    assert.equal(res.reason, 'no_connection');
+  });
+
+  test('reloadBroadlink con reload fallido (500) → reload_failed', async () => {
+    const h = makeTokenHarness({ reloadOk: false });
+    const res = await h.sender.reloadBroadlink(CONFIG_TOKEN);
+    assert.equal(res.ok, false);
+    assert.equal(res.reason, 'reload_failed');
   });
 
   test('token rechazado (401) → fallback al webhook, NO revierte (def. 27)', async () => {
