@@ -5,10 +5,17 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 ## Última actualización: 2026-07-19 (def. 26 ACEPTADA por Fernán — v2.0.7 en San Fran)
 
 ### 🔜 PENDIENTES AL RETOMAR (lo próximo, en orden de valor)
-1. **Fernán: cargar el token propio de fatato** en los settings de la app (Homey Talar) para ACTIVAR su feedback — todo lo demás de fatato ya está (v2.0.7 + script enriquecido activo). El token se crea en su HA (192.168.68.60 = el server panteasmart-fatato, verificado por IP) → Perfil → Tokens de larga duración. Ídem jx/segun si se quiere feedback ahí.
-2. **Spot-checks restantes** con "Prueba Zombie": encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
+1. **Checklist final contra las 27 definiciones** (Etapa 7) — lo puede hacer Claude solo y reportar discrepancias. Es lo que más valor tiene para cerrar el rediseño.
+2. **Spot-checks restantes** con "Prueba Zombie" (San Fran): encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
 3. **Migrar Living y Playroom** en San Fran (los 2 aires DC que faltan) → retirar el HomeyScript "PS Broadlink" cuando no queden tiles DC.
-4. **Cierre (Etapa 7):** imágenes definitivas de la app (hoy placeholders azules), checklist final contra las 27 definiciones, mejora menor (cancelar reintentos supersedidos).
+4. **Cierre (Etapa 7), resto:** imágenes definitivas de la app (hoy placeholders azules — necesita input de diseño de Fernán), mejora menor (cancelar reintentos supersedidos).
+5. **Opcional:** feedback en jx/segun (falta su token + el script enriquecido en cada HA). Sin token siguen en webhook clásico, sin romper nada.
+
+### ✅ Feedback ACTIVO y VERIFICADO en fatato (Talar) — 2026-07-19
+Fernán cargó el token de fatato y probó end-to-end: apuntó un tile a una entidad inexistente (`zombie`) → **"No se encuentra la entidad remote.zombie en Pantea Home Manager…"**. Eso valida las 4 capas juntas: token OK (si fuera inválido, def. 27 lo degradaría al webhook **en silencio** y no habría mensaje), script enriquecido devolviendo `remote_not_found`, y el mapeo de la app con la entidad completa. **El caso "Aire Lavadero" que originó def. 26 ya está cubierto en la casa donde ocurrió.**
+- fatato tiene 9 remotes Broadlink: gym, lavadero, cine, family, piano, seve, cocina, chicas, master.
+- ⚠️ Recordatorio operativo: tras esa prueba hay que **restaurar la entidad real** del tile que se usó (quedó en `zombie`).
+- **Casas con feedback ACTIVO: San Fran (ferno) y Talar (fatato).** jx/segun siguen en webhook (sin token).
 
 ### ✅ Rollout v2.0.7 + script COMPLETO (2026-07-19)
 - **App v2.0.7 instalada en los 4 Homeys**: San Fran, Sta Barbara OK (jx), Cerrillos (segun), Talar (fatato).
