@@ -121,7 +121,8 @@ La tarea, dos partes:
 - ⬜ Etapa 7 — Cierre (imágenes reales, checklist defs 1–20, migración San Fran, v2.0.0)
 
 ### Pendiente / dependencias
-- ⚠️ **Fernán: extender el Apps Script** con `?marcas={code}` (hoja "Marcas") — lo consume la Etapa 4; el wizard degrada sin eso.
+- ✅ ~~Fernán: extender el Apps Script con `?marcas={code}`~~ — **HECHO y verificado (2026-07-16)**: el wizard ya muestra "Aplica a: …". Copia en [referencia/apps-script-webservice.gs](referencia/apps-script-webservice.gs).
+- (sin dependencias externas abiertas)
 
 ### Reglas de trabajo
 - Todo lo aprendido/definido/hecho se guarda en `.md` dentro de este repo (`docs/`).
