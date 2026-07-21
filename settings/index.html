@@ -11,6 +11,8 @@
       border: 1px solid #ccc; border-radius: 8px;
     }
     .hint { font-size: 12px; color: #888; margin-top: 4px; }
+    .toggle { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-weight: 400; font-size: 13px; color: #666; cursor: pointer; }
+    .toggle input { width: auto; margin: 0; }
     .row { display: flex; gap: 10px; }
     .row > div { flex: 1; }
     .row > div.small { flex: 0 0 90px; }
@@ -37,6 +39,7 @@
 
   <label for="ha-token">Token de acceso</label>
   <input id="ha-token" type="password" placeholder="(opcional)" autocomplete="off">
+  <label class="toggle" for="show-token"><input id="show-token" type="checkbox"> Mostrar token</label>
   <div class="hint">Token de acceso de larga duración de Pantea Home Manager. Habilita el aviso cuando un control no responde y el botón "Reconectar control". Si se deja vacío, los comandos se envían igual pero sin ese aviso.</div>
 
   <h2>Avanzado</h2>
@@ -59,6 +62,10 @@
       });
       Homey.get('ha_token', (err, value) => {
         if (!err && value != null) document.getElementById('ha-token').value = value;
+      });
+
+      document.getElementById('show-token').addEventListener('change', (e) => {
+        document.getElementById('ha-token').type = e.target.checked ? 'text' : 'password';
       });
 
       document.getElementById('save').addEventListener('click', () => {
