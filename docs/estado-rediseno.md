@@ -6,10 +6,14 @@ Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero pa
 
 ### 🔜 PENDIENTES AL RETOMAR (lo próximo, en orden de valor)
 1. **Checklist final contra las 27 definiciones** (Etapa 7) — lo puede hacer Claude solo y reportar discrepancias. Es lo que más valor tiene para cerrar el rediseño.
-2. **Spot-checks restantes** con "Prueba Zombie" (San Fran): encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
-3. **Migrar Living y Playroom** en San Fran (los 2 aires DC que faltan) → retirar el HomeyScript "PS Broadlink" cuando no queden tiles DC.
-4. **Cierre (Etapa 7), resto:** imágenes definitivas de la app (hoy placeholders azules — necesita input de diseño de Fernán), mejora menor (cancelar reintentos supersedidos).
-5. **Opcional:** feedback en jx/segun (falta su token + el script enriquecido en cada HA). Sin token siguen en webhook clásico, sin romper nada.
+2. **Limpiar PS Heating** (HomeyScript San Fran): tras borrar el device "Aire Living" (2026-07-21, sin remote todavía en ese ambiente), quedó una referencia colgada — sacar el bloque del heater "Aire Living" y quitarlo del `waitBeforeOffAfterHeatersOff` de "Calefaccion Living". NO rompe (el script hace `continue` al no encontrar el device), solo mete ruido en los logs. Copia en `Homey/HomeyScript/PS Heating_20260715.js`. Verificado que Playroom sí tiene `remote.playroom` en HA.
+3. **Spot-checks restantes** con "Prueba Zombie" (San Fran): encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
+4. **Migrar el aire de Playroom si falta** y, cuando no queden tiles DC, retirar el HomeyScript "PS Broadlink". (Living queda para cuando tenga remote.)
+5. **Cierre (Etapa 7), resto:** imágenes definitivas de la app (hoy placeholders azules — necesita input de diseño de Fernán), mejora menor (cancelar reintentos supersedidos).
+6. **Opcional:** feedback en jx/segun (falta su token + el script enriquecido en cada HA). Sin token siguen en webhook clásico, sin romper nada.
+
+### ✅ Toggle "Mostrar token" (v2.0.8, 2026-07-21) — flota pareja
+Checkbox debajo del campo de token en `settings/index.html` (alterna password↔text, patrón integrator). v2.0.8 instalada en los **4 Homeys** (ferno, fatato, jx, segun).
 
 ### ✅ Feedback ACTIVO y VERIFICADO en fatato (Talar) — 2026-07-19
 Fernán cargó el token de fatato y probó end-to-end: apuntó un tile a una entidad inexistente (`zombie`) → **"No se encuentra la entidad remote.zombie en Pantea Home Manager…"**. Eso valida las 4 capas juntas: token OK (si fuera inválido, def. 27 lo degradaría al webhook **en silencio** y no habría mensaje), script enriquecido devolviendo `remote_not_found`, y el mapeo de la app con la entidad completa. **El caso "Aire Lavadero" que originó def. 26 ya está cubierto en la casa donde ocurrió.**
