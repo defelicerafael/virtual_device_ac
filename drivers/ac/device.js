@@ -1,6 +1,7 @@
 'use strict';
 
 const Homey = require('homey');
+const { SWING_POSITIONS } = require('../../lib/ir-codes');
 
 /**
  * Aire acondicionado Pantea. Orquesta las reglas de negocio (definiciones
@@ -157,8 +158,13 @@ class AcDevice extends Homey.Device {
 
     if (!result.ok) return this._failure(result);
     if (result.remoteDown) return this._warnRemoteDown(result.reason);
-    if (result.skipped) this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
     await this._warnMissing(result.missing);
+    if (result.skipped) {
+      // Sin código no se envió NADA al equipo: el estado queda solo en el
+      // tile, así que tampoco corresponde disparar la flow card de cambio.
+      this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
+      return true;
+    }
     this._triggerFlow('swing', key);
     return true;
   }
@@ -356,23 +362,30 @@ class AcDevice extends Homey.Device {
 
   /**
    * Def. 5, al prender: si la planilla tiene códigos de swing DISTINTOS para
-   * on y off, se manda el del estado del tile después del encendido. Si son
-   * iguales (toggle) o no existen, no se manda nada. No revierte el
-   * encendido si falla: solo log.
+   * las claves del equipo, se manda el del estado del tile después del
+   * encendido. Si son iguales (toggle) o no existen, no se manda nada. No
+   * revierte el encendido si falla: solo log.
    */
   async _swingAfterPowerOn() {
     try {
       const { code } = this._config();
       if (!code) return;
+      const key = this._swingKey();
+      if (!key) return;
       const commands = await this.homey.app.irCodes.getSwingCommands(code);
-      const available = Object.values(commands).filter((c) => c != null);
+      // Solo las claves del TIPO de swing de este equipo: un code puede traer
+      // los dos juegos (on/off y posiciones) y mezclarlos falsearía la
+      // detección de toggle — un on/off con códigos iguales pasaría el
+      // conteo gracias a una clave posicional que este tile ni usa.
+      const ownKeys = this.hasCapability('swing_mode') ? SWING_POSITIONS : ['on', 'off'];
+      const available = ownKeys.map((k) => commands[k]).filter((c) => c != null);
       // Hace falta más de un código distinto: con uno solo (o todos
       // repetidos = toggle) no se puede saber el estado real del equipo.
       if (new Set(available).size < 2) return;
-      const key = this._swingKey();
-      if (!key || !commands[key]) return;
+      if (!commands[key]) return;
       const result = await this.homey.app.commandSender.sendSwing(this._config(), key);
       if (!result.ok) this.error('No se pudo reenviar swing tras el encendido:', result.error?.message);
+      else if (result.remoteDown) this.log(`Swing tras el encendido: el control no respondió (${result.reason}).`);
     } catch (err) {
       this.error('Error en swing post-encendido:', err);
     }
@@ -477,6 +490,13 @@ class AcDevice extends Homey.Device {
     // instalador. Solo se muestra si NO hay code de planilla configurado; con
     // code, el usuario final nunca lo ve.
     const hasCode = String(settings.code ?? '').trim() !== '';
+    // Si el botón desaparece con el learning prendido (se cargó un code sin
+    // haber mandado ningún comando), el modo quedaría activo SIN forma de
+    // apagarlo: el próximo comando se iría a ac_learn y el aire no respondería.
+    if (hasCode && this._learning) {
+      this._learning = false;
+      this.log('Learning cancelado: el equipo pasó a tener code de planilla.');
+    }
     await syncCap('learning_mode', !hasCode);
 
     // Swing (def. 5 v3): 'onoff' → toggle, 'positions' → picker,

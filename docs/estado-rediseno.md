@@ -2,10 +2,22 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-07-19 (def. 26 ACEPTADA por Fernán — v2.0.7 en San Fran)
+## Última actualización: 2026-07-28 (checklist de las 27 definiciones HECHO — v2.0.9, SIN desplegar)
+
+### ✅ Checklist de regresión contra las definiciones 1–27 (2026-07-28) — Etapa 7 punto 2 CERRADO
+Documento nuevo: **[checklist-definiciones.md](checklist-definiciones.md)** (tabla def-por-def con el archivo donde se cumple cada una). Resultado: **25/27 sin desvíos**, 2 marcadas 🔍 porque su comprobación final es física (def. 21, filtrado de modos del picker) o depende del servidor (def. 26, `script.ac_command` enriquecido solo en ferno y fatato). `npm test` 61/61 y `validate --level publish` OK.
+
+**5 hallazgos, ninguno crítico. Fernán decidió arreglar 1, 3, 4 y 5 → v2.0.9:**
+1. **Learning colgado al cargar un code** (el único con impacto real): quitar la capability `learning_mode` no reseteaba `this._learning`, así que el siguiente comando se iba a `ac_learn` sin forma de apagarlo. Arreglado en `_syncAllowedFeatures`.
+2. *(NO se arregla, decisión de Fernán)* el learning se apaga aunque el comando falle.
+3. `_swingAfterPowerOn` contaba las 6 claves de swing juntas en vez de las del tipo del equipo → un toggle con una clave posicional al lado se mandaba igual. Arreglado con `SWING_POSITIONS` / `['on','off']`.
+4. `remoteDown` silencioso en el swing post-encendido → ahora loguea (sigue sin revertir, correcto).
+5. El trigger `swing_changed` se disparaba con `skipped` (sin código en planilla, no se enviaba nada) → ahora se saltea.
+
+⚠️ **v2.0.9 SIN desplegar** a los 4 Homeys. También quedó respondido ahí que el device **no persiste en ningún lado** que el swing sea toggle: se recalcula en cada encendido contra el cache de `ir-codes`.
 
 ### 🔜 PENDIENTES AL RETOMAR (lo próximo, en orden de valor)
-1. **Checklist final contra las 27 definiciones** (Etapa 7) — lo puede hacer Claude solo y reportar discrepancias. Es lo que más valor tiene para cerrar el rediseño.
+1. **Desplegar v2.0.9** a los 4 Homeys (`homey-app update` + `install`) cuando Fernán dé el OK.
 2. **Limpiar PS Heating** (HomeyScript San Fran): tras borrar el device "Aire Living" (2026-07-21, sin remote todavía en ese ambiente), quedó una referencia colgada — sacar el bloque del heater "Aire Living" y quitarlo del `waitBeforeOffAfterHeatersOff` de "Calefaccion Living". NO rompe (el script hace `continue` al no encontrar el device), solo mete ruido en los logs. Copia en `Homey/HomeyScript/PS Heating_20260715.js`. Verificado que Playroom sí tiene `remote.playroom` en HA.
 3. **Spot-checks restantes** con "Prueba Zombie" (San Fran): encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
 4. **Migrar el aire de Playroom si falta** y, cuando no queden tiles DC, retirar el HomeyScript "PS Broadlink" (el de AC). (Living queda para cuando tenga remote.)
@@ -70,7 +82,7 @@ La tarea, dos partes:
 1. **Enterarse:** que el usuario sepa cuando tira un comando y el remote de destino no responde. Requiere cambiar el contrato con el servidor: en vez de webhook (sin respuesta), un endpoint que devuelva el resultado (¿REST API de HA con `?return_response`? ¿webhook que setea un helper que la app consulta? ¿script con response_variable?) → warning en el tile + Telegram como en def. 10.
 2. **Recuperarse:** una acción a mano del usuario en Homey para intentar reconectar el Broadlink — opciones a explorar: botón/maintenance action que dispare en HA un reload del config entry de Broadlink (`homeassistant.reload_config_entry` vía webhook/script nuevo), toggle de un enchufe inteligente si el RM está detrás de uno, y/o reinicio de la app como palanca genérica. Definir con Fernán qué combinación.
 
-**Falta para el cierre (Etapa 7):** spot-checks pendientes (2 pasos con code 5; camino legacy sin code; swing con filas swing_* cuando se carguen en la planilla; learning contra un Broadlink REAL cuando toque aprender un aire nuevo), imágenes definitivas, checklist contra las definiciones 1–25, mejora menor (cancelar reintentos supersedidos) y terminar la migración de los aires de San Fran (faltan Living y Playroom).
+**Falta para el cierre (Etapa 7):** spot-checks pendientes (2 pasos con code 5; camino legacy sin code; swing con filas swing_* cuando se carguen en la planilla; learning contra un Broadlink REAL cuando toque aprender un aire nuevo), imágenes definitivas, ~~checklist contra las definiciones 1–25~~ ✅ HECHO 2026-07-28 ([checklist-definiciones.md](checklist-definiciones.md)), mejora menor (cancelar reintentos supersedidos) y terminar la migración de los aires de San Fran (faltan Living y Playroom).
 - ✅ Spot-check LEARNING (2026-07-16, en modo INSTALADO): Fernán activó Aprender en "Prueba Zombie" y mandó comandos → los POST llegaron al webhook `ac_learn` de HA, la automation "AC Learning Mode via Webhook" corrió hasta `remote.learn_command` (falló solo por la entidad de prueba inexistente, como se esperaba). Verificado además que el contrato `simple_mode` de la app matchea la automation del servidor (simple → `ir_{device}_{modo}`; completo → secuencia). El device "Prueba Zombie" (id 79954337-...) queda para los spot-checks restantes.
 - ✅ Migración COCINA completa (2026-07-15): device nuevo "Aire Cocina" con entidad `remote.cocina` corregida (verificado en log), comandado por Alexa por voz.
 - ✅ PS Heating actualizado CARGADO en el HomeyScript de San Fran (2026-07-15) — soporta Pantea AC.
@@ -89,7 +101,8 @@ La tarea, dos partes:
 - Instalada la app en los 3 Homeys; luego el ciclo run/stop desató el problema activo de arriba (ver [debug-modo-instalado.md](debug-modo-instalado.md)).
 
 ### Mapa de documentos
-- [rediseno-app.md](rediseno-app.md) — las 20 definiciones de producto + relevamiento de la app vieja. TODO el detalle de qué hace la app está ahí.
+- [rediseno-app.md](rediseno-app.md) — las 27 definiciones de producto + relevamiento de la app vieja. TODO el detalle de qué hace la app está ahí.
+- [checklist-definiciones.md](checklist-definiciones.md) — verificación del código contra las 27 definiciones, una por una (Etapa 7 punto 2), con los hallazgos y qué se hizo con cada uno.
 - [propuesta-diseno.md](propuesta-diseno.md) — diseño APROBADO (arquitectura, capabilities, flujo de comando, lib/, wizard, flow cards, migración).
 - [plan-implementacion.md](plan-implementacion.md) — las 8 etapas con su forma de prueba.
 - [ps-broadlink-analisis.md](ps-broadlink-analisis.md) + [referencia/PS-Broadlink-original.js](referencia/PS-Broadlink-original.js) — el HomeyScript que la app reemplaza.
@@ -130,7 +143,7 @@ La tarea, dos partes:
   - `driver.flow.compose.json`: triggers `fan_speed_changed` (token speed) / `swing_changed` (token swing) / `sleep_turned_on|off`; conditions `fan_speed_is` / `swing_is` / `sleep_is_on`; actions `set_fan_speed` / `set_swing_onoff` / `set_swing_position` / `set_sleep`. Las de onoff/modo/temperatura las regala Homey.
   - Runtime en `driver._registerFlowCards()`: actions vía `triggerCapabilityListener` (mismo camino que el tile, con error amigable si la capability no está por def. 21/5v3); triggers disparados desde `device._triggerFlow()` tras cambios exitosos.
   - ✅ validate publish OK (es/en completos, titleFormatted incluidos).
-- ⬜ Etapa 7 — Cierre (imágenes reales, checklist defs 1–20, migración San Fran, v2.0.0)
+- 🟡 **Etapa 7 — Cierre:** ✅ validate publish · ✅ v2.0.0 · ✅ **checklist defs 1–27 (2026-07-28, [checklist-definiciones.md](checklist-definiciones.md))** · 🟡 migración San Fran (faltan Living y Playroom) · ⬜ imágenes reales
 
 ### Pendiente / dependencias
 - ✅ ~~Fernán: extender el Apps Script con `?marcas={code}`~~ — **HECHO y verificado (2026-07-16)**: el wizard ya muestra "Aplica a: …". Copia en [referencia/apps-script-webservice.gs](referencia/apps-script-webservice.gs).
