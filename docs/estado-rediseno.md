@@ -2,7 +2,7 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-07-28 (checklist de las 27 definiciones HECHO — v2.0.9, SIN desplegar)
+## Última actualización: 2026-08-03 (v2.0.9 DESPLEGADA en las 5 casas — verificado en vivo)
 
 ### ✅ Checklist de regresión contra las definiciones 1–27 (2026-07-28) — Etapa 7 punto 2 CERRADO
 Documento nuevo: **[checklist-definiciones.md](checklist-definiciones.md)** (tabla def-por-def con el archivo donde se cumple cada una). Resultado: **25/27 sin desvíos**, 2 marcadas 🔍 porque su comprobación final es física (def. 21, filtrado de modos del picker) o depende del servidor (def. 26, `script.ac_command` enriquecido solo en ferno y fatato). `npm test` 61/61 y `validate --level publish` OK.
@@ -14,13 +14,16 @@ Documento nuevo: **[checklist-definiciones.md](checklist-definiciones.md)** (tab
 4. `remoteDown` silencioso en el swing post-encendido → ahora loguea (sigue sin revertir, correcto).
 5. El trigger `swing_changed` se disparaba con `skipped` (sin código en planilla, no se enviaba nada) → ahora se saltea.
 
-⚠️ **v2.0.9 SIN desplegar** a los 4 Homeys. También quedó respondido ahí que el device **no persiste en ningún lado** que el swing sea toggle: se recalcula en cada encendido contra el cache de `ir-codes`.
+✅ **v2.0.9 DESPLEGADA y corriendo en los 5 Homeys** (ferno, jx, segun, fatato y boating) — verificado el 2026-08-03 contra `/api/manager/apps/app` de cada casa. ⚠️ Este párrafo decía "SIN desplegar" hasta esa fecha: el deploy se hizo y el doc no se actualizó. Ojo con creerle a un doc sin verificar. También quedó respondido ahí que el device **no persiste en ningún lado** que el swing sea toggle: se recalcula en cada encendido contra el cache de `ir-codes`.
 
 ### 🔜 PENDIENTES AL RETOMAR (lo próximo, en orden de valor)
-1. **Desplegar v2.0.9** a los 4 Homeys (`homey-app update` + `install`) cuando Fernán dé el OK.
+1. ✅ ~~**Desplegar v2.0.9**~~ — **HECHO**: corriendo en las 5 casas (verificado 2026-08-03). El clone y la versión instalada coinciden en `2.0.9` en todas.
 2. **Limpiar PS Heating** (HomeyScript San Fran): tras borrar el device "Aire Living" (2026-07-21, sin remote todavía en ese ambiente), quedó una referencia colgada — sacar el bloque del heater "Aire Living" y quitarlo del `waitBeforeOffAfterHeatersOff` de "Calefaccion Living". NO rompe (el script hace `continue` al no encontrar el device), solo mete ruido en los logs. Copia en `Homey/HomeyScript/PS Heating_20260715.js`. Verificado que Playroom sí tiene `remote.playroom` en HA.
 3. **Spot-checks restantes** con "Prueba Zombie" (San Fran): encendido en 2 pasos (code 5 → 2 POST separados 2s), camino legacy sin code.
-4. **Migrar el aire de Playroom si falta** y, cuando no queden tiles DC, retirar el HomeyScript "PS Broadlink" (el de AC). (Living queda para cuando tenga remote.)
+4. ✅ ~~**Migrar el aire de Playroom**~~ — **HECHO** (verificado 2026-07-28: "Aire Playroom" está en la app y `available`; los 7 aires de San Fran migrados). Living no cuenta: su device se borró el 21-jul porque el ambiente no tiene Broadlink.
+   ✅ **RETIRADO el HomeyScript "PS Broadlink" (30-jul-2026)** — con esto se cierra el ciclo que arrancó el rediseño: la app reemplazó a los tres (tiles DC + Flows + script). Se borraron los 2 Advanced Flows (`AC Controller`, `AC Controller (Detail)`, ya deshabilitados), el script, y `PS Heating (old)` (nunca ejecutado). Backups: el código ya estaba en [`referencia/PS-Broadlink-original.js`](./referencia/PS-Broadlink-original.js) y los flows en [`referencia/AC-Controller-flows-backup-20260730.json`](./referencia/AC-Controller-flows-backup-20260730.json). ⚠️ "PS Broadlink RF" y "PS Heating" intactos (se verificó que ningún flow los referenciara: los nombres son substrings unos de otros).
+   🪤 Gotcha: los HomeyScripts se borran **por `id`, no por nombre** — el DELETE por nombre devuelve `✓ Done` y no borra nada.
+   ⚠️ Gotcha: para auditar flows hay que mirar `/api/manager/flow/advancedflow` (los normales son solo 8), y ese endpoint **se trunca en 64 KB por pipe de SSH** — redirigir a archivo EN la Pi y procesar ahí.
    - ⚠️ **Bloqueante para retirar RF, NO abordar todavía (Fernán, 2026-07-21):** existe un HomeyScript SEPARADO **"PS Broadlink RF.js"** (persianas por RF vía `remote.chicas`, webhook `rf_command`/`rf_learn`, modelo `windowcoverings_state`). Tiene los mismos vicios que el AC pre-def.26 (fire-and-forget sin feedback, `panteasmart.local` hardcodeado, depende de Device Capabilities con `restartApp`). **Esa integración NO anduvo** → hoy las persianas RF no funcionan por ahí, no es dependencia viva. Camino futuro (a diseñar cuando Fernán lo pida): driver `windowcoverings` RF en esta misma app reusando host/token/command-sender/feedback + enriquecer `rf_command.yaml` con `response_variable`. **Por ahora: no hacer nada.**
 5. **Cierre (Etapa 7), resto:** imágenes definitivas de la app (hoy placeholders azules — necesita input de diseño de Fernán), mejora menor (cancelar reintentos supersedidos).
 6. **Opcional:** feedback en jx/segun (falta su token + el script enriquecido en cada HA). Sin token siguen en webhook clásico, sin romper nada.
