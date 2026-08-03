@@ -25,7 +25,8 @@ Documento nuevo: **[checklist-definiciones.md](checklist-definiciones.md)** (tab
    🪤 Gotcha: los HomeyScripts se borran **por `id`, no por nombre** — el DELETE por nombre devuelve `✓ Done` y no borra nada.
    ⚠️ Gotcha: para auditar flows hay que mirar `/api/manager/flow/advancedflow` (los normales son solo 8), y ese endpoint **se trunca en 64 KB por pipe de SSH** — redirigir a archivo EN la Pi y procesar ahí.
    - ⚠️ **Bloqueante para retirar RF, NO abordar todavía (Fernán, 2026-07-21):** existe un HomeyScript SEPARADO **"PS Broadlink RF.js"** (persianas por RF vía `remote.chicas`, webhook `rf_command`/`rf_learn`, modelo `windowcoverings_state`). Tiene los mismos vicios que el AC pre-def.26 (fire-and-forget sin feedback, `panteasmart.local` hardcodeado, depende de Device Capabilities con `restartApp`). **Esa integración NO anduvo** → hoy las persianas RF no funcionan por ahí, no es dependencia viva. Camino futuro (a diseñar cuando Fernán lo pida): driver `windowcoverings` RF en esta misma app reusando host/token/command-sender/feedback + enriquecer `rf_command.yaml` con `response_variable`. **Por ahora: no hacer nada.**
-5. **Cierre (Etapa 7), resto:** imágenes definitivas de la app (hoy placeholders azules — necesita input de diseño de Fernán), mejora menor (cancelar reintentos supersedidos).
+5. **Cierre (Etapa 7), resto** — migrado a issues de GitHub: imágenes definitivas → **issue #2**; cancelar reintentos supersedidos → **issue #3**. Los dos con prioridad MUY BAJA; el de imágenes espera input de diseño de Fernán.
+   ✅ La verificación física del filtrado de modos del picker (def. 21) la hizo Fernán el 2026-08-03: **quedó OK**.
 6. **Opcional:** feedback en jx/segun (falta su token + el script enriquecido en cada HA). Sin token siguen en webhook clásico, sin romper nada.
 
 ### ✅ Toggle "Mostrar token" (v2.0.8, 2026-07-21) — flota pareja

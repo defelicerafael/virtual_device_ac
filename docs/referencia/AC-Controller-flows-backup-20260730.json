@@ -1,0 +1,1864 @@
+[
+  {
+    "id": "71171816-f689-48fd-94b1-847fd04b6b6d",
+    "name": "AC Controller (Detail)",
+    "folder": "2df5f5de-29e7-46e0-a031-c34ba2d527ca",
+    "triggerable": false,
+    "enabled": false,
+    "broken": false,
+    "cards": {
+      "03036dd6-1abb-4ea3-9d24-7da404e9e9c3": {
+        "type": "note",
+        "value": "Aire Chicas",
+        "color": "yellow",
+        "x": 20,
+        "y": 1280,
+        "width": null,
+        "height": null
+      },
+      "806db5bd-2fcd-44eb-aed2-ca7b352ec871": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 1420,
+        "args": {
+          "device": {
+            "id": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03",
+            "name": "Aire Chicas"
+          },
+          "capability": {
+            "id": "target_temperature",
+            "name": "Temp. Seteada",
+            "description": "number",
+            "getable": true,
+            "setable": true,
+            "deviceId": "275f829b-e161-4d82-8901-4deea7d6ec48"
+          }
+        },
+        "outputSuccess": [
+          "1b050055-7ae2-4752-9a8c-a819bbdf91de"
+        ]
+      },
+      "87e99763-18ac-474f-aaed-d2fea5f95de6": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 1560,
+        "outputSuccess": [
+          "b97ee4de-7009-4a79-b829-33e8026c3141"
+        ]
+      },
+      "b97ee4de-7009-4a79-b829-33e8026c3141": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::4ffe35fa-7c1a-42fb-b970-3493bd76f3e6::error]]",
+          "group": "PS AC Controller / [[trigger::806db5bd-2fcd-44eb-aed2-ca7b352ec871::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 1420
+      },
+      "1b050055-7ae2-4752-9a8c-a819bbdf91de": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::806db5bd-2fcd-44eb-aed2-ca7b352ec871::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 1420,
+        "outputSuccess": [
+          "4ffe35fa-7c1a-42fb-b970-3493bd76f3e6"
+        ]
+      },
+      "4ffe35fa-7c1a-42fb-b970-3493bd76f3e6": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 1400,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::1b050055-7ae2-4752-9a8c-a819bbdf91de::text]]\",\"name\":\"[[trigger::806db5bd-2fcd-44eb-aed2-ca7b352ec871::deviceName]]\"}"
+        },
+        "outputError": [
+          "87e99763-18ac-474f-aaed-d2fea5f95de6"
+        ]
+      },
+      "e052d9e1-e948-47a9-a624-9af7df8b792b": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 1640,
+        "args": {
+          "device": {
+            "id": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03",
+            "name": "Aire Chicas"
+          },
+          "capability": {
+            "id": "devicecapabilities_picker-auto-low-medium-high-turbo_list",
+            "name": "Fan",
+            "description": "enum",
+            "getable": true,
+            "setable": true,
+            "deviceId": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03"
+          }
+        },
+        "outputSuccess": [
+          "337b70a4-c5cb-4039-8b7d-fedaf86d4885"
+        ]
+      },
+      "26651624-9e2c-41ee-9443-5ff59ff145fa": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 1780,
+        "outputSuccess": [
+          "cc0d1d5b-29c8-4f72-abd5-2ba591784720"
+        ]
+      },
+      "cc0d1d5b-29c8-4f72-abd5-2ba591784720": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::987063e1-90a5-4142-ae45-0c30e7f6b24a::error]]",
+          "group": "PS AC Controller / [[trigger::e052d9e1-e948-47a9-a624-9af7df8b792b::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 1640
+      },
+      "337b70a4-c5cb-4039-8b7d-fedaf86d4885": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::e052d9e1-e948-47a9-a624-9af7df8b792b::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 1640,
+        "outputSuccess": [
+          "987063e1-90a5-4142-ae45-0c30e7f6b24a"
+        ]
+      },
+      "987063e1-90a5-4142-ae45-0c30e7f6b24a": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 1620,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::337b70a4-c5cb-4039-8b7d-fedaf86d4885::text]]\",\"name\":\"[[trigger::e052d9e1-e948-47a9-a624-9af7df8b792b::deviceName]]\"}"
+        },
+        "outputError": [
+          "26651624-9e2c-41ee-9443-5ff59ff145fa"
+        ]
+      },
+      "92cd19ca-1e8a-4947-a5f0-f7c15c93e944": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 2080,
+        "args": {
+          "device": {
+            "id": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03",
+            "name": "Aire Chicas"
+          },
+          "capability": {
+            "id": "thermostat_mode",
+            "name": "Mode",
+            "description": "enum",
+            "getable": true,
+            "setable": true,
+            "deviceId": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03"
+          }
+        },
+        "outputSuccess": [
+          "312022d2-1974-45f7-893b-02f432f160ec"
+        ]
+      },
+      "40c2c55d-5bfb-4053-b0f5-c86676a07757": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 2220,
+        "outputSuccess": [
+          "bdb301fb-c8f9-4163-88d2-b341c6a07c11"
+        ]
+      },
+      "bdb301fb-c8f9-4163-88d2-b341c6a07c11": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::6932e69b-35da-437a-9b2d-f928c132ed05::error]]",
+          "group": "PS AC Controller / [[trigger::92cd19ca-1e8a-4947-a5f0-f7c15c93e944::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 2080
+      },
+      "312022d2-1974-45f7-893b-02f432f160ec": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::92cd19ca-1e8a-4947-a5f0-f7c15c93e944::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 2080,
+        "outputSuccess": [
+          "6932e69b-35da-437a-9b2d-f928c132ed05"
+        ]
+      },
+      "6932e69b-35da-437a-9b2d-f928c132ed05": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 2060,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::312022d2-1974-45f7-893b-02f432f160ec::text]]\",\"name\":\"[[trigger::92cd19ca-1e8a-4947-a5f0-f7c15c93e944::deviceName]]\",\"capability\":\"thermostat_mode\"}"
+        },
+        "outputError": [
+          "40c2c55d-5bfb-4053-b0f5-c86676a07757"
+        ]
+      },
+      "5450b4ed-bd6a-4f58-b0ee-ee9f6f4ddd35": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 2300,
+        "args": {
+          "device": {
+            "id": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03",
+            "name": "Aire Chicas"
+          },
+          "capability": {
+            "id": "onoffbuttontab_devicecapabilities_button-custom_19.boolean2",
+            "name": "Swing",
+            "description": "boolean",
+            "getable": true,
+            "setable": true,
+            "deviceId": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03"
+          }
+        },
+        "outputSuccess": [
+          "d6c35d18-5914-4c56-8e23-90d422718622"
+        ]
+      },
+      "c06e8470-908c-47c5-abcb-6d1be05d0cbc": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 2440,
+        "outputSuccess": [
+          "b90a34de-e715-45ac-be00-753f9a4a0be7"
+        ]
+      },
+      "b90a34de-e715-45ac-be00-753f9a4a0be7": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::0d9b756b-a495-4ed0-8c66-e9aa697e0f9f::error]]",
+          "group": "PS AC Controller / [[trigger::5450b4ed-bd6a-4f58-b0ee-ee9f6f4ddd35::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 2300
+      },
+      "d6c35d18-5914-4c56-8e23-90d422718622": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::5450b4ed-bd6a-4f58-b0ee-ee9f6f4ddd35::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 2300,
+        "outputSuccess": [
+          "0d9b756b-a495-4ed0-8c66-e9aa697e0f9f"
+        ]
+      },
+      "0d9b756b-a495-4ed0-8c66-e9aa697e0f9f": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 2280,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::d6c35d18-5914-4c56-8e23-90d422718622::text]]\",\"name\":\"[[trigger::5450b4ed-bd6a-4f58-b0ee-ee9f6f4ddd35::deviceName]]\",\"capability\":\"swing\"}"
+        },
+        "outputError": [
+          "c06e8470-908c-47c5-abcb-6d1be05d0cbc"
+        ]
+      },
+      "799a1f07-0a1c-48c2-ae15-6128dcba6818": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 1860,
+        "args": {
+          "device": {
+            "id": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03",
+            "name": "Aire Chicas"
+          },
+          "capability": {
+            "id": "onoffbuttontab_devicecapabilities_button-custom_31.boolean1",
+            "name": "Sleep",
+            "description": "boolean",
+            "getable": true,
+            "setable": true,
+            "deviceId": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03"
+          }
+        },
+        "outputSuccess": [
+          "d4536233-d5d0-4cbb-af82-01e7acaa8c05"
+        ]
+      },
+      "5b4e50d3-4862-4ef1-8701-6b6202325a64": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 2000,
+        "outputSuccess": [
+          "fc7f8b32-b2e9-4f93-9d82-db38bfc6fecc"
+        ]
+      },
+      "fc7f8b32-b2e9-4f93-9d82-db38bfc6fecc": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::36c65554-d9eb-4502-b6c1-b2d061217fbe::error]]",
+          "group": "PS AC Controller / [[trigger::799a1f07-0a1c-48c2-ae15-6128dcba6818::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 1860
+      },
+      "d4536233-d5d0-4cbb-af82-01e7acaa8c05": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::799a1f07-0a1c-48c2-ae15-6128dcba6818::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 1860,
+        "outputSuccess": [
+          "36c65554-d9eb-4502-b6c1-b2d061217fbe"
+        ]
+      },
+      "36c65554-d9eb-4502-b6c1-b2d061217fbe": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 1840,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::d4536233-d5d0-4cbb-af82-01e7acaa8c05::text]]\",\"name\":\"[[trigger::799a1f07-0a1c-48c2-ae15-6128dcba6818::deviceName]]\"}"
+        },
+        "outputError": [
+          "5b4e50d3-4862-4ef1-8701-6b6202325a64"
+        ]
+      },
+      "4fb391d6-ff30-459b-91ab-3977dc29510e": {
+        "type": "note",
+        "value": "AC Tincho",
+        "color": "yellow",
+        "x": 20,
+        "y": 2460,
+        "width": null,
+        "height": null
+      },
+      "a2c5f1e1-ae65-4b6c-9065-7e363d8e8195": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 2600,
+        "args": {
+          "device": {
+            "id": "44b95afb-1e0a-4087-afe3-4e19bff3cf9b",
+            "name": "Aire Tincho"
+          },
+          "capability": {
+            "id": "target_temperature",
+            "name": "Temp. Seteada",
+            "description": "number",
+            "getable": true,
+            "setable": true,
+            "deviceId": "275f829b-e161-4d82-8901-4deea7d6ec48"
+          }
+        },
+        "outputSuccess": [
+          "f78cd626-c6ce-4d53-827a-5a86f7b0bb32"
+        ]
+      },
+      "f447401b-843d-48d9-b96a-ef4216dd294d": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 2740,
+        "outputSuccess": [
+          "8404e080-02ca-4a28-8f15-4a90347461e1"
+        ]
+      },
+      "8404e080-02ca-4a28-8f15-4a90347461e1": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::b9d2ad70-375a-4d7e-bb78-0df26ef79d55::error]]",
+          "group": "PS AC Controller / [[trigger::a2c5f1e1-ae65-4b6c-9065-7e363d8e8195::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 2600
+      },
+      "f78cd626-c6ce-4d53-827a-5a86f7b0bb32": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::a2c5f1e1-ae65-4b6c-9065-7e363d8e8195::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 2600,
+        "outputSuccess": [
+          "b9d2ad70-375a-4d7e-bb78-0df26ef79d55"
+        ]
+      },
+      "b9d2ad70-375a-4d7e-bb78-0df26ef79d55": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 2580,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::f78cd626-c6ce-4d53-827a-5a86f7b0bb32::text]]\",\"name\":\"[[trigger::a2c5f1e1-ae65-4b6c-9065-7e363d8e8195::deviceName]]\"}"
+        },
+        "outputError": [
+          "f447401b-843d-48d9-b96a-ef4216dd294d"
+        ]
+      },
+      "db5b3816-b7d7-4394-9e55-a672bba9aab3": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 2820,
+        "args": {
+          "device": {
+            "id": "44b95afb-1e0a-4087-afe3-4e19bff3cf9b",
+            "name": "Aire Tincho"
+          },
+          "capability": {
+            "id": "devicecapabilities_picker-auto-low-medium-high-turbo_list",
+            "name": "Fan",
+            "description": "enum",
+            "getable": true,
+            "setable": true,
+            "deviceId": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03"
+          }
+        },
+        "outputSuccess": [
+          "4a61a9b2-ece5-43c8-aa20-16236c6fde5f"
+        ]
+      },
+      "249e77d1-0f49-43b6-82b8-eb6cfff532f2": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 2960,
+        "outputSuccess": [
+          "74966ef4-f43b-4bfd-9024-7c894be1926c"
+        ]
+      },
+      "74966ef4-f43b-4bfd-9024-7c894be1926c": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::d5fa2d51-c13c-4947-8224-dd8d862bae7f::error]]",
+          "group": "PS AC Controller / [[trigger::db5b3816-b7d7-4394-9e55-a672bba9aab3::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 2820
+      },
+      "4a61a9b2-ece5-43c8-aa20-16236c6fde5f": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::db5b3816-b7d7-4394-9e55-a672bba9aab3::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 2820,
+        "outputSuccess": [
+          "d5fa2d51-c13c-4947-8224-dd8d862bae7f"
+        ]
+      },
+      "d5fa2d51-c13c-4947-8224-dd8d862bae7f": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 2800,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::4a61a9b2-ece5-43c8-aa20-16236c6fde5f::text]]\",\"name\":\"[[trigger::db5b3816-b7d7-4394-9e55-a672bba9aab3::deviceName]]\"}"
+        },
+        "outputError": [
+          "249e77d1-0f49-43b6-82b8-eb6cfff532f2"
+        ]
+      },
+      "1ea5b5bd-e915-45e4-b19d-680e3627a9a2": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 3260,
+        "args": {
+          "device": {
+            "id": "44b95afb-1e0a-4087-afe3-4e19bff3cf9b",
+            "name": "Aire Tincho"
+          },
+          "capability": {
+            "id": "thermostat_mode",
+            "name": "Mode",
+            "description": "enum",
+            "getable": true,
+            "setable": true,
+            "deviceId": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03"
+          }
+        },
+        "outputSuccess": [
+          "da52df37-4a7b-4a78-a549-44a013de5e3a"
+        ]
+      },
+      "d2b56d2f-2299-4223-b467-72318d15b054": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 3400,
+        "outputSuccess": [
+          "ee1e3725-1609-4fb7-ad82-4d076db62353"
+        ]
+      },
+      "ee1e3725-1609-4fb7-ad82-4d076db62353": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::f3c2f111-60e4-4ed7-bf40-710d57095f33::error]]",
+          "group": "PS AC Controller / [[trigger::1ea5b5bd-e915-45e4-b19d-680e3627a9a2::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 3260
+      },
+      "da52df37-4a7b-4a78-a549-44a013de5e3a": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::1ea5b5bd-e915-45e4-b19d-680e3627a9a2::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 3260,
+        "outputSuccess": [
+          "f3c2f111-60e4-4ed7-bf40-710d57095f33"
+        ]
+      },
+      "f3c2f111-60e4-4ed7-bf40-710d57095f33": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 3240,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::da52df37-4a7b-4a78-a549-44a013de5e3a::text]]\",\"name\":\"[[trigger::1ea5b5bd-e915-45e4-b19d-680e3627a9a2::deviceName]]\",\"capability\":\"thermostat_mode\"}"
+        },
+        "outputError": [
+          "d2b56d2f-2299-4223-b467-72318d15b054"
+        ]
+      },
+      "038a456d-daa3-45cc-83f5-59631a102080": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 3480,
+        "args": {
+          "device": {
+            "id": "44b95afb-1e0a-4087-afe3-4e19bff3cf9b",
+            "name": "Aire Tincho"
+          },
+          "capability": {
+            "id": "onoffbuttontab_devicecapabilities_button-custom_19.boolean2",
+            "name": "Swing",
+            "description": "boolean",
+            "getable": true,
+            "setable": true,
+            "deviceId": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03"
+          }
+        },
+        "outputSuccess": [
+          "0659570c-3f3f-4bff-8d6a-96b7da54ec89"
+        ]
+      },
+      "f4426dd6-cfce-4775-9c0a-68f85e5c8656": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 3620,
+        "outputSuccess": [
+          "bb1dbc9b-ae27-4afc-99ac-e5a91c6f45e4"
+        ]
+      },
+      "bb1dbc9b-ae27-4afc-99ac-e5a91c6f45e4": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::29690a13-9a77-4e56-940b-1b6d7e70a393::error]]",
+          "group": "PS AC Controller / [[trigger::038a456d-daa3-45cc-83f5-59631a102080::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 3480
+      },
+      "0659570c-3f3f-4bff-8d6a-96b7da54ec89": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::038a456d-daa3-45cc-83f5-59631a102080::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 3480,
+        "outputSuccess": [
+          "29690a13-9a77-4e56-940b-1b6d7e70a393"
+        ]
+      },
+      "29690a13-9a77-4e56-940b-1b6d7e70a393": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 3460,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::0659570c-3f3f-4bff-8d6a-96b7da54ec89::text]]\",\"name\":\"[[trigger::038a456d-daa3-45cc-83f5-59631a102080::deviceName]]\",\"capability\":\"swing\"}"
+        },
+        "outputError": [
+          "f4426dd6-cfce-4775-9c0a-68f85e5c8656"
+        ]
+      },
+      "175857a0-6ec2-44c5-8e22-25a4d59de288": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 3040,
+        "args": {
+          "device": {
+            "id": "44b95afb-1e0a-4087-afe3-4e19bff3cf9b",
+            "name": "Aire Tincho"
+          },
+          "capability": {
+            "id": "onoffbuttontab_devicecapabilities_button-custom_31.boolean1",
+            "name": "Sleep",
+            "description": "boolean",
+            "getable": true,
+            "setable": true,
+            "deviceId": "b534181f-fff7-4f4d-bcc7-dfd90bd78d03"
+          }
+        },
+        "outputSuccess": [
+          "308f0302-d361-48b3-a4dc-dd9010f28e07"
+        ]
+      },
+      "61d2cdf1-6e65-4a9e-940f-e52df475ade2": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 3180,
+        "outputSuccess": [
+          "a5e1b46f-39fd-490f-aef0-068adbbb8595"
+        ]
+      },
+      "a5e1b46f-39fd-490f-aef0-068adbbb8595": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::42856c66-b4f7-40a1-ba44-e3fc2294178d::error]]",
+          "group": "PS AC Controller / [[trigger::175857a0-6ec2-44c5-8e22-25a4d59de288::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 3040
+      },
+      "308f0302-d361-48b3-a4dc-dd9010f28e07": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::175857a0-6ec2-44c5-8e22-25a4d59de288::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 3040,
+        "outputSuccess": [
+          "42856c66-b4f7-40a1-ba44-e3fc2294178d"
+        ]
+      },
+      "42856c66-b4f7-40a1-ba44-e3fc2294178d": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 3020,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::308f0302-d361-48b3-a4dc-dd9010f28e07::text]]\",\"name\":\"[[trigger::175857a0-6ec2-44c5-8e22-25a4d59de288::deviceName]]\"}"
+        },
+        "outputError": [
+          "61d2cdf1-6e65-4a9e-940f-e52df475ade2"
+        ]
+      },
+      "28fa114f-5a67-4856-bff0-ecede20480a0": {
+        "type": "note",
+        "value": "Aire Cuarto",
+        "color": "yellow",
+        "x": 20,
+        "y": 3640,
+        "width": null,
+        "height": null
+      },
+      "cbe2738f-ffb9-4f91-b6a2-81af76754e59": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 3780,
+        "args": {
+          "device": {
+            "id": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b",
+            "name": "Aire Cuarto"
+          },
+          "capability": {
+            "id": "target_temperature",
+            "name": "Temp. Seteada",
+            "description": "number",
+            "getable": true,
+            "setable": true,
+            "deviceId": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b"
+          }
+        },
+        "outputSuccess": [
+          "21371a73-50c9-4fc7-8cf3-bdfae8cbe0a0"
+        ]
+      },
+      "a8a1b31d-d5f6-442c-b4c5-f61095714347": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 3920,
+        "outputSuccess": [
+          "1c8736a2-dfa9-46c2-87d8-85bc08d7365e"
+        ]
+      },
+      "1c8736a2-dfa9-46c2-87d8-85bc08d7365e": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::369589ac-11e6-4e45-89dc-d3290ed17a77::error]]",
+          "group": "PS AC Controller / [[trigger::cbe2738f-ffb9-4f91-b6a2-81af76754e59::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 3780
+      },
+      "21371a73-50c9-4fc7-8cf3-bdfae8cbe0a0": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::cbe2738f-ffb9-4f91-b6a2-81af76754e59::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 3780,
+        "outputSuccess": [
+          "369589ac-11e6-4e45-89dc-d3290ed17a77"
+        ]
+      },
+      "369589ac-11e6-4e45-89dc-d3290ed17a77": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 3760,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::21371a73-50c9-4fc7-8cf3-bdfae8cbe0a0::text]]\",\"name\":\"[[trigger::cbe2738f-ffb9-4f91-b6a2-81af76754e59::deviceName]]\"}"
+        },
+        "outputError": [
+          "a8a1b31d-d5f6-442c-b4c5-f61095714347"
+        ]
+      },
+      "59159daa-7e01-44ba-b793-e9206125a04f": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 4000,
+        "args": {
+          "device": {
+            "id": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b",
+            "name": "Aire Cuarto"
+          },
+          "capability": {
+            "id": "devicecapabilities_picker-auto-low-medium-high-turbo_list",
+            "name": "Fan",
+            "description": "enum",
+            "getable": true,
+            "setable": true,
+            "deviceId": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b"
+          }
+        },
+        "outputSuccess": [
+          "0b8a112d-4eb8-4bbf-b1e6-5ffe586a903b"
+        ]
+      },
+      "c04a4a3b-e402-4c87-b001-f5dbf40b64a2": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 4140,
+        "outputSuccess": [
+          "f63d09b0-0ed2-4c5f-8944-02a87101051e"
+        ]
+      },
+      "f63d09b0-0ed2-4c5f-8944-02a87101051e": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::fef366cd-b9ea-4b7f-bcc8-e9436815aa0f::error]]",
+          "group": "PS AC Controller / [[trigger::59159daa-7e01-44ba-b793-e9206125a04f::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 4000
+      },
+      "0b8a112d-4eb8-4bbf-b1e6-5ffe586a903b": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::59159daa-7e01-44ba-b793-e9206125a04f::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 4000,
+        "outputSuccess": [
+          "fef366cd-b9ea-4b7f-bcc8-e9436815aa0f"
+        ]
+      },
+      "fef366cd-b9ea-4b7f-bcc8-e9436815aa0f": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 3980,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::0b8a112d-4eb8-4bbf-b1e6-5ffe586a903b::text]]\",\"name\":\"[[trigger::59159daa-7e01-44ba-b793-e9206125a04f::deviceName]]\"}"
+        },
+        "outputError": [
+          "c04a4a3b-e402-4c87-b001-f5dbf40b64a2"
+        ]
+      },
+      "6a570ddd-d3fc-4169-a887-841805514f8e": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 4440,
+        "args": {
+          "device": {
+            "id": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b",
+            "name": "Aire Cuarto"
+          },
+          "capability": {
+            "id": "thermostat_mode",
+            "name": "Mode",
+            "description": "enum",
+            "getable": true,
+            "setable": true,
+            "deviceId": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b"
+          }
+        },
+        "outputSuccess": [
+          "a5ee8894-42da-4ccc-b15f-5ebbf1af32f3"
+        ]
+      },
+      "c27c5d43-511b-4c94-9b52-7f4fdbd886ca": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 4580,
+        "outputSuccess": [
+          "a7e61a19-5268-4a01-aa71-0ec7625dde7f"
+        ]
+      },
+      "a7e61a19-5268-4a01-aa71-0ec7625dde7f": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::cb0c7955-7941-4ff4-abbd-44253c7639b8::error]]",
+          "group": "PS AC Controller / [[trigger::6a570ddd-d3fc-4169-a887-841805514f8e::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 4440
+      },
+      "a5ee8894-42da-4ccc-b15f-5ebbf1af32f3": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::6a570ddd-d3fc-4169-a887-841805514f8e::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 4440,
+        "outputSuccess": [
+          "cb0c7955-7941-4ff4-abbd-44253c7639b8"
+        ]
+      },
+      "cb0c7955-7941-4ff4-abbd-44253c7639b8": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 4420,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::a5ee8894-42da-4ccc-b15f-5ebbf1af32f3::text]]\",\"name\":\"[[trigger::6a570ddd-d3fc-4169-a887-841805514f8e::deviceName]]\",\"capability\":\"thermostat_mode\"}"
+        },
+        "outputError": [
+          "c27c5d43-511b-4c94-9b52-7f4fdbd886ca"
+        ]
+      },
+      "ba90625c-1a95-45fa-8422-82c81ce753dc": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 4660,
+        "args": {
+          "device": {
+            "id": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b",
+            "name": "Aire Cuarto"
+          },
+          "capability": {
+            "id": "onoffbuttontab_devicecapabilities_button-custom_19.boolean2",
+            "name": "Swing",
+            "description": "boolean",
+            "getable": true,
+            "setable": true,
+            "deviceId": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b"
+          }
+        },
+        "outputSuccess": [
+          "b000f338-7f8c-49a9-91cb-96dda282a33b"
+        ]
+      },
+      "483f9158-9240-406e-8975-b3b06ad9c95c": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 4800,
+        "outputSuccess": [
+          "856e7dea-264f-4eaa-a9af-b3292b500f86"
+        ]
+      },
+      "856e7dea-264f-4eaa-a9af-b3292b500f86": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::ad4a3b71-14a9-4f16-9c05-d75aa2df91e4::error]]",
+          "group": "PS AC Controller / [[trigger::ba90625c-1a95-45fa-8422-82c81ce753dc::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 4660
+      },
+      "b000f338-7f8c-49a9-91cb-96dda282a33b": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::ba90625c-1a95-45fa-8422-82c81ce753dc::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 4660,
+        "outputSuccess": [
+          "ad4a3b71-14a9-4f16-9c05-d75aa2df91e4"
+        ]
+      },
+      "ad4a3b71-14a9-4f16-9c05-d75aa2df91e4": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 4640,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::b000f338-7f8c-49a9-91cb-96dda282a33b::text]]\",\"name\":\"[[trigger::ba90625c-1a95-45fa-8422-82c81ce753dc::deviceName]]\",\"capability\":\"swing\"}"
+        },
+        "outputError": [
+          "483f9158-9240-406e-8975-b3b06ad9c95c"
+        ]
+      },
+      "83d2573c-668a-4d3a-b33f-3a6b352ea73f": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 4220,
+        "args": {
+          "device": {
+            "id": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b",
+            "name": "Aire Cuarto"
+          },
+          "capability": {
+            "id": "onoffbuttontab_devicecapabilities_button-custom_31.boolean1",
+            "name": "Sleep",
+            "description": "boolean",
+            "getable": true,
+            "setable": true,
+            "deviceId": "1b5a1480-29fb-43f2-9170-8bcef0fcd87b"
+          }
+        },
+        "outputSuccess": [
+          "e3cc9693-7306-48cc-a90f-511cd994392d"
+        ]
+      },
+      "6cea2dbe-fd4b-4792-9f5c-24907a5401f3": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 4360,
+        "outputSuccess": [
+          "ef13982d-5676-4458-b1b6-12f017b6b5e4"
+        ]
+      },
+      "ef13982d-5676-4458-b1b6-12f017b6b5e4": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::50d3a395-8740-4e98-a7dd-b994e575174e::error]]",
+          "group": "PS AC Controller / [[trigger::83d2573c-668a-4d3a-b33f-3a6b352ea73f::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 4220
+      },
+      "e3cc9693-7306-48cc-a90f-511cd994392d": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::83d2573c-668a-4d3a-b33f-3a6b352ea73f::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 4220,
+        "outputSuccess": [
+          "50d3a395-8740-4e98-a7dd-b994e575174e"
+        ]
+      },
+      "50d3a395-8740-4e98-a7dd-b994e575174e": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 4200,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::e3cc9693-7306-48cc-a90f-511cd994392d::text]]\",\"name\":\"[[trigger::83d2573c-668a-4d3a-b33f-3a6b352ea73f::deviceName]]\"}"
+        },
+        "outputError": [
+          "6cea2dbe-fd4b-4792-9f5c-24907a5401f3"
+        ]
+      },
+      "88fc8de5-d800-4925-8afc-c43259a2456b": {
+        "type": "note",
+        "value": "Aire Escritorio",
+        "color": "yellow",
+        "x": 20,
+        "y": 80,
+        "width": null,
+        "height": null
+      },
+      "06058dd9-3d54-4dd6-8631-fff7571bb5dc": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 220,
+        "args": {
+          "device": {
+            "id": "275f829b-e161-4d82-8901-4deea7d6ec48",
+            "name": "Aire Escritorio"
+          },
+          "capability": {
+            "id": "target_temperature",
+            "name": "Temp. Seteada",
+            "description": "number",
+            "getable": true,
+            "setable": true,
+            "deviceId": "275f829b-e161-4d82-8901-4deea7d6ec48"
+          }
+        },
+        "outputSuccess": [
+          "0c95be92-f496-492f-ad93-f164e4933fc2"
+        ]
+      },
+      "95cc886d-2c31-4cd4-b61f-79b40eb84384": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 360,
+        "outputSuccess": [
+          "27089f88-d0d4-4cee-856e-9d49b7c95260"
+        ]
+      },
+      "27089f88-d0d4-4cee-856e-9d49b7c95260": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::fa46f85f-3de7-40ce-a99c-4c9b39089be4::error]]",
+          "group": "PS AC Controller / [[trigger::06058dd9-3d54-4dd6-8631-fff7571bb5dc::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 220
+      },
+      "0c95be92-f496-492f-ad93-f164e4933fc2": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::06058dd9-3d54-4dd6-8631-fff7571bb5dc::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 220,
+        "outputSuccess": [
+          "fa46f85f-3de7-40ce-a99c-4c9b39089be4"
+        ]
+      },
+      "fa46f85f-3de7-40ce-a99c-4c9b39089be4": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 200,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::0c95be92-f496-492f-ad93-f164e4933fc2::text]]\",\"name\":\"[[trigger::06058dd9-3d54-4dd6-8631-fff7571bb5dc::deviceName]]\"}"
+        },
+        "outputError": [
+          "95cc886d-2c31-4cd4-b61f-79b40eb84384"
+        ]
+      },
+      "135547d4-9aed-46db-844a-d0f6530dbd56": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 440,
+        "args": {
+          "device": {
+            "id": "275f829b-e161-4d82-8901-4deea7d6ec48",
+            "name": "Aire Escritorio"
+          },
+          "capability": {
+            "id": "devicecapabilities_picker-auto-low-medium-high-turbo_list",
+            "name": "Fan",
+            "description": "enum",
+            "getable": true,
+            "setable": true,
+            "deviceId": "275f829b-e161-4d82-8901-4deea7d6ec48"
+          }
+        },
+        "outputSuccess": [
+          "75f88755-acfb-4c34-9fc5-55b8d5686406"
+        ]
+      },
+      "058b724d-e106-4867-a021-aee1ab8190eb": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 580,
+        "outputSuccess": [
+          "8d9b6908-5908-459f-8993-669570e858d6"
+        ]
+      },
+      "8d9b6908-5908-459f-8993-669570e858d6": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::70230e00-e4e8-4d41-ad1a-459e246c0d9f::error]]",
+          "group": "PS AC Controller / [[trigger::135547d4-9aed-46db-844a-d0f6530dbd56::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 440
+      },
+      "75f88755-acfb-4c34-9fc5-55b8d5686406": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::135547d4-9aed-46db-844a-d0f6530dbd56::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 440,
+        "outputSuccess": [
+          "70230e00-e4e8-4d41-ad1a-459e246c0d9f"
+        ]
+      },
+      "70230e00-e4e8-4d41-ad1a-459e246c0d9f": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 420,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::75f88755-acfb-4c34-9fc5-55b8d5686406::text]]\",\"name\":\"[[trigger::135547d4-9aed-46db-844a-d0f6530dbd56::deviceName]]\"}"
+        },
+        "outputError": [
+          "058b724d-e106-4867-a021-aee1ab8190eb"
+        ]
+      },
+      "69f34b11-6c60-4ad8-b958-9d520d991c82": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 880,
+        "args": {
+          "device": {
+            "id": "275f829b-e161-4d82-8901-4deea7d6ec48",
+            "name": "Aire Escritorio"
+          },
+          "capability": {
+            "id": "thermostat_mode",
+            "name": "Mode",
+            "description": "enum",
+            "getable": true,
+            "setable": true,
+            "deviceId": "275f829b-e161-4d82-8901-4deea7d6ec48"
+          }
+        },
+        "outputSuccess": [
+          "7bc98aec-396e-43b9-85af-9596afd92695"
+        ]
+      },
+      "c9e33bb5-e0e8-4348-963e-0e2980c3119a": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 1020,
+        "outputSuccess": [
+          "fd4df02a-4781-413a-affd-93c12586b37b"
+        ]
+      },
+      "fd4df02a-4781-413a-affd-93c12586b37b": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::718f79f6-69c6-4e9f-bb74-86d9e34a3b43::error]]",
+          "group": "PS AC Controller / [[trigger::69f34b11-6c60-4ad8-b958-9d520d991c82::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 880
+      },
+      "7bc98aec-396e-43b9-85af-9596afd92695": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::69f34b11-6c60-4ad8-b958-9d520d991c82::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 880,
+        "outputSuccess": [
+          "718f79f6-69c6-4e9f-bb74-86d9e34a3b43"
+        ]
+      },
+      "718f79f6-69c6-4e9f-bb74-86d9e34a3b43": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 860,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::7bc98aec-396e-43b9-85af-9596afd92695::text]]\",\"name\":\"[[trigger::69f34b11-6c60-4ad8-b958-9d520d991c82::deviceName]]\",\"capability\":\"thermostat_mode\"}"
+        },
+        "outputError": [
+          "c9e33bb5-e0e8-4348-963e-0e2980c3119a"
+        ]
+      },
+      "3d322238-e0ce-4a3b-8309-e44b41fa5704": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 1100,
+        "args": {
+          "device": {
+            "id": "275f829b-e161-4d82-8901-4deea7d6ec48",
+            "name": "Aire Escritorio"
+          },
+          "capability": {
+            "id": "onoffbuttontab_devicecapabilities_button-custom_19.boolean2",
+            "name": "Swing",
+            "description": "boolean",
+            "getable": true,
+            "setable": true,
+            "deviceId": "275f829b-e161-4d82-8901-4deea7d6ec48"
+          }
+        },
+        "outputSuccess": [
+          "dab8dae3-aa93-4765-8415-b35014a90d6a"
+        ]
+      },
+      "3d2bcb11-987f-4e9a-b307-7268a558f370": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 1240,
+        "outputSuccess": [
+          "524b69aa-51a6-4f47-82af-ce1f44ec3ec4"
+        ]
+      },
+      "524b69aa-51a6-4f47-82af-ce1f44ec3ec4": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::22d719a0-400a-4578-a19c-5b571baa85a6::error]]",
+          "group": "PS AC Controller / [[trigger::3d322238-e0ce-4a3b-8309-e44b41fa5704::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 1100
+      },
+      "dab8dae3-aa93-4765-8415-b35014a90d6a": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::3d322238-e0ce-4a3b-8309-e44b41fa5704::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 1100,
+        "outputSuccess": [
+          "22d719a0-400a-4578-a19c-5b571baa85a6"
+        ]
+      },
+      "22d719a0-400a-4578-a19c-5b571baa85a6": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 1080,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::dab8dae3-aa93-4765-8415-b35014a90d6a::text]]\",\"name\":\"[[trigger::3d322238-e0ce-4a3b-8309-e44b41fa5704::deviceName]]\",\"capability\":\"swing\"}"
+        },
+        "outputError": [
+          "3d2bcb11-987f-4e9a-b307-7268a558f370"
+        ]
+      },
+      "bcfedcf7-da93-4d35-99fb-4d2cec6f3d84": {
+        "ownerUri": "homey:app:nl.qluster-it.DeviceCapabilities",
+        "id": "homey:app:nl.qluster-it.DeviceCapabilities:trigger_capability_changed2",
+        "type": "trigger",
+        "x": 0,
+        "y": 660,
+        "args": {
+          "device": {
+            "id": "275f829b-e161-4d82-8901-4deea7d6ec48",
+            "name": "Aire Escritorio"
+          },
+          "capability": {
+            "id": "onoffbuttontab_devicecapabilities_button-custom_31.boolean1",
+            "name": "Sleep",
+            "description": "boolean",
+            "getable": true,
+            "setable": true,
+            "deviceId": "275f829b-e161-4d82-8901-4deea7d6ec48"
+          }
+        },
+        "outputSuccess": [
+          "b563af7c-2ccf-4002-b160-e46d463b1be1"
+        ]
+      },
+      "e3c1e609-0c3d-4974-bc25-42f4698baa0f": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 1020,
+        "y": 800,
+        "outputSuccess": [
+          "a50b6cd0-1e30-4f15-bdee-be2be31aed6a"
+        ]
+      },
+      "a50b6cd0-1e30-4f15-bdee-be2be31aed6a": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::94f9e10c-3031-490c-b5d0-b1ccd73b2412::error]]",
+          "group": "PS AC Controller / [[trigger::bcfedcf7-da93-4d35-99fb-4d2cec6f3d84::deviceName]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1180,
+        "y": 660
+      },
+      "b563af7c-2ccf-4002-b160-e46d463b1be1": {
+        "ownerUri": "homey:app:net.i-dev.betterlogic",
+        "id": "homey:app:net.i-dev.betterlogic:execute_bl_expression_tag",
+        "args": {
+          "expression": "_.lowerCase(_.trimStart(\"[[trigger::bcfedcf7-da93-4d35-99fb-4d2cec6f3d84::deviceName]]\", \"Aire \"))"
+        },
+        "type": "action",
+        "x": 380,
+        "y": 660,
+        "outputSuccess": [
+          "94f9e10c-3031-490c-b5d0-b1ccd73b2412"
+        ]
+      },
+      "94f9e10c-3031-490c-b5d0-b1ccd73b2412": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 760,
+        "y": 640,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"remote_entity\":\"remote.[[action::b563af7c-2ccf-4002-b160-e46d463b1be1::text]]\",\"name\":\"[[trigger::bcfedcf7-da93-4d35-99fb-4d2cec6f3d84::deviceName]]\"}"
+        },
+        "outputError": [
+          "e3c1e609-0c3d-4974-bc25-42f4698baa0f"
+        ]
+      }
+    }
+  },
+  {
+    "id": "d48782a7-63f5-4061-8c8c-0be087d82841",
+    "name": "AC Controller",
+    "folder": "2df5f5de-29e7-46e0-a031-c34ba2d527ca",
+    "triggerable": false,
+    "enabled": false,
+    "broken": false,
+    "cards": {
+      "99d64218-4502-493f-8dab-28a990580292": {
+        "ownerUri": "homey:app:com.arjankranenburg.virtual",
+        "id": "homey:app:com.arjankranenburg.virtual:device_changed",
+        "type": "trigger",
+        "x": 20,
+        "y": 60,
+        "outputSuccess": [
+          "9999a360-9d7e-43b8-afab-d1aebf01cb2d"
+        ]
+      },
+      "99ed4d21-1208-4fcc-8dc0-364eadbab0c7": {
+        "ownerUri": "homey:device:061fba67-f048-45c1-9431-05620acf141f",
+        "id": "homey:device:061fba67-f048-45c1-9431-05620acf141f:target_temperature_changed",
+        "type": "trigger",
+        "x": 0,
+        "y": 320,
+        "outputSuccess": [
+          "6d7b705b-b4ec-4a5f-be06-00db256f6790"
+        ]
+      },
+      "77271d6a-ae9f-4383-b886-b45d942c3631": {
+        "ownerUri": "homey:device:061fba67-f048-45c1-9431-05620acf141f",
+        "id": "homey:device:061fba67-f048-45c1-9431-05620acf141f:thermostat_mode_set",
+        "args": {
+          "thermostat_mode": "cool"
+        },
+        "type": "action",
+        "x": 1160,
+        "y": 320
+      },
+      "6d7b705b-b4ec-4a5f-be06-00db256f6790": {
+        "ownerUri": "homey:device:061fba67-f048-45c1-9431-05620acf141f",
+        "id": "homey:device:061fba67-f048-45c1-9431-05620acf141f:thermostat_mode_is",
+        "args": {
+          "thermostat_mode": "off"
+        },
+        "type": "condition",
+        "x": 380,
+        "y": 320,
+        "outputTrue": [
+          "05af0e42-6797-466b-9e27-812482d8e082"
+        ]
+      },
+      "dcbd80df-fab0-4d0b-89dc-288ec282a58f": {
+        "type": "delay",
+        "args": {
+          "delay": {
+            "number": "1",
+            "multiplier": 1
+          }
+        },
+        "x": 920,
+        "y": 160,
+        "outputSuccess": [
+          "322861c6-723f-4aa7-88a9-da04f36168b8"
+        ]
+      },
+      "322861c6-723f-4aa7-88a9-da04f36168b8": {
+        "ownerUri": "homey:app:nl.nielsdeklerk.log",
+        "id": "homey:app:nl.nielsdeklerk.log:Input_group_log",
+        "args": {
+          "log": "Homeyscript error: [[card::9999a360-9d7e-43b8-afab-d1aebf01cb2d::error]]",
+          "group": "PS AC Controller / [[trigger::99d64218-4502-493f-8dab-28a990580292::device]]",
+          "severity": "2",
+          "facility": "16"
+        },
+        "type": "action",
+        "x": 1080,
+        "y": 60
+      },
+      "9999a360-9d7e-43b8-afab-d1aebf01cb2d": {
+        "ownerUri": "homey:app:com.athom.homeyscript",
+        "id": "homey:app:com.athom.homeyscript:runWithArg",
+        "type": "action",
+        "x": 460,
+        "y": 40,
+        "args": {
+          "script": {
+            "id": "e71413b2-96e0-4233-8238-0b0a37240a69",
+            "name": "PS Broadlink"
+          },
+          "argument": "{\"name\":\"[[trigger::99d64218-4502-493f-8dab-28a990580292::device]]\",\"capability\":\"[[trigger::99d64218-4502-493f-8dab-28a990580292::variable]]\"}"
+        },
+        "outputError": []
+      },
+      "05af0e42-6797-466b-9e27-812482d8e082": {
+        "ownerUri": "homey:manager:logic",
+        "id": "homey:manager:logic:lt",
+        "droptoken": "trigger::99ed4d21-1208-4fcc-8dc0-364eadbab0c7::target_temperature",
+        "args": {
+          "comparator": "[[homey:device:9baedf14-b558-4c40-9005-35f0e8dddc10|measure_temperature]]"
+        },
+        "type": "condition",
+        "x": 760,
+        "y": 320,
+        "outputTrue": [
+          "77271d6a-ae9f-4383-b886-b45d942c3631"
+        ],
+        "outputFalse": [
+          "e7ec4ff4-9f36-48bc-a33c-c4c738d4ada0"
+        ]
+      },
+      "e7ec4ff4-9f36-48bc-a33c-c4c738d4ada0": {
+        "ownerUri": "homey:device:061fba67-f048-45c1-9431-05620acf141f",
+        "id": "homey:device:061fba67-f048-45c1-9431-05620acf141f:thermostat_mode_set",
+        "args": {
+          "thermostat_mode": "heat"
+        },
+        "type": "action",
+        "x": 1160,
+        "y": 400
+      },
+      "fe585498-64c5-4236-9e05-c53fe55de765": {
+        "ownerUri": "homey:device:372a94e8-368a-4080-b8a8-4f4f96d47633",
+        "id": "homey:device:372a94e8-368a-4080-b8a8-4f4f96d47633:target_temperature_changed",
+        "type": "trigger",
+        "x": 0,
+        "y": 480,
+        "outputSuccess": [
+          "b62d830b-319d-4cc2-9a86-2f05ab7c8980"
+        ]
+      },
+      "fbc3d217-277d-4f63-8252-cb938f83a459": {
+        "ownerUri": "homey:manager:logic",
+        "id": "homey:manager:logic:lt",
+        "droptoken": "trigger::fe585498-64c5-4236-9e05-c53fe55de765::target_temperature",
+        "args": {
+          "comparator": "[[homey:device:328ee512-b02a-4221-b482-dc37ab3902a7|measure_temperature]]"
+        },
+        "type": "condition",
+        "x": 760,
+        "y": 480,
+        "outputTrue": [
+          "6cb41360-32d4-473b-bef6-8efa3eb6864d"
+        ],
+        "outputFalse": [
+          "cfe3ec03-17d3-4eec-8aaf-926beb7b76bb"
+        ]
+      },
+      "b62d830b-319d-4cc2-9a86-2f05ab7c8980": {
+        "ownerUri": "homey:device:372a94e8-368a-4080-b8a8-4f4f96d47633",
+        "id": "homey:device:372a94e8-368a-4080-b8a8-4f4f96d47633:thermostat_mode_is",
+        "type": "condition",
+        "x": 380,
+        "y": 480,
+        "outputTrue": [
+          "fbc3d217-277d-4f63-8252-cb938f83a459"
+        ],
+        "args": {
+          "thermostat_mode": "off"
+        }
+      },
+      "6cb41360-32d4-473b-bef6-8efa3eb6864d": {
+        "ownerUri": "homey:device:372a94e8-368a-4080-b8a8-4f4f96d47633",
+        "id": "homey:device:372a94e8-368a-4080-b8a8-4f4f96d47633:thermostat_mode_set",
+        "type": "action",
+        "x": 1160,
+        "y": 480,
+        "args": {
+          "thermostat_mode": "cool"
+        }
+      },
+      "cfe3ec03-17d3-4eec-8aaf-926beb7b76bb": {
+        "ownerUri": "homey:device:372a94e8-368a-4080-b8a8-4f4f96d47633",
+        "id": "homey:device:372a94e8-368a-4080-b8a8-4f4f96d47633:thermostat_mode_set",
+        "type": "action",
+        "x": 1160,
+        "y": 560,
+        "args": {
+          "thermostat_mode": "heat"
+        }
+      },
+      "92701906-facd-4011-bbca-8b04952fad50": {
+        "ownerUri": "homey:device:42f58ce7-fa90-4c4e-9fbf-b71f62133522",
+        "id": "homey:device:42f58ce7-fa90-4c4e-9fbf-b71f62133522:set_sensor_value_oc",
+        "type": "action",
+        "x": 20,
+        "y": 160,
+        "args": {
+          "sensor": {
+            "name": "measure_data_size",
+            "id": "measure_data_size"
+          },
+          "value": "2"
+        }
+      }
+    }
+  }
+]
