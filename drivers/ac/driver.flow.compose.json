@@ -45,6 +45,28 @@
       ]
     },
     {
+      "id": "state_detected",
+      "title": { "en": "The unit changed on its own", "es": "El equipo cambió por su cuenta" },
+      "hint": {
+        "en": "Fires when the louver sensor shows the unit was started or stopped outside the app (for example with the physical remote). Nothing was sent to the unit.",
+        "es": "Se dispara cuando el sensor de la aleta muestra que el equipo arrancó o paró por fuera de la app (por ejemplo con el control físico). No se le envió nada al equipo."
+      },
+      "tokens": [
+        {
+          "name": "mode",
+          "type": "string",
+          "title": { "en": "Detected mode", "es": "Modo detectado" },
+          "example": { "en": "cool", "es": "cool" }
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "title": { "en": "Evidence", "es": "Evidencia" },
+          "example": { "en": "outdoor", "es": "outdoor" }
+        }
+      ]
+    },
+    {
       "id": "auto_off_finished",
       "title": { "en": "Auto-off completed", "es": "Se cumplió el apagado automático" },
       "hint": {

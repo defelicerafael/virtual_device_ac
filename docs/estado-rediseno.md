@@ -2,7 +2,18 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-08-06 (v2.1.0 — apagado automático, def. 28, DESPLEGADA en ferno)
+## Última actualización: 2026-08-06 (v2.2.0 — estado real por sensor de aleta, def. 29, SIN desplegar)
+
+### 🆕 Def. 29 — Estado real del equipo por sensor de aleta (v2.2.0, 2026-08-06)
+Idea de Fernán (audio): un sensor de contacto en la aleta que el split cierra al parar permite mostrar en el tile si el aire está funcionando **aunque lo hayan prendido con el control físico** — y deducir si arrancó en frío o en calor. **Nunca se envía IR por esto**: solo se escribe la capability. Escalera de inferencia, reglas y tiempos en la [definición 29](rediseno-app.md); el motor (`lib/state-mirror.js` → `decide()`) es puro y tiene 14 tests. `npm test` 88/88 y `validate --level publish` OK.
+
+**Lo que hay que saber:**
+- **Desactivado por defecto** (`flap_source` vacío): ningún device existente cambia de comportamiento.
+- **El sensor ideal del audio no existe en la flota.** Relevado en ferno el 2026-08-06: los de contacto que hay (`TS0203` x4, `lumi.sensor_magnet.aq2`) **no traen temperatura**. Con contacto solo, el prendido/apagado se detecta igual (es lo decisivo) y el frío/calor sale de la temperatura exterior + cómo se mueve la del cuarto. El nivel decisivo (sensor en la salida de aire) queda implementado y a la espera de hardware.
+- **La regla que no hay que romper:** los indicios (tendencia del cuarto, temperatura de afuera, `_lastMode`) **solo infieren cuando el tile estaba apagado**. Si pisaran un modo ya conocido, prender en `cool` desde Homey en invierno terminaría con la app cambiándote el tile sola. Está fijado por el campo `decisive` y por un test dedicado.
+- **Sin probar en vivo**: falta montar un sensor en la aleta de un split real. Hasta entonces no se sabe si el contacto de la aleta es estable (el debounce es de 30 s, puede necesitar ajuste) ni si todos los splits cierran la aleta al parar.
+
+## Actualización previa: 2026-08-06 (v2.1.0 — apagado automático, def. 28, DESPLEGADA en ferno)
 
 ### 🆕 Def. 28 — Apagado automático (v2.1.0, 2026-08-06)
 Slider `auto_off` en el tile con las horas que faltan para que el equipo se apague (0 = sin temporizador), habilitado por equipo con el setting `auto_off_mode`: **Desactivado** (default — los devices existentes no cambian), **Lo maneja Pantea** (la app cuenta y al vencer manda el apagado) o **Lo maneja el aire** (se le manda el temporizador por IR ahora). El slider baja solo en los dos modos y el vencimiento vive en el store, así que sobrevive a reinicios. Detalle completo, claves de planilla y casos borde en la [definición 28](rediseno-app.md). `npm test` 74/74 y `validate --level publish` OK.

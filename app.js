@@ -6,6 +6,7 @@ const IrCodes = require('./lib/ir-codes');
 const CommandSender = require('./lib/command-sender');
 const TelegramNotifier = require('./lib/telegram');
 const TempMirror = require('./lib/temp-mirror');
+const StateMirror = require('./lib/state-mirror');
 
 // URL del webservice de la planilla (def. 15): configurable en settings de
 // app, con la URL histórica de PS Broadlink.js como default.
@@ -55,6 +56,13 @@ class PanteaDevicesApp extends Homey.App {
       error: this.error.bind(this),
     });
 
+    // Estado real del equipo vía sensor de aleta (def. 29).
+    this.stateMirror = new StateMirror({
+      getHomeyApi: () => this.getHomeyApi(),
+      log: this.log.bind(this),
+      error: this.error.bind(this),
+    });
+
     // Si se cambia el token en los settings de la app, reevaluar el estado
     // de "token rechazado" del sender (def. 27) — el nuevo token puede ser
     // válido donde el anterior no lo era.
@@ -67,6 +75,7 @@ class PanteaDevicesApp extends Homey.App {
 
   async onUninit() {
     this.tempMirror?.destroyAll();
+    this.stateMirror?.destroyAll();
   }
 
   async _telegramChannelConfig() {

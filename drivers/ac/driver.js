@@ -48,6 +48,7 @@ class AcDriver extends Homey.Driver {
     this.flowSleepOff = this.homey.flow.getDeviceTriggerCard('sleep_turned_off');
     this.flowAutoOffSet = this.homey.flow.getDeviceTriggerCard('auto_off_set');
     this.flowAutoOffFinished = this.homey.flow.getDeviceTriggerCard('auto_off_finished');
+    this.flowStateDetected = this.homey.flow.getDeviceTriggerCard('state_detected');
 
     // Conditions.
     this.homey.flow.getConditionCard('fan_speed_is')
@@ -111,21 +112,25 @@ class AcDriver extends Homey.Driver {
       return { host, port, configured: host !== '', hasDefault };
     });
 
-    session.setHandler('get_temp_devices', async () => {
+    const namesWithCapability = async (capability) => {
       try {
         const api = await this.homey.app.getHomeyApi();
         const devices = await api.devices.getDevices();
         const names = Object.values(devices)
           .filter((device) => Array.isArray(device.capabilities)
-            && device.capabilities.includes('measure_temperature'))
+            && device.capabilities.includes(capability))
           .map((device) => device.name)
           .sort((a, b) => a.localeCompare(b));
         return [...new Set(names)];
       } catch (err) {
-        this.error('No se pudieron listar los sensores de temperatura:', err.message || err);
+        this.error(`No se pudieron listar los devices con ${capability}:`, err.message || err);
         return [];
       }
-    });
+    };
+
+    session.setHandler('get_temp_devices', () => namesWithCapability('measure_temperature'));
+    // Sensores de contacto para la aleta del split (def. 29).
+    session.setHandler('get_contact_devices', () => namesWithCapability('alarm_contact'));
 
     session.setHandler('check_code', async ({ code }) => {
       const clean = String(code ?? '').trim();
@@ -188,6 +193,11 @@ class AcDriver extends Homey.Driver {
           learned_fan_override: 'auto',
           learn_temp_scope: 'range',
           learn_timer_scope: 'range',
+          flap_source: String(form.flapSource ?? '').trim(),
+          flap_inverted: false,
+          discharge_temp_source: '',
+          outdoor_temp_source: '',
+          outdoor_cutoff: 19,
         },
       };
     });

@@ -326,6 +326,82 @@
     {
       "type": "group",
       "label": {
+        "en": "Real state of the unit",
+        "es": "Estado real del equipo"
+      },
+      "children": [
+        {
+          "id": "flap_source",
+          "type": "text",
+          "label": {
+            "en": "Louver contact sensor",
+            "es": "Sensor de contacto en la aleta"
+          },
+          "hint": {
+            "en": "Name of a contact sensor mounted on the louver that closes when the unit stops. With it the tile shows whether the unit is really running, even if it was turned on with the physical remote. Nothing is ever sent to the unit because of this: the tile is only updated. Empty: disabled.",
+            "es": "Nombre de un sensor de contacto montado en la aleta que se cierra cuando el equipo para. Con eso el tile muestra si el equipo está funcionando de verdad, aunque lo hayan prendido con el control físico. Por esto NUNCA se le envía nada al equipo: solo se actualiza el tile. Vacío: desactivado."
+          },
+          "value": ""
+        },
+        {
+          "id": "flap_inverted",
+          "type": "checkbox",
+          "label": {
+            "en": "Louver sensor is inverted",
+            "es": "El sensor de la aleta está invertido"
+          },
+          "hint": {
+            "en": "Tick if the sensor reads 'closed' when the louver is open (depends on how the magnet was mounted).",
+            "es": "Marcar si el sensor lee 'cerrado' cuando la aleta está abierta (depende de cómo se montó el imán)."
+          },
+          "value": false
+        },
+        {
+          "id": "discharge_temp_source",
+          "type": "text",
+          "label": {
+            "en": "Discharge air temperature sensor",
+            "es": "Sensor de temperatura del aire que sale"
+          },
+          "hint": {
+            "en": "Optional. Name of a temperature sensor sitting in the air the unit blows out. It is the only evidence strong enough to tell heat from cool on its own, and the only one allowed to correct a mode the app already knows.",
+            "es": "Opcional. Nombre de un sensor de temperatura puesto en el aire que tira el equipo. Es la única evidencia lo bastante fuerte como para distinguir frío de calor por sí sola, y la única que puede corregir un modo que la app ya conoce."
+          },
+          "value": ""
+        },
+        {
+          "id": "outdoor_temp_source",
+          "type": "text",
+          "label": {
+            "en": "Outdoor temperature sensor",
+            "es": "Sensor de temperatura exterior"
+          },
+          "hint": {
+            "en": "Optional. Used to guess whether an externally started unit is heating or cooling, when there is no discharge sensor.",
+            "es": "Opcional. Se usa para deducir si un equipo que prendieron por afuera está en frío o en calor, cuando no hay sensor en la salida de aire."
+          },
+          "value": ""
+        },
+        {
+          "id": "outdoor_cutoff",
+          "type": "number",
+          "label": {
+            "en": "Outdoor heat/cool cutoff (°C)",
+            "es": "Corte frío/calor de la temperatura exterior (°C)"
+          },
+          "hint": {
+            "en": "Above this value (plus a 3°C dead band) an externally started unit is assumed to be cooling; below it, heating. Inside the band nothing is assumed.",
+            "es": "Por encima de este valor (más una banda muerta de 3°C) se asume que un equipo prendido por afuera está enfriando; por debajo, calentando. Dentro de la banda no se asume nada."
+          },
+          "value": 19,
+          "min": 0,
+          "max": 40
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
         "en": "Advanced",
         "es": "Avanzado"
       },

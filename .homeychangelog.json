@@ -6,5 +6,9 @@
   "2.1.0": {
     "en": "New auto-off: a slider on the tile turns the unit off after a while and counts down on its own. Per unit you choose whether Pantea sends the off command when the time is up, or the timer is sent to the unit over IR.",
     "es": "Nuevo apagado automático: un control en el tile apaga el equipo dentro de un rato y va bajando solo. Por equipo se elige si Pantea manda la orden de apagado al cumplirse el tiempo, o si el temporizador se le envía al aire por IR."
+  },
+  "2.2.0": {
+    "en": "The tile now shows whether the unit is really running. With a contact sensor on the louver, if someone starts the air conditioner with the physical remote the tile follows along — and works out whether it is heating or cooling from the outdoor and room temperatures. It never sends anything to the unit: it only updates the tile.",
+    "es": "El tile ahora muestra si el equipo está funcionando de verdad. Con un sensor de contacto en la aleta, si alguien prende el aire con el control físico el tile lo acompaña — y deduce si está en frío o en calor mirando la temperatura de afuera y la del cuarto. Nunca le envía nada al equipo: solo actualiza el tile."
   }
 }

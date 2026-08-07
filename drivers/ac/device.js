@@ -2,6 +2,7 @@
 
 const Homey = require('homey');
 const { SWING_POSITIONS } = require('../../lib/ir-codes');
+const { decide: decideDetectedMode } = require('../../lib/state-mirror');
 
 const MS_PER_HOUR = 3600000;
 // Auto-apagado (def. 28): tope del slider cuando lo maneja la app (en modo IR
@@ -11,6 +12,17 @@ const AUTO_OFF_DEFAULT_MAX_H = 12;
 // reiniciando (deploy, reboot). Más viejo que esto no se dispara: el equipo
 // pudo haberse usado en el medio.
 const AUTO_OFF_GRACE_MS = 5 * 60 * 1000;
+
+// Espejo de estado real (def. 29).
+// La aleta aletea al arrancar y al frenar: se exige que el contacto quede
+// quieto antes de creerle.
+const FLAP_DEBOUNCE_MS = 30 * 1000;
+// Tras un comando PROPIO la aleta se mueve por lo que mandamos nosotros, no
+// por una acción externa: en esa ventana el tile ya está bien y no se toca.
+const OWN_COMMAND_SETTLE_MS = 3 * 60 * 1000;
+// El serpentín tarda en tomar temperatura y el cuarto más todavía: la
+// evidencia buena para decidir frío/calor recién existe unos minutos después.
+const MODE_EVAL_DELAY_MS = 5 * 60 * 1000;
 
 /**
  * Aire acondicionado Pantea. Orquesta las reglas de negocio (definiciones
@@ -37,6 +49,12 @@ class AcDevice extends Homey.Device {
     this._autoOffUntil = null;
     this._autoOffTimeout = null;
     this._autoOffStepH = 0.5;
+    // Espejo de estado real (def. 29).
+    this._flapState = null;
+    this._flapDebounce = null;
+    this._modeEvalTimeout = null;
+    this._roomTempAtStart = null;
+    this._lastOwnCommandAt = 0;
 
     if (this.getCapabilityValue('onoff') === null) {
       await this.setCapabilityValue('onoff', false).catch(this.error);
@@ -46,6 +64,9 @@ class AcDevice extends Homey.Device {
     // la capability + suscripción al device fuente vía HomeyAPI.
     await this._syncTempCapability().catch(this.error);
     this._attachTempMirror();
+
+    // Estado real del equipo desde el sensor de aleta (def. 29).
+    this._attachStateMirror();
 
     // Funciones permitidas del equipo (def. 21): presencia de capabilities
     // y modos visibles según settings.
@@ -348,6 +369,9 @@ class AcDevice extends Homey.Device {
   async _dispatch(state, trigger) {
     const sender = this.homey.app.commandSender;
     const config = this._config();
+    // Marca para el espejo de aleta (def. 29): lo que se mueva a partir de acá
+    // lo causamos nosotros, no una acción externa.
+    this._lastOwnCommandAt = Date.now();
 
     let result;
     if (this._learning) {
@@ -746,6 +770,167 @@ class AcDevice extends Homey.Device {
     }
   }
 
+  // -------------------- estado real del equipo (def. 29) --------------------
+
+  /** Suscripción (o baja) al sensor de aleta según los settings vigentes. */
+  _attachStateMirror() {
+    const mirror = this.homey.app.stateMirror;
+    const contact = String(this.getSetting('flap_source') || '').trim();
+    if (contact === '') {
+      mirror.detach(this);
+      this._cancelFlapTimers();
+      this._flapState = null;
+      return;
+    }
+    mirror.attach(this, {
+      contact,
+      inverted: this.getSetting('flap_inverted') === true,
+      discharge: String(this.getSetting('discharge_temp_source') || '').trim(),
+      outdoor: String(this.getSetting('outdoor_temp_source') || '').trim(),
+    }).catch(this.error);
+  }
+
+  /**
+   * Entrada desde el espejo: cambió el contacto de la aleta. Se aplica recién
+   * cuando queda quieto (`FLAP_DEBOUNCE_MS`) — la aleta aletea al arrancar y
+   * al frenar, y cada rebote no puede mover el tile.
+   * @param {boolean} open true = aleta abierta = el equipo está funcionando
+   */
+  onFlapChanged(open) {
+    if (this._flapState === open) return;
+    if (this._flapDebounce) this.homey.clearTimeout(this._flapDebounce);
+    this._flapDebounce = this.homey.setTimeout(
+      () => this._applyFlap(open).catch(this.error),
+      FLAP_DEBOUNCE_MS,
+    );
+  }
+
+  async _applyFlap(open) {
+    this._flapDebounce = null;
+    this._flapState = open;
+
+    // Ventana de asentamiento: si la aleta se movió por un comando NUESTRO, el
+    // tile ya refleja lo que corresponde. Sin esto, el rato que tarda la aleta
+    // en cerrarse tras un apagado se leería como "encendido externo".
+    if (Date.now() - this._lastOwnCommandAt < OWN_COMMAND_SETTLE_MS) {
+      this.log(`Aleta ${open ? 'abierta' : 'cerrada'} dentro de la ventana del último comando propio: se ignora.`);
+      return;
+    }
+
+    if (!open) {
+      this._cancelModeEval();
+      if ((this.getCapabilityValue('thermostat_mode') || 'off') === 'off') return;
+      await this._setDetected('off', 'flap');
+      // Un apagado externo también deja sin sentido el apagado automático.
+      await this._cancelAutoOff();
+      return;
+    }
+
+    const tileMode = this.getCapabilityValue('thermostat_mode') || 'off';
+    if (tileMode !== 'off') {
+      // Ya sabíamos que estaba prendido y en qué modo: solo la evidencia
+      // DECISIVA (sensor de descarga) puede corregirlo.
+      this._scheduleModeEval({ allowHints: false });
+      return;
+    }
+
+    // El tile estaba apagado y la aleta está abierta ⇒ lo prendieron con el
+    // control físico. Se resuelve un modo provisorio con lo que haya ahora y
+    // se reevalúa cuando el equipo tomó temperatura.
+    this._roomTempAtStart = this._readRoomTemp();
+    const temps = await this.homey.app.stateMirror.readTemps(this).catch(() => ({}));
+    const { mode, reason } = decideDetectedMode({
+      dischargeTemp: temps.discharge,
+      roomTemp: this._readRoomTemp(),
+      outdoorTemp: temps.outdoor,
+      outdoorCutoff: Number(this.getSetting('outdoor_cutoff')) || 19,
+      lastMode: this._lastMode,
+    });
+    await this._setDetected(mode || 'cool', mode ? reason : 'default');
+    this._scheduleModeEval({ allowHints: true });
+  }
+
+  /**
+   * Aplica un estado DETECTADO. Nunca envía IR: usa `_setCompanion`, que
+   * escribe la capability sin pasar por su listener. Es el punto donde se
+   * cumple el pedido "cuando lo setea no manda ninguna señal".
+   */
+  async _setDetected(modoDetectado, reason) {
+    // Un modo inferido puede no existir en este equipo (def. 21): p. ej. la
+    // temperatura de afuera dice "calor" en un aire que solo enfría. Se cae a
+    // `cool`, que ningún setting puede deshabilitar.
+    let mode = modoDetectado;
+    if (mode !== 'off' && !this._isModeAllowed(mode)) {
+      this.log(`Modo detectado ${mode} no habilitado en este equipo: se refleja como cool.`);
+      mode = 'cool';
+    }
+    const previo = this.getCapabilityValue('thermostat_mode') || 'off';
+    if (previo === mode) return;
+    await this._setCompanion('thermostat_mode', mode);
+    await this._setCompanion('onoff', mode !== 'off');
+    if (mode !== 'off') {
+      this._lastMode = mode;
+      await this.setStoreValue('last_mode', mode).catch(this.error);
+    }
+    this.log(`Estado detectado sin enviar nada: ${previo} → ${mode} (${reason}).`);
+    this.driver.flowStateDetected?.trigger(this, { mode: String(mode), reason: String(reason) }, {})
+      .catch(this.error);
+  }
+
+  /**
+   * Reevaluación del modo cuando ya hay evidencia buena. `allowHints` false =
+   * el tile ya tiene un modo conocido y solo se acepta evidencia decisiva
+   * (regla de seguridad de la def. 29).
+   */
+  _scheduleModeEval({ allowHints }) {
+    this._cancelModeEval();
+    this._modeEvalTimeout = this.homey.setTimeout(
+      () => this._evaluateDetectedMode(allowHints).catch(this.error),
+      MODE_EVAL_DELAY_MS,
+    );
+  }
+
+  async _evaluateDetectedMode(allowHints) {
+    this._modeEvalTimeout = null;
+    if (this._flapState !== true) return; // se apagó mientras esperábamos
+    const temps = await this.homey.app.stateMirror.readTemps(this).catch(() => ({}));
+    const resultado = decideDetectedMode({
+      dischargeTemp: temps.discharge,
+      roomTemp: this._readRoomTemp(),
+      roomTempAtStart: this._roomTempAtStart,
+      outdoorTemp: temps.outdoor,
+      outdoorCutoff: Number(this.getSetting('outdoor_cutoff')) || 19,
+      lastMode: this._lastMode,
+    });
+    if (!resultado.mode) return;
+    if (!resultado.decisive && !allowHints) {
+      this.log(`Modo detectado (${resultado.reason}) descartado: el tile ya sabe el modo y el indicio no es evidencia decisiva.`);
+      return;
+    }
+    await this._setDetected(resultado.mode, resultado.reason);
+  }
+
+  _readRoomTemp() {
+    if (!this.hasCapability('measure_temperature')) return null;
+    const value = this.getCapabilityValue('measure_temperature');
+    return typeof value === 'number' ? value : null;
+  }
+
+  _cancelModeEval() {
+    if (this._modeEvalTimeout) {
+      this.homey.clearTimeout(this._modeEvalTimeout);
+      this._modeEvalTimeout = null;
+    }
+  }
+
+  _cancelFlapTimers() {
+    if (this._flapDebounce) {
+      this.homey.clearTimeout(this._flapDebounce);
+      this._flapDebounce = null;
+    }
+    this._cancelModeEval();
+  }
+
   // -------------------- estado y config --------------------
 
   _config() {
@@ -822,12 +1007,17 @@ class AcDevice extends Homey.Device {
     return null;
   }
 
-  _assertModeAllowed(mode) {
+  /** ¿El equipo tiene habilitado este modo? (def. 21) */
+  _isModeAllowed(mode) {
     const settings = this.getSettings();
-    const blocked = (mode === 'heat' && settings.allow_heat === false)
-      || (mode === 'dry' && settings.allow_dry === false)
-      || (mode === 'fan' && settings.allow_fan_mode === false);
-    if (blocked) {
+    if (mode === 'heat') return settings.allow_heat !== false;
+    if (mode === 'dry') return settings.allow_dry !== false;
+    if (mode === 'fan') return settings.allow_fan_mode !== false;
+    return true;
+  }
+
+  _assertModeAllowed(mode) {
+    if (!this._isModeAllowed(mode)) {
       throw new Error(this.homey.__({
         en: 'This unit does not support that mode.',
         es: 'Este equipo no permite ese modo.',
@@ -944,12 +1134,16 @@ class AcDevice extends Homey.Device {
 
   async onDeleted() {
     this.homey.app.tempMirror?.detach(this);
+    this.homey.app.stateMirror?.detach(this);
+    this._cancelFlapTimers();
     this._clearAutoOffTimeout();
     if (this._phmSettingsListener) this.homey.settings.removeListener('set', this._phmSettingsListener);
   }
 
   async onUninit() {
     this.homey.app.tempMirror?.detach(this);
+    this.homey.app.stateMirror?.detach(this);
+    this._cancelFlapTimers();
     // El vencimiento queda en store: `_restoreAutoOff` lo retoma al arrancar.
     this._clearAutoOffTimeout();
     if (this._phmSettingsListener) this.homey.settings.removeListener('set', this._phmSettingsListener);
@@ -997,6 +1191,32 @@ class AcDevice extends Homey.Device {
           .then(() => this._attachTempMirror())
           .catch(this.error);
       }, 500);
+    }
+
+    // Fuentes del espejo de estado (def. 29): se valida que el nombre
+    // corresponda a un device real con la capability que hace falta, igual que
+    // `temp_source` (def. 9).
+    const fuentes = [
+      ['flap_source', 'alarm_contact', { en: 'contact', es: 'de contacto' }],
+      ['discharge_temp_source', 'measure_temperature', { en: 'temperature', es: 'de temperatura' }],
+      ['outdoor_temp_source', 'measure_temperature', { en: 'temperature', es: 'de temperatura' }],
+    ];
+    for (const [key, capability, tipo] of fuentes) {
+      if (!changedKeys.includes(key)) continue;
+      const nombre = String(newSettings[key] || '').trim();
+      if (nombre === '') continue;
+      const encontrado = await this.homey.app.stateMirror.findSourceByName(nombre, capability)
+        .catch(() => undefined); // HomeyAPI caída: no validar (undefined ≠ null)
+      if (encontrado === null) {
+        throw new Error(this.homey.__({
+          en: `No device named "${nombre}" with a ${tipo.en} sensor was found.`,
+          es: `No se encontró un dispositivo "${nombre}" con sensor ${tipo.es}.`,
+        }));
+      }
+    }
+
+    if (changedKeys.some((key) => ['flap_source', 'flap_inverted', 'discharge_temp_source', 'outdoor_temp_source'].includes(key))) {
+      this.homey.setTimeout(() => this._attachStateMirror(), 500);
     }
 
     if (changedKeys.some((key) => key.startsWith('allow_') || key.startsWith('auto_off')

@@ -140,6 +140,11 @@
   </select>
   <div class="hint">Control en el tile para apagar el equipo dentro de un rato. <strong>Lo maneja Pantea</strong>: la orden de apagado sale recién al cumplirse el tiempo (el equipo hace su beep en ese momento). <strong>Lo maneja el aire</strong>: el temporizador se le envía ahora por IR y se apaga solo; necesita los códigos <code>timer_off_XX</code> aprendidos.</div>
 
+  <h2>Estado real del equipo</h2>
+  <label class="field" for="f-flap-source">Sensor de contacto en la aleta — opcional</label>
+  <select id="f-flap-source"><option value="">Ninguno</option></select>
+  <div class="hint">Montado en la aleta que se cierra cuando el equipo para: permite mostrar en el tile si el aire está funcionando aunque lo hayan prendido con el control físico. <strong>Nunca le envía nada al equipo</strong>, solo actualiza el tile. El resto (sensor exterior, corte frío/calor, inversión) se ajusta después en la configuración del equipo.</div>
+
   <button id="add-button">Agregar equipo</button>
 </div>
 
@@ -174,17 +179,21 @@
     })
     .catch(() => { /* sin dato: quedan los campos editables */ });
 
-  // Drop-down de sensores con measure_temperature (def. 9).
+  // Drop-downs de sensores: measure_temperature (def. 9) y alarm_contact (def. 29).
+  function llenarSelect(id, names) {
+    const select = $(id);
+    (names || []).forEach((name) => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+  }
   Homey.emit('get_temp_devices')
-    .then((names) => {
-      const select = $('f-temp-source');
-      (names || []).forEach((name) => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        select.appendChild(option);
-      });
-    })
+    .then((names) => llenarSelect('f-temp-source', names))
+    .catch(() => { /* sin lista: queda solo "Ninguno" */ });
+  Homey.emit('get_contact_devices')
+    .then((names) => llenarSelect('f-flap-source', names))
     .catch(() => { /* sin lista: queda solo "Ninguno" */ });
 
   // Consulta del code en vivo: comandos disponibles + marcas (def. 17 + §7).
@@ -252,6 +261,7 @@
         allowFanSpeed: $('f-allow-fan-speed').checked,
         swingType: $('f-swing-type').value,
         autoOffMode: $('f-auto-off-mode').value,
+        flapSource: $('f-flap-source').value,
       });
       await Homey.createDevice(device);
       await Homey.done();
