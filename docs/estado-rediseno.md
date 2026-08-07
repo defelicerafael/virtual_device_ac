@@ -2,19 +2,24 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-08-06 (v2.1.0 — apagado automático, def. 28, SIN desplegar)
+## Última actualización: 2026-08-06 (v2.1.0 — apagado automático, def. 28, DESPLEGADA en ferno)
 
 ### 🆕 Def. 28 — Apagado automático (v2.1.0, 2026-08-06)
 Slider `auto_off` en el tile con las horas que faltan para que el equipo se apague (0 = sin temporizador), habilitado por equipo con el setting `auto_off_mode`: **Desactivado** (default — los devices existentes no cambian), **Lo maneja Pantea** (la app cuenta y al vencer manda el apagado) o **Lo maneja el aire** (se le manda el temporizador por IR ahora). El slider baja solo en los dos modos y el vencimiento vive en el store, así que sobrevive a reinicios. Detalle completo, claves de planilla y casos borde en la [definición 28](rediseno-app.md). `npm test` 74/74 y `validate --level publish` OK.
 
 **Lo que hay que saber para probarlo:**
 - **Falta cargar los códigos en la planilla** para el modo "Lo maneja el aire": filas mode-only `timer_off_XX` (décimas de hora, 2 dígitos mínimo: `timer_off_05` = 0,5 h, `timer_off_10` = 1 h, `timer_off_120` = 12 h; `timer_off_00` = cancelar). Hasta que estén cargados, el modo IR revierte con "este equipo no tiene aprendido el apagado automático de X h" y **solo el modo "Lo maneja Pantea" es usable**.
-- ⚠️ **PENDIENTE DE DEPLOY EN EL SERVIDOR:** el learning por barrido 0,5–12 h necesita dos cosas en cada HA (medir en vivo antes de asumir; al 2026-08-06 se miró **solo ferno**, que NO las tiene) —
+- **Deploy del servidor: HECHO EN FERNO, falta en las otras 4 casas.** El learning por barrido 0,5–12 h necesita dos cosas en cada HA (medir en vivo antes de asumir en cualquier casa) —
   1. `docs/referencia/ha-script-ac_timer_learn.yaml` → `/opt/pantea/homeassistant/config/scripts/ac_timer_learn.yaml` (dos scripts: `learn_ac1_timer_off` con 0,5–12 y `learn_ac1_timer_off_horas` con 1–12; los dos arrancan por el comando de cancelar).
   2. La rama `elif mode.startswith("timer_off")` en la automation `ac_learning_mode_via_webhook` de `automations.yaml` → bloque completo en `docs/referencia/ha-automation-ac_learn.yaml`.
-  Sin esto, el barrido despacha un script que no existe y **no aprende nada**. El alcance "Tiempo específico" (uno por uno) sí funciona tal cual está hoy: entra por la rama `simple_mode` que ya usa el swing.
+  Sin esto, el barrido despacha un script que no existe y **no aprende nada**. El alcance "Tiempo específico" (uno por uno) sí funciona tal cual está hoy en toda la flota: entra por la rama `simple_mode` que ya usa el swing.
 - **El aviso de éxito NO es verde:** el SDK no tiene banner verde (`Device` solo expone `setWarning`/`setUnavailable`). Va por el banner amarillo con ✅ adelante, por decisión de Fernán.
-- **Sin verificar en vivo todavía** (ni deploy ni prueba física en ferno).
+
+**Estado del deploy en ferno (2026-08-06, verificado en vivo):**
+- App **v2.1.0 instalada en el Homey "San Fran"** (`homey-app update` desde la Mac; clon en `eea3d97`, SYNC OK / DIRTY NO).
+- HA de ferno: `scripts/ac_timer_learn.yaml` copiado y la automation parcheada (backup `automations.yaml.bak-20260806-230522`). `check_config` exit 0 sin errores, HA reiniciado y vivo (HTTP 200 a los 20 s), y `script.learn_ac1_timer_off` + `script.learn_ac1_timer_off_horas` registrados en el entity registry.
+- ⚠️ **Falta la prueba FÍSICA**: nadie corrió todavía una sesión de learning contra un aire real, así que sigue sin responderse **qué pasa si un tiempo no se aprieta** (¿HA aborta el resto de la lista o sigue? ¿guarda lo aprendido hasta ahí?). Con 25 comandos eso decide si el barrido completo es usable o conviene el de horas enteras (13).
+- 🔎 Observado de paso, **sin relación con esto y sin tocar**: la antena SMLIGHT `192.168.88.50` de ferno no responde a ping (integración `smlight` tirando `SmlightConnectionError` en el log de HA).
 
 ## Actualización previa: 2026-08-03 (v2.0.9 DESPLEGADA en las 5 casas — verificado en vivo)
 
