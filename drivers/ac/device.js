@@ -24,6 +24,12 @@ const OWN_COMMAND_SETTLE_MS = 3 * 60 * 1000;
 // evidencia buena para decidir frío/calor recién existe unos minutos después.
 const MODE_EVAL_DELAY_MS = 5 * 60 * 1000;
 
+// Learning (def. 7 rev. 2026-08-06): el modo queda ARMADO si el envío falla,
+// para poder reintentar sin volver a tocar el botón. Se apaga solo después de
+// este rato sin actividad, así no queda colgado indefinidamente (que es lo que
+// el fix de la v2.0.9 quería evitar).
+const LEARNING_IDLE_MS = 5 * 60 * 1000;
+
 /**
  * Aire acondicionado Pantea. Orquesta las reglas de negocio (definiciones
  * 1–20 de docs/rediseno-app.md) y delega en los servicios de la app:
@@ -40,6 +46,7 @@ class AcDevice extends Homey.Device {
     this.log('AC inicializado:', this.getName());
 
     this._learning = false;
+    this._learningTimeout = null;
     this._lastMode = (await this.getStoreValue('last_mode')) || 'cool';
     // Banner del tile: `setWarning` es el ÚNICO banner que expone el SDK (no
     // hay uno "de éxito"), así que lo comparten el aviso de comando faltante
@@ -193,8 +200,7 @@ class AcDevice extends Homey.Device {
     let result;
     if (this._learning) {
       result = await sender.sendSwingLearn(this._config(), key);
-      this._learning = false;
-      await this.setCapabilityValue('learning_mode', false).catch(this.error);
+      await this._afterLearnAttempt(result);
     } else {
       result = await sender.sendSwing(this._config(), key);
     }
@@ -243,8 +249,7 @@ class AcDevice extends Homey.Device {
         }));
       }
       const result = await this.homey.app.commandSender.sendTimerLearn(config, hours);
-      this._learning = false;
-      await this.setCapabilityValue('learning_mode', false).catch(this.error);
+      await this._afterLearnAttempt(result);
       if (!result.ok) return this._failure(result);
       this.log(scope === 'single'
         ? `Learning del apagado automático de ${hours} h enviado.`
@@ -300,11 +305,54 @@ class AcDevice extends Homey.Device {
     return true;
   }
 
-  /** Learning (def. 7): botón por device; queda activo hasta el primer comando. */
+  /**
+   * Learning (def. 7): botón por device; queda activo hasta el primer comando
+   * que SALGA bien (rev. 2026-08-06) o hasta que se cumplan `LEARNING_IDLE_MS`
+   * sin actividad.
+   */
   async _onLearning(value) {
     this._learning = value === true;
+    if (this._learning) this._touchLearning();
+    else this._clearLearningTimeout();
     this.log('Modo learning:', this._learning);
     return true;
+  }
+
+  /**
+   * Cierre de un intento de aprendizaje (def. 7 rev. 2026-08-06). El modo solo
+   * se apaga si el comando SALIÓ. Si el envío al servidor falló, el aviso con
+   * el motivo lo da `_failure` (banner + Telegram + timeline) y el learning
+   * queda ARMADO para reintentar sin volver a tocar el botón — con la cuenta
+   * de inactividad arrancando de nuevo.
+   */
+  async _afterLearnAttempt(result) {
+    if (result && result.ok) await this._endLearning('el comando de aprendizaje salió');
+    else this._touchLearning();
+  }
+
+  /** Arranca o reinicia la cuenta de inactividad del learning. */
+  _touchLearning() {
+    this._clearLearningTimeout();
+    this._learningTimeout = this.homey.setTimeout(
+      () => this._endLearning('5 minutos sin actividad').catch(this.error),
+      LEARNING_IDLE_MS,
+    );
+  }
+
+  /** Apaga el learning (si estaba activo) y corta su cuenta de inactividad. */
+  async _endLearning(motivo) {
+    this._clearLearningTimeout();
+    if (!this._learning) return;
+    this._learning = false;
+    await this.setCapabilityValue('learning_mode', false).catch(this.error);
+    this.log(`Modo learning apagado: ${motivo}.`);
+  }
+
+  _clearLearningTimeout() {
+    if (this._learningTimeout) {
+      this.homey.clearTimeout(this._learningTimeout);
+      this._learningTimeout = null;
+    }
   }
 
   /** Maintenance action "recargar códigos" (def. 18). */
@@ -376,8 +424,7 @@ class AcDevice extends Homey.Device {
     let result;
     if (this._learning) {
       result = await sender.sendLearn(config, state, trigger);
-      this._learning = false;
-      await this.setCapabilityValue('learning_mode', false).catch(this.error);
+      await this._afterLearnAttempt(result);
     } else {
       result = await sender.sendState(config, state, trigger);
     }
@@ -1058,10 +1105,11 @@ class AcDevice extends Homey.Device {
     // Si el botón desaparece con el learning prendido (se cargó un code sin
     // haber mandado ningún comando), el modo quedaría activo SIN forma de
     // apagarlo: el próximo comando se iría a ac_learn y el aire no respondería.
-    if (hasCode && this._learning) {
-      this._learning = false;
-      this.log('Learning cancelado: el equipo pasó a tener code de planilla.');
-    }
+    // Se apaga SIEMPRE que aparezca un code, sin esperar los 5 minutos de
+    // inactividad (pedido explícito de Fernán 2026-08-06): si no, el botón
+    // desaparecería con el learning armado y el próximo comando se iría a
+    // `ac_learn` sin forma de apagarlo.
+    if (hasCode) await this._endLearning('el equipo pasó a tener code de planilla');
     await syncCap('learning_mode', !hasCode);
 
     // Swing (def. 5 v3): 'onoff' → toggle, 'positions' → picker,
@@ -1136,6 +1184,7 @@ class AcDevice extends Homey.Device {
     this.homey.app.tempMirror?.detach(this);
     this.homey.app.stateMirror?.detach(this);
     this._cancelFlapTimers();
+    this._clearLearningTimeout();
     this._clearAutoOffTimeout();
     if (this._phmSettingsListener) this.homey.settings.removeListener('set', this._phmSettingsListener);
   }
@@ -1144,6 +1193,7 @@ class AcDevice extends Homey.Device {
     this.homey.app.tempMirror?.detach(this);
     this.homey.app.stateMirror?.detach(this);
     this._cancelFlapTimers();
+    this._clearLearningTimeout();
     // El vencimiento queda en store: `_restoreAutoOff` lo retoma al arrancar.
     this._clearAutoOffTimeout();
     if (this._phmSettingsListener) this.homey.settings.removeListener('set', this._phmSettingsListener);

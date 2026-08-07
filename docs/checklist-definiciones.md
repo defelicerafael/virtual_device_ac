@@ -59,11 +59,14 @@ Cinco desvíos, ninguno crítico. Decisión de Fernán (2026-07-28): se arreglan
    limpiaba recién al reiniciar la app. Ahora se cancela el learning al quitar la
    capability, con log.
 
-2. **NO se arregla (decisión de Fernán) — el learning se apaga aunque el comando
-   falle.** `_dispatch` y `_onSwing` ponen `_learning = false` antes de mirar el
-   resultado, así que con el PHM caído el instalador pierde el modo learning y
-   además el tile revierte. La def. 7 dice "tras el primer comando *ejecutado*".
-   Queda así a propósito.
+2. **~~NO se arregla~~ → ARREGLADO (v2.3.0, 2026-08-06): Fernán cambió de
+   criterio.** El hallazgo original: `_dispatch` y `_onSwing` ponían
+   `_learning = false` antes de mirar el resultado, así que con el PHM caído el
+   instalador perdía el modo learning y además el tile revertía — la def. 7 dice
+   "tras el primer comando *ejecutado*". Se había dejado así a propósito.
+   Ahora el modo sobrevive a la falla (el mensaje con el motivo ya aparecía) y
+   se apaga por comando exitoso, por 5 minutos de inactividad, o porque
+   aparezca un code en los ajustes. Ver la revisión 2026-08-06 de la def. 7.
 
 3. **⚠️ ARREGLADO (v2.0.9) — `_swingAfterPowerOn` no filtraba por el tipo de
    swing.** Contaba los códigos de las 6 claves (`on/off/auto/up/middle/down`)

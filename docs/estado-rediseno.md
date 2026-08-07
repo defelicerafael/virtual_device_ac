@@ -2,7 +2,16 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-08-06 (v2.2.0 — estado real por sensor de aleta, def. 29, DESPLEGADA en ferno)
+## Última actualización: 2026-08-06 (v2.3.0 — el learning sobrevive a una falla de envío, SIN desplegar)
+
+### 🆕 Def. 7 rev. — el learning ya no se apaga si el envío falló (v2.3.0, 2026-08-06)
+Fernán **revirtió el "no se arregla"** del hallazgo 2 del [checklist](checklist-definiciones.md). Ahora: falla el envío → sale el mensaje con el motivo (eso ya funcionaba) y el modo **queda armado** para reintentar sin volver a apretar el botón. Se apaga por comando exitoso, por **5 minutos sin actividad** (la cuenta se reinicia en cada intento) o porque **aparezca un code en los ajustes** (en el acto, sin esperar los 5 min).
+
+- **⚠️ Sin cobertura de tests.** Toda esta lógica vive en `drivers/ac/device.js`, que no tiene arnés de pruebas — los 88 tests cubren solo `lib/`. Se verifica a mano.
+- **Cómo probarlo:** apuntar el device a una **IP de PHM inexistente** y mandar un comando con "Aprender" activo. Ojo: apuntar a una *entidad remote* inexistente NO sirve — `ac_learn` va por webhook y HA responde 200 igual. Solo una falla de **transporte** (PHM inalcanzable, 404, 5xx) da `ok:false`.
+- **Lo que esto NO puede saber:** si el webhook responde 200, el aprendizaje se da por bueno aunque el Broadlink no haya captado nada. Eso lo sigue verificando el instalador mirando el LED.
+
+## Actualización previa: 2026-08-06 (v2.2.0 — estado real por sensor de aleta, def. 29, DESPLEGADA en ferno)
 
 ### 🆕 Def. 29 — Estado real del equipo por sensor de aleta (v2.2.0, 2026-08-06)
 Idea de Fernán (audio): un sensor de contacto en la aleta que el split cierra al parar permite mostrar en el tile si el aire está funcionando **aunque lo hayan prendido con el control físico** — y deducir si arrancó en frío o en calor. **Nunca se envía IR por esto**: solo se escribe la capability. Escalera de inferencia, reglas y tiempos en la [definición 29](rediseno-app.md); el motor (`lib/state-mirror.js` → `decide()`) es puro y tiene 14 tests. `npm test` 88/88 y `validate --level publish` OK.
