@@ -132,6 +132,14 @@
     <option value="none">Desactivado</option>
   </select>
 
+  <label class="field" for="f-auto-off-mode">Apagado automático</label>
+  <select id="f-auto-off-mode">
+    <option value="none" selected>Desactivado</option>
+    <option value="device">Lo maneja Pantea</option>
+    <option value="ir">Lo maneja el aire (IR)</option>
+  </select>
+  <div class="hint">Control en el tile para apagar el equipo dentro de un rato. <strong>Lo maneja Pantea</strong>: la orden de apagado sale recién al cumplirse el tiempo (el equipo hace su beep en ese momento). <strong>Lo maneja el aire</strong>: el temporizador se le envía ahora por IR y se apaga solo; necesita los códigos <code>timer_off_XX</code> aprendidos.</div>
+
   <button id="add-button">Agregar equipo</button>
 </div>
 
@@ -207,6 +215,9 @@
         (s.sleep ? ', con sleep' : '') +
         (s.hasSwing ? ', con swing' : '') +
         (s.twoStep ? ', encendido en 2 pasos' : ''));
+      if (Array.isArray(s.timerHours) && s.timerHours.length > 0) {
+        lines.push(`Apagado automático aprendido: ${s.timerHours.join(' / ').replace(/\./g, ',')} h`);
+      }
       if (Array.isArray(result.brands) && result.brands.length > 0) {
         const brands = result.brands
           .map((row) => Object.values(row).filter((v) => v !== code && String(v).trim() !== '').join(' '))
@@ -240,6 +251,7 @@
         allowSleep: $('f-allow-sleep').checked,
         allowFanSpeed: $('f-allow-fan-speed').checked,
         swingType: $('f-swing-type').value,
+        autoOffMode: $('f-auto-off-mode').value,
       });
       await Homey.createDevice(device);
       await Homey.done();

@@ -1,0 +1,53 @@
+# Automation `ac_learning_mode_via_webhook` de automations.yaml, CON el
+# agregado de la def. 28 (apagado automático). Versión canónica: reemplaza el
+# bloque `- id: ac_learning_mode_via_webhook` existente en cada casa.
+#
+# Único cambio respecto de lo que hay hoy en la flota: la rama `elif` de
+# `timer_off` en el template del `default`. Todo lo demás queda igual.
+#
+# Cómo entra cada caso:
+#   simple_mode: true + hvac_mode: swing_up      -> aprende ir_ac1_swing_up
+#   simple_mode: true + hvac_mode: timer_off_15  -> aprende ir_ac1_timer_off_15
+#   hvac_mode: timer_off        -> script.learn_ac1_timer_off        (0,5 a 12 h)
+#   hvac_mode: timer_off_horas  -> script.learn_ac1_timer_off_horas  (1 a 12 h)
+#   hvac_mode: cool (+fan/sleep)-> script.learn_ac1_cool_auto_off    (16 a 30)
+#   hvac_mode: off              -> script.learn_ac1_off
+#
+# Los dos scripts nuevos están en ha-script-ac_timer_learn.yaml y van a
+# /opt/pantea/homeassistant/config/scripts/ (include_dir_merge_named).
+
+- id: ac_learning_mode_via_webhook
+  alias: AC Learning Mode via Webhook
+  triggers:
+  - trigger: webhook
+    webhook_id: ac_learn
+    allowed_methods:
+    - POST
+    local_only: true
+  actions:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ (trigger.json.simple_mode | default(false) | string |
+          lower) == ''true'' }}'
+      sequence:
+      - action: remote.learn_command
+        target:
+          entity_id: '{{ trigger.json.remote_entity | default(''remote.nombre_broadlink'')
+            }}'
+        data:
+          device: '{{ trigger.json.device | default(''ac1'') }}'
+          command: ir_{{ trigger.json.device | default('ac1') }}_{{ trigger.json.hvac_mode
+            | default('cool') }}
+    default:
+    - action: "{% set device = trigger.json.device | default('ac1') %} {% set mode
+        = trigger.json.hvac_mode | default('cool') %} {% set fan = trigger.json.fan_mode
+        | default('auto') %} {% set sleep = trigger.json.sleep | default('off') %}
+        {% if mode == \"off\" %}\n  script.learn_{{ device }}_{{ mode }}\n{% elif
+        mode.startswith(\"timer_off\") %}\n  script.learn_{{ device }}_{{ mode }}\n{%
+        else %}\n  script.learn_{{ device }}_{{ mode }}_{{ fan }}_{{ sleep }}\n{%
+        endif %}\n"
+      data_template:
+        remote_entity: '{{ trigger.json.remote_entity | default(''remote.nombre_broadlink'')
+          }}'
+  mode: single

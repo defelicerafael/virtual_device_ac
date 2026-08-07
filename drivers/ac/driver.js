@@ -46,6 +46,8 @@ class AcDriver extends Homey.Driver {
     this.flowSwingChanged = this.homey.flow.getDeviceTriggerCard('swing_changed');
     this.flowSleepOn = this.homey.flow.getDeviceTriggerCard('sleep_turned_on');
     this.flowSleepOff = this.homey.flow.getDeviceTriggerCard('sleep_turned_off');
+    this.flowAutoOffSet = this.homey.flow.getDeviceTriggerCard('auto_off_set');
+    this.flowAutoOffFinished = this.homey.flow.getDeviceTriggerCard('auto_off_finished');
 
     // Conditions.
     this.homey.flow.getConditionCard('fan_speed_is')
@@ -54,6 +56,8 @@ class AcDriver extends Homey.Driver {
       .registerRunListener(async ({ device, swing }) => device.getSwingKey() === swing);
     this.homey.flow.getConditionCard('sleep_is_on')
       .registerRunListener(async ({ device }) => device.getCapabilityValue('sleep_on_off') === true);
+    this.homey.flow.getConditionCard('auto_off_is_active')
+      .registerRunListener(async ({ device }) => device.isAutoOffActive());
 
     // Actions: pasan por triggerCapabilityListener para recorrer el mismo
     // camino que un toque en el tile (envío incluido).
@@ -79,6 +83,11 @@ class AcDriver extends Homey.Driver {
       .registerRunListener(async ({ device, state }) => {
         requireCapability(device, 'sleep_on_off', this.homey.__({ en: 'This unit does not allow sleep.', es: 'Este equipo no permite sleep.' }));
         await device.triggerCapabilityListener('sleep_on_off', state === 'on');
+      });
+    this.homey.flow.getActionCard('set_auto_off')
+      .registerRunListener(async ({ device, hours }) => {
+        requireCapability(device, 'auto_off', this.homey.__({ en: 'This unit does not have the auto-off enabled.', es: 'Este equipo no tiene habilitado el apagado automático.' }));
+        await device.triggerCapabilityListener('auto_off', Number(hours) || 0);
       });
   }
 
@@ -173,9 +182,12 @@ class AcDriver extends Homey.Driver {
           allow_sleep: form.allowSleep === true,
           allow_fan_speed: form.allowFanSpeed === true,
           swing_type: ['onoff', 'positions', 'none'].includes(form.swingType) ? form.swingType : 'onoff',
+          auto_off_mode: ['none', 'device', 'ir'].includes(form.autoOffMode) ? form.autoOffMode : 'none',
+          auto_off_max: 12,
           two_step_override: 'auto',
           learned_fan_override: 'auto',
           learn_temp_scope: 'range',
+          learn_timer_scope: 'range',
         },
       };
     });

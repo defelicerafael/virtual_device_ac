@@ -2,5 +2,9 @@
   "2.0.0": {
     "en": "Complete redesign: pairing wizard, code sheet commands, two-step power on, per-unit features, learning per device, flow cards.",
     "es": "Rediseño completo: wizard de alta, códigos desde la planilla, encendido en 2 pasos, funciones por equipo, learning por dispositivo, flow cards."
+  },
+  "2.1.0": {
+    "en": "New auto-off: a slider on the tile turns the unit off after a while and counts down on its own. Per unit you choose whether Pantea sends the off command when the time is up, or the timer is sent to the unit over IR.",
+    "es": "Nuevo apagado automático: un control en el tile apaga el equipo dentro de un rato y va bajando solo. Por equipo se elige si Pantea manda la orden de apagado al cumplirse el tiempo, o si el temporizador se le envía al aire por IR."
   }
 }

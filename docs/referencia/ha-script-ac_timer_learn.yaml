@@ -1,0 +1,76 @@
+# Aprendizaje del apagado automático (def. 28 de com.panteasmart.devices).
+#
+# Mismo patrón que los learn de temperatura (ac1_learn.yaml): UN
+# `remote.learn_command` con la LISTA completa de comandos, así una sola
+# sesión de learning cubre todo el rango — el instalador va apretando cada
+# tiempo en el control mientras HA le pide uno por uno.
+#
+# Nombres: `ir_ac1_timer_off_XX` con el tiempo en DÉCIMAS de hora y mínimo 2
+# dígitos (05 = 0,5 h · 10 = 1 h · 120 = 12 h). `timer_off_00` es el comando
+# de CANCELAR el temporizador y va primero. Coinciden exactamente con las
+# claves `timer_off_XX` de la planilla, que es adonde Fernán copia después
+# los códigos desde el archivo de la integración Broadlink (def. 14).
+#
+# Solo `ac1`: el device es fijo desde la def. 3 (la app manda siempre 'ac1').
+#
+# Los tiempos que el control no tenga simplemente no se aprietan; ese comando
+# expira y el resto de la sesión sigue. Cortar antes es válido: lo aprendido
+# hasta ahí queda.
+
+learn_ac1_timer_off:
+  alias: 'Aprender Comando IR - AC1 APAGADO AUTOMATICO 0,5 a 12 h'
+  sequence:
+    - action: remote.learn_command
+      target:
+        entity_id: "{{ remote_entity | default('remote.nombre_broadlink') }}"
+      data:
+        device: ac1
+        command:
+          - ir_ac1_timer_off_00
+          - ir_ac1_timer_off_05
+          - ir_ac1_timer_off_10
+          - ir_ac1_timer_off_15
+          - ir_ac1_timer_off_20
+          - ir_ac1_timer_off_25
+          - ir_ac1_timer_off_30
+          - ir_ac1_timer_off_35
+          - ir_ac1_timer_off_40
+          - ir_ac1_timer_off_45
+          - ir_ac1_timer_off_50
+          - ir_ac1_timer_off_55
+          - ir_ac1_timer_off_60
+          - ir_ac1_timer_off_65
+          - ir_ac1_timer_off_70
+          - ir_ac1_timer_off_75
+          - ir_ac1_timer_off_80
+          - ir_ac1_timer_off_85
+          - ir_ac1_timer_off_90
+          - ir_ac1_timer_off_95
+          - ir_ac1_timer_off_100
+          - ir_ac1_timer_off_105
+          - ir_ac1_timer_off_110
+          - ir_ac1_timer_off_115
+          - ir_ac1_timer_off_120
+
+learn_ac1_timer_off_horas:
+  alias: 'Aprender Comando IR - AC1 APAGADO AUTOMATICO 1 a 12 h (horas enteras)'
+  sequence:
+    - action: remote.learn_command
+      target:
+        entity_id: "{{ remote_entity | default('remote.nombre_broadlink') }}"
+      data:
+        device: ac1
+        command:
+          - ir_ac1_timer_off_00
+          - ir_ac1_timer_off_10
+          - ir_ac1_timer_off_20
+          - ir_ac1_timer_off_30
+          - ir_ac1_timer_off_40
+          - ir_ac1_timer_off_50
+          - ir_ac1_timer_off_60
+          - ir_ac1_timer_off_70
+          - ir_ac1_timer_off_80
+          - ir_ac1_timer_off_90
+          - ir_ac1_timer_off_100
+          - ir_ac1_timer_off_110
+          - ir_ac1_timer_off_120

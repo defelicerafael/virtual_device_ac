@@ -48,5 +48,6 @@ Fuente: Google Spreadsheet de Fernán ([link](https://docs.google.com/spreadshee
 1. **El code 5 ya usa el patrón "modo/ON separado"**: tiene filas `heat`/`cool` SIN temp (comando de modo solo) además de las completas. → La app podría **autodetectar** si un aire necesita la secuencia modo→wait→completo mirando si su code tiene filas de modo solo, en lugar de un flag manual en el wizard.
 2. **No hay filas de `dry` ni `fan`** (modo ventilador) todavía en ningún code — los modos nuevos van a requerir cargar códigos.
 3. **No hay filas de swing** — confirma que swing hoy no se maneja por planilla; las filas `swing_on`/`swing_off` de la definición 5 son un agregado nuevo.
+   - Lo mismo vale para las filas **`timer_off_XX`** del apagado automático (def. 28): también son mode-only sin temp, con el tiempo en **décimas de hora y mínimo 2 dígitos** (`timer_off_05` = 0,5 h · `timer_off_10` = 1 h · `timer_off_120` = 12 h) y **`timer_off_00` = cancelar el temporizador**. Todavía no hay ninguna cargada.
 4. La cobertura por code es heterogénea (code 1 tiene todas las velocidades y sleep; 2–5 solo fan auto y sleep off) → la opción "tiene fan_mode aprendido" del wizard también podría autodetectarse (¿hay filas con fan ≠ auto para este code?).
 5. El webservice es público sin auth: aceptable (solo lectura de códigos IR, baja sensibilidad), pero tenerlo presente.

@@ -22,6 +22,7 @@
     "swing_on_off",
     "swing_mode",
     "sleep_on_off",
+    "auto_off",
     "learning_mode",
     "button.reload_codes",
     "button.reconnect"
@@ -283,6 +284,42 @@
             "es": "Si no está activado queda Ventilador = auto en todos los modos."
           },
           "value": false
+        },
+        {
+          "id": "auto_off_mode",
+          "type": "dropdown",
+          "label": {
+            "en": "Auto-off",
+            "es": "Apagado automático"
+          },
+          "hint": {
+            "en": "Adds a slider to the tile to turn the unit off after a while. Managed by Pantea: nothing is sent now — the off command goes out when the time is up, so the unit will most likely beep hours later. Managed by the unit: the timer is sent to it now over IR, it beeps right away and turns itself off; it needs the auto-off codes learned (like swing), and any later command sent to the unit clears its timer.",
+            "es": "Agrega al tile un control para apagar el equipo dentro de un rato. Lo maneja Pantea: ahora no se manda nada — la orden de apagado sale al cumplirse el tiempo, así que es muy probable que el equipo haga el beep de apagado recién en x hs. Lo maneja el aire: el temporizador se le envía ahora por IR, hace el beep en el momento y se apaga solo; necesita los códigos de apagado automático aprendidos (igual que el swing), y cualquier comando posterior que se le envíe le borra el temporizador."
+          },
+          "value": "none",
+          "values": [
+            {
+              "id": "none",
+              "label": {
+                "en": "Disabled",
+                "es": "Desactivado"
+              }
+            },
+            {
+              "id": "device",
+              "label": {
+                "en": "Managed by Pantea",
+                "es": "Lo maneja Pantea"
+              }
+            },
+            {
+              "id": "ir",
+              "label": {
+                "en": "Managed by the unit (IR)",
+                "es": "Lo maneja el aire (IR)"
+              }
+            }
+          ]
         }
       ]
     },
@@ -330,6 +367,21 @@
           ]
         },
         {
+          "id": "auto_off_max",
+          "type": "number",
+          "label": {
+            "en": "Longest auto-off (hours)",
+            "es": "Apagado automático más largo (horas)"
+          },
+          "hint": {
+            "en": "Top of the auto-off slider when Pantea manages it. When the unit manages it, the code sheet decides (the longest learned time).",
+            "es": "Tope del control de apagado automático cuando lo maneja Pantea. Cuando lo maneja el aire, lo decide la planilla (el tiempo más largo aprendido)."
+          },
+          "value": 12,
+          "min": 1,
+          "max": 24
+        },
+        {
           "id": "learn_temp_scope",
           "type": "dropdown",
           "label": {
@@ -354,6 +406,42 @@
               "label": {
                 "en": "Specific temperature",
                 "es": "Temperatura específica"
+              }
+            }
+          ]
+        },
+        {
+          "id": "learn_timer_scope",
+          "type": "dropdown",
+          "label": {
+            "en": "Auto-off learning",
+            "es": "Aprendizaje del apagado automático"
+          },
+          "hint": {
+            "en": "Full range: one learning session walks every time from 0.5 to 12 h (plus the cancel command) — press each one on the remote as it is asked for. Whole hours: same, but only 1 to 12 h. Specific time: learns only the time currently set on the slider (to fix a badly learned one).",
+            "es": "Rango completo: una sesión de aprendizaje recorre todos los tiempos de 0,5 a 12 h (más el comando de cancelar) — se va apretando cada uno en el control a medida que lo pide. Horas enteras: igual pero solo de 1 a 12 h. Tiempo específico: aprende solo el tiempo que esté puesto en el control del tile (para corregir uno mal aprendido)."
+          },
+          "value": "range",
+          "values": [
+            {
+              "id": "range",
+              "label": {
+                "en": "Full range (0.5-12 h)",
+                "es": "Rango completo (0,5-12 h)"
+              }
+            },
+            {
+              "id": "hour",
+              "label": {
+                "en": "Whole hours (1-12 h)",
+                "es": "Horas enteras (1-12 h)"
+              }
+            },
+            {
+              "id": "single",
+              "label": {
+                "en": "Specific time",
+                "es": "Tiempo específico"
               }
             }
           ]

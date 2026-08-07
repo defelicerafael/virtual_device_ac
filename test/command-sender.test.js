@@ -23,6 +23,10 @@ FIXTURES[99] = JSON.stringify([
   { code: 99, mode: 'swing_up', fan: '', temp: '', sleep: '', irCommand: 'SWINGUP99' },
   { code: 99, mode: 'swing_down', fan: '', temp: '', sleep: '', irCommand: 'SWINGDOWN99' },
   { code: 99, mode: 'swing_off', fan: '', temp: '', sleep: '', irCommand: 'SWINGOFF99' },
+  // Auto-apagado (def. 28): mismo patrón mode-only. 00 = cancelar.
+  { code: 99, mode: 'timer_off_00', fan: '', temp: '', sleep: '', irCommand: 'TIMERCANCEL99' },
+  { code: 99, mode: 'timer_off_05', fan: '', temp: '', sleep: '', irCommand: 'TIMER0599' },
+  { code: 99, mode: 'timer_off_20', fan: '', temp: '', sleep: '', irCommand: 'TIMER2099' },
 ]);
 
 const CONFIG_BASE = {
@@ -261,6 +265,66 @@ describe('CommandSender', () => {
       hvac_mode: 'swing_middle',
       simple_mode: true,
     });
+  });
+
+  test('def. 28: auto-apagado por horas → POST del command_code timer_off_XX', async () => {
+    const media = await h.sender.sendTimer({ ...CONFIG_BASE, code: 99 }, 0.5);
+    const dos = await h.sender.sendTimer({ ...CONFIG_BASE, code: 99 }, 2);
+    const cancelar = await h.sender.sendTimer({ ...CONFIG_BASE, code: 99 }, 0);
+    assert.equal(media.ok, true);
+    assert.equal(dos.ok, true);
+    assert.equal(cancelar.ok, true);
+    assert.equal(h.posts[0].payload.command_code, 'TIMER0599');
+    assert.equal(h.posts[1].payload.command_code, 'TIMER2099');
+    assert.equal(h.posts[2].payload.command_code, 'TIMERCANCEL99');
+    assert.equal(h.posts[0].payload.remote_entity, 'remote.escritorio');
+  });
+
+  test('def. 28: tiempo no aprendido → skipped + missing, sin POST ni fallback legacy', async () => {
+    const res = await h.sender.sendTimer({ ...CONFIG_BASE, code: 99 }, 3);
+    assert.deepEqual(res, { ok: true, skipped: true, missing: ['timer_off_30'] });
+    assert.equal(h.posts.length, 0);
+  });
+
+  test('def. 28: sin code configurado → skipped SIN missing', async () => {
+    const res = await h.sender.sendTimer(CONFIG_BASE, 2);
+    assert.deepEqual(res, { ok: true, skipped: true, missing: [] });
+    assert.equal(h.posts.length, 0);
+  });
+
+  test('def. 28: learning de un tiempo específico → ac_learn con timer_off_XX y simple_mode', async () => {
+    await h.sender.sendTimerLearn({ ...CONFIG_BASE, code: 99, learnTimerScope: 'single' }, 1.5);
+    const { url, payload } = h.posts[0];
+    assert.match(url, /ac_learn$/);
+    assert.deepEqual(payload, {
+      remote_entity: 'remote.escritorio',
+      device: 'ac1',
+      hvac_mode: 'timer_off_15',
+      simple_mode: true,
+    });
+  });
+
+  test('def. 28: barrido 0,5–12 → hvac_mode timer_off SIN simple_mode (lo recorre el servidor)', async () => {
+    // Sin `simple_mode` la automation del servidor cae al default y despacha
+    // `script.learn_ac1_timer_off`, que hace UN learn_command con la lista
+    // entera — igual que el 16–30 de temperaturas (def. 22).
+    await h.sender.sendTimerLearn({ ...CONFIG_BASE, code: 99, learnTimerScope: 'range' }, 2);
+    assert.deepEqual(h.posts[0].payload, {
+      remote_entity: 'remote.escritorio',
+      device: 'ac1',
+      hvac_mode: 'timer_off',
+    });
+  });
+
+  test('def. 28: barrido de horas enteras → hvac_mode timer_off_horas', async () => {
+    await h.sender.sendTimerLearn({ ...CONFIG_BASE, code: 99, learnTimerScope: 'hour' }, 2);
+    assert.equal(h.posts[0].payload.hvac_mode, 'timer_off_horas');
+    assert.equal(h.posts[0].payload.simple_mode, undefined);
+  });
+
+  test('def. 28: sin alcance configurado el default es el barrido completo', async () => {
+    await h.sender.sendTimerLearn({ ...CONFIG_BASE, code: 99 }, 2);
+    assert.equal(h.posts[0].payload.hvac_mode, 'timer_off');
   });
 
   test('def. 21: sin permiso de sleep → sleep off en clave/payload aunque el tile diga on', async () => {

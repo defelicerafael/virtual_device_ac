@@ -3,6 +3,15 @@
 const Homey = require('homey');
 const { SWING_POSITIONS } = require('../../lib/ir-codes');
 
+const MS_PER_HOUR = 3600000;
+// Auto-apagado (def. 28): tope del slider cuando lo maneja la app (en modo IR
+// manda la planilla). Configurable por equipo en Avanzado.
+const AUTO_OFF_DEFAULT_MAX_H = 12;
+// Margen para ejecutar un auto-apagado que venció mientras la app estaba
+// reiniciando (deploy, reboot). Más viejo que esto no se dispara: el equipo
+// pudo haberse usado en el medio.
+const AUTO_OFF_GRACE_MS = 5 * 60 * 1000;
+
 /**
  * Aire acondicionado Pantea. Orquesta las reglas de negocio (definiciones
  * 1–20 de docs/rediseno-app.md) y delega en los servicios de la app:
@@ -20,6 +29,14 @@ class AcDevice extends Homey.Device {
 
     this._learning = false;
     this._lastMode = (await this.getStoreValue('last_mode')) || 'cool';
+    // Banner del tile: `setWarning` es el ÚNICO banner que expone el SDK (no
+    // hay uno "de éxito"), así que lo comparten el aviso de comando faltante
+    // (def. 23) y el del apagado automático programado (def. 28) — el estado
+    // vive acá para que `_refreshBanner` sea el único que lo escribe.
+    this._lastMissing = [];
+    this._autoOffUntil = null;
+    this._autoOffTimeout = null;
+    this._autoOffStepH = 0.5;
 
     if (this.getCapabilityValue('onoff') === null) {
       await this.setCapabilityValue('onoff', false).catch(this.error);
@@ -58,9 +75,14 @@ class AcDevice extends Homey.Device {
     // Swing según tipo (def. 5 v3): el tile tiene UNA de las dos capabilities.
     this.registerCapabilityListener('swing_on_off', (value) => this._onSwing(value === true ? 'on' : 'off'));
     this.registerCapabilityListener('swing_mode', (value) => this._onSwing(value));
+    this.registerCapabilityListener('auto_off', (value) => this._onAutoOff(value));
     this.registerCapabilityListener('learning_mode', (value) => this._onLearning(value));
     this.registerCapabilityListener('button.reload_codes', () => this._onReloadCodes());
     this.registerCapabilityListener('button.reconnect', () => this._onReconnect());
+
+    // Auto-apagado en curso al arrancar (def. 28): el vencimiento vive en
+    // store, así que sobrevive a reinicios de la app.
+    await this._restoreAutoOff().catch(this.error);
 
     // Disponibilidad explícita: tras un ciclo de desinstalación/reinstalación
     // (p. ej. el uninstall-on-quit de homey app run), Homey puede dejar el
@@ -165,7 +187,95 @@ class AcDevice extends Homey.Device {
       this.log(`Swing ${key} sin código en la planilla: solo queda el estado en el tile.`);
       return true;
     }
+    // El swing es otra trama IR completa: en modo 'ir' también pisa el
+    // temporizador del equipo (def. 28).
+    await this._autoOffAfterCommand();
     this._triggerFlow('swing', key);
+    return true;
+  }
+
+  /**
+   * Apagado automático (def. 28). El slider son horas restantes; 0 = sin
+   * temporizador. Según el setting `auto_off_mode`:
+   *   'device' → lo cuenta la app y al vencer manda el comando de apagado.
+   *   'ir'     → se manda AHORA el código `timer_off_XX` de la planilla y el
+   *              equipo se apaga solo; la cuenta del slider es un reflejo.
+   * Con learning activo se aprende la clave, igual que el swing.
+   */
+  async _onAutoOff(value) {
+    const hours = Number(value) || 0;
+    const mode = this._autoOffMode();
+
+    // Solo hay algo que aprender en modo 'ir': en modo 'device' el
+    // temporizador es de la app, no del equipo — mover el slider no consume
+    // la sesión de learning.
+    if (this._learning && mode === 'ir') {
+      const config = this._config();
+      const scope = config.learnTimerScope;
+      // Con barrido no importa qué tiempo se movió en el slider: el servidor
+      // recorre la lista entera. Solo el alcance "tiempo específico" necesita
+      // un valor concreto.
+      if (scope === 'single' && hours <= 0) {
+        throw new Error(this.homey.__({
+          en: 'Pick a time greater than 0 to learn it.',
+          es: 'Elegí un tiempo mayor a 0 para aprenderlo.',
+        }));
+      }
+      const result = await this.homey.app.commandSender.sendTimerLearn(config, hours);
+      this._learning = false;
+      await this.setCapabilityValue('learning_mode', false).catch(this.error);
+      if (!result.ok) return this._failure(result);
+      this.log(scope === 'single'
+        ? `Learning del apagado automático de ${hours} h enviado.`
+        : `Learning del apagado automático enviado (barrido ${scope}).`);
+      return true;
+    }
+
+    if (hours <= 0) {
+      await this._cancelAutoOff({ sendToUnit: mode === 'ir' });
+      return true;
+    }
+
+    // La flow card acepta hasta 24 h, pero el tope real lo fija el equipo
+    // (setting en modo 'device', planilla en modo 'ir'): mejor un error claro
+    // que un contador corriendo con el slider fuera de rango.
+    const max = Number((this.getCapabilityOptions('auto_off') || {}).max) || AUTO_OFF_DEFAULT_MAX_H;
+    if (hours > max) {
+      const top = this._hoursText(max);
+      throw new Error(this.homey.__({
+        en: `The longest auto-off for this unit is ${top.en}.`,
+        es: `El apagado automático más largo de este equipo es de ${top.es}.`,
+      }));
+    }
+
+    // Programar un apagado sobre un equipo apagado no tiene sentido: se
+    // rechaza (a diferencia de fan/sleep, que sí se guardan para el próximo
+    // encendido, un temporizador no se puede "aplicar más tarde").
+    if ((this.getCapabilityValue('thermostat_mode') || 'off') === 'off') {
+      throw new Error(this.homey.__({
+        en: 'The unit is off: turn it on before scheduling the auto-off.',
+        es: 'El equipo está apagado: prendelo antes de programar el apagado automático.',
+      }));
+    }
+
+    if (mode === 'ir') {
+      const result = await this.homey.app.commandSender.sendTimer(this._config(), hours);
+      if (!result.ok) return this._failure(result);
+      if (result.remoteDown) return this._warnRemoteDown(result.reason);
+      if (result.skipped) {
+        // A diferencia del swing (def. 5), acá el valor NO queda en el tile:
+        // una cuenta regresiva corriendo sin que el equipo haya recibido nada
+        // le miente al usuario. Se revierte con el motivo.
+        const time = this._hoursText(hours);
+        throw new Error(this.homey.__({
+          en: `This unit has no auto-off of ${time.en} learned.`,
+          es: `Este equipo no tiene aprendido el apagado automático de ${time.es}.`,
+        }));
+      }
+    }
+
+    await this._startAutoOff(hours);
+    this._triggerFlow('auto_off', hours);
     return true;
   }
 
@@ -251,6 +361,7 @@ class AcDevice extends Homey.Device {
     if (!result.ok) return this._failure(result);
     if (result.remoteDown) return this._warnRemoteDown(result.reason);
     await this._warnMissing(result.missing);
+    await this._autoOffAfterCommand({ goesOff: state.mode === 'off' });
     return result;
   }
 
@@ -319,14 +430,42 @@ class AcDevice extends Homey.Device {
    * se limpia el warning.
    */
   async _warnMissing(missing) {
-    if (Array.isArray(missing) && missing.length > 0) {
+    this._lastMissing = Array.isArray(missing) ? missing : [];
+    await this._refreshBanner();
+  }
+
+  /**
+   * Único dueño del banner del tile: el faltante de planilla (def. 23) tiene
+   * prioridad y, si no hay, se muestra el aviso del apagado automático
+   * programado (def. 28). El SDK de Homey no expone un banner "de éxito"
+   * (`Device` solo tiene `setWarning` y `setUnavailable`), así que el aviso en
+   * verde que pedía el diseño va por el mismo canal amarillo, con ✅ adelante.
+   */
+  async _refreshBanner() {
+    const missing = this._lastMissing || [];
+    if (missing.length > 0) {
       await this.setWarning(this.homey.__({
         en: `Command not available in the code sheet: ${missing.join(', ')}`,
         es: `Comando no disponible en la planilla: ${missing.join(', ')}`,
       })).catch(() => {});
-    } else {
-      await this.setWarning(null).catch(() => {});
+      return;
     }
+    await this.setWarning(this._autoOffBanner()).catch(() => {});
+  }
+
+  _autoOffBanner() {
+    if (this._autoOffUntil == null) return null;
+    const left = this._hoursText(this._autoOffRemainingHours());
+    if (this._autoOffMode() === 'ir') {
+      return this.homey.__({
+        en: `✅ Auto-off sent to the unit: it turns off in ${left.en}. It most likely beeped when it took the order.`,
+        es: `✅ Apagado automático enviado al equipo: se apaga en ${left.es}. Es muy probable que haya hecho un beep al recibir la orden.`,
+      });
+    }
+    return this.homey.__({
+      en: `✅ Auto-off in ${left.en}: the off command will be sent then, and the unit will most likely beep.`,
+      es: `✅ Apagado automático en ${left.es}: se va a enviar la orden de apagado y es muy probable que el equipo haga un beep.`,
+    });
   }
 
   /**
@@ -391,6 +530,222 @@ class AcDevice extends Homey.Device {
     }
   }
 
+  // -------------------- apagado automático (def. 28) --------------------
+
+  _autoOffMode() {
+    return this.getSetting('auto_off_mode') || 'none';
+  }
+
+  /** Texto del tiempo en los dos idiomas (el español lleva coma decimal). */
+  _hoursText(hours) {
+    const plain = Number.isInteger(hours) ? String(hours) : hours.toFixed(1);
+    return { en: `${plain} h`, es: `${plain.replace('.', ',')} h` };
+  }
+
+  /** Horas que corresponde mostrar en el slider, redondeadas hacia arriba al paso. */
+  _autoOffRemainingHours() {
+    if (this._autoOffUntil == null) return 0;
+    const step = this._autoOffStepH || 0.5;
+    const remaining = (this._autoOffUntil - Date.now()) / MS_PER_HOUR;
+    if (remaining <= 0) return 0;
+    return Math.round(Math.ceil(remaining / step) * step * 10) / 10;
+  }
+
+  /**
+   * Máximo y paso del slider según el modo (def. 28). En modo IR los manda la
+   * planilla: el tope es el tiempo más largo aprendido y, si son todos horas
+   * enteras, el paso pasa a 1 (el slider no ofrece medias horas que el equipo
+   * no sabe hacer).
+   */
+  async _syncAutoOffOptions(mode) {
+    if (!this.hasCapability('auto_off')) return;
+    let max = Number(this.getSetting('auto_off_max')) || AUTO_OFF_DEFAULT_MAX_H;
+    let step = 0.5;
+
+    if (mode === 'ir') {
+      const hours = await this._learnedAutoOffHours();
+      if (hours.length > 0) {
+        max = Math.max(...hours);
+        step = hours.every((h) => Number.isInteger(h)) ? 1 : 0.5;
+      }
+    }
+
+    this._autoOffStepH = step;
+    try {
+      await this.setCapabilityOptions('auto_off', {
+        min: 0, max, step, decimals: step === 1 ? 0 : 1,
+      });
+    } catch (err) {
+      this.log('setCapabilityOptions(auto_off) no disponible:', err.message);
+    }
+    if (this.getCapabilityValue('auto_off') === null) {
+      await this.setCapabilityValue('auto_off', 0).catch(this.error);
+    }
+  }
+
+  async _learnedAutoOffHours() {
+    const { code } = this._config();
+    if (!code) return [];
+    try {
+      return await this.homey.app.irCodes.getTimerHours(code);
+    } catch (err) {
+      this.error('No se pudieron leer los tiempos de apagado automático:', err.message || err);
+      return [];
+    }
+  }
+
+  async _startAutoOff(hours) {
+    this._autoOffUntil = Date.now() + Math.round(hours * MS_PER_HOUR);
+    await this.setStoreValue('auto_off_until', this._autoOffUntil).catch(this.error);
+    await this._setCompanion('auto_off', hours);
+    this._scheduleAutoOffTick();
+    await this._refreshBanner();
+    this.log(`Apagado automático programado en ${hours} h (modo ${this._autoOffMode()}).`);
+  }
+
+  /**
+   * Cancela el temporizador. `sendToUnit` (solo modo IR) manda además el
+   * código de cancelar; si la planilla no lo tiene, no hay forma de anularlo
+   * en el equipo y se avisa en vez de mentir.
+   */
+  async _cancelAutoOff({ sendToUnit = false } = {}) {
+    const hadTimer = this._autoOffUntil != null;
+    this._clearAutoOffTimeout();
+    this._autoOffUntil = null;
+    if (this.hasCapability('auto_off') && this.getCapabilityValue('auto_off') !== 0) {
+      await this._setCompanion('auto_off', 0);
+    }
+    // Sin temporizador en curso no hay nada que anular: no se toca el banner
+    // (lo llama `_syncAllowedFeatures` en cada arranque y borraría un aviso
+    // de comando faltante ajeno).
+    if (!hadTimer) return;
+    await this.unsetStoreValue('auto_off_until').catch(this.error);
+
+    if (sendToUnit) {
+      const result = await this.homey.app.commandSender.sendTimer(this._config(), 0);
+      if (!result.ok) return this._failure(result);
+      if (result.remoteDown) return this._warnRemoteDown(result.reason);
+      if (result.skipped) {
+        await this.setWarning(this.homey.__({
+          en: 'The auto-off was cleared here, but this unit has no "cancel timer" command learned: it may still turn itself off.',
+          es: 'Se borró el apagado automático acá, pero este equipo no tiene aprendido el comando de cancelar: puede que se apague igual.',
+        })).catch(() => {});
+        return;
+      }
+    }
+    await this._refreshBanner();
+  }
+
+  _clearAutoOffTimeout() {
+    if (this._autoOffTimeout) {
+      this.homey.clearTimeout(this._autoOffTimeout);
+      this._autoOffTimeout = null;
+    }
+  }
+
+  /** Despierta justo cuando el slider tiene que bajar un paso (no cada minuto). */
+  _scheduleAutoOffTick() {
+    this._clearAutoOffTimeout();
+    if (this._autoOffUntil == null) return;
+    const remaining = this._autoOffUntil - Date.now();
+    if (remaining <= 0) {
+      this._autoOffTimeout = this.homey.setTimeout(() => this._fireAutoOff().catch(this.error), 0);
+      return;
+    }
+    const stepMs = (this._autoOffStepH || 0.5) * MS_PER_HOUR;
+    const nextBoundary = (Math.ceil(remaining / stepMs) - 1) * stepMs;
+    const delay = Math.max(remaining - nextBoundary, 1000);
+    this._autoOffTimeout = this.homey.setTimeout(() => this._autoOffTick().catch(this.error), delay);
+  }
+
+  async _autoOffTick() {
+    if (this._autoOffUntil == null) return;
+    if (this._autoOffUntil - Date.now() <= 0) {
+      await this._fireAutoOff();
+      return;
+    }
+    await this._setCompanion('auto_off', this._autoOffRemainingHours());
+    await this._refreshBanner();
+    this._scheduleAutoOffTick();
+  }
+
+  /**
+   * Vencimiento. En modo 'device' recién acá sale el comando de apagado; en
+   * modo 'ir' el equipo ya se apagó solo, así que solo se pone el tile en off
+   * sin enviar nada.
+   */
+  async _fireAutoOff() {
+    this._clearAutoOffTimeout();
+    const mode = this._autoOffMode();
+    this._autoOffUntil = null;
+    await this.unsetStoreValue('auto_off_until').catch(this.error);
+    if (this.hasCapability('auto_off')) await this._setCompanion('auto_off', 0);
+
+    if (mode === 'device') {
+      try {
+        await this._dispatch(this._state({ mode: 'off' }), 'mode');
+      } catch (err) {
+        // No lo disparó el usuario: no hay UI que revertir. `_dispatch` ya
+        // avisó por banner + Telegram + timeline (defs. 10 y 26).
+        this.error('No se pudo enviar el apagado automático:', err.message || err);
+        return;
+      }
+    }
+
+    await this._setCompanion('thermostat_mode', 'off');
+    await this._setCompanion('onoff', false);
+    await this._refreshBanner();
+    this.driver.flowAutoOffFinished?.trigger(this, {}, {}).catch(this.error);
+    this.log(`Apagado automático ejecutado (modo ${mode}).`);
+  }
+
+  /** Retoma un temporizador que quedó vivo en store al reiniciar la app. */
+  async _restoreAutoOff() {
+    const until = Number(await this.getStoreValue('auto_off_until')) || null;
+    if (!this.hasCapability('auto_off')) {
+      // Se deshabilitó el apagado automático con uno programado: que no
+      // reviva si mañana lo vuelven a habilitar.
+      if (until) await this.unsetStoreValue('auto_off_until').catch(this.error);
+      return;
+    }
+    if (!until) {
+      if (this.getCapabilityValue('auto_off') !== 0) await this._setCompanion('auto_off', 0);
+      return;
+    }
+    this._autoOffUntil = until;
+
+    if (Date.now() - until > AUTO_OFF_GRACE_MS) {
+      this._autoOffUntil = null;
+      await this.unsetStoreValue('auto_off_until').catch(this.error);
+      await this._setCompanion('auto_off', 0);
+      this.homey.notifications.createNotification({
+        excerpt: `⚠️ ${this.getName()}: el apagado automático venció mientras la app estaba fuera de servicio y no se ejecutó.`,
+      }).catch(this.error);
+      return;
+    }
+
+    await this._setCompanion('auto_off', this._autoOffRemainingHours());
+    this._scheduleAutoOffTick();
+    await this._refreshBanner();
+  }
+
+  /**
+   * Cualquier comando IR posterior invalida el temporizador: en modo 'ir'
+   * porque el protocolo es stateful (la trama nueva pisa el temporizador del
+   * equipo) y en los dos modos cuando el equipo queda apagado.
+   */
+  async _autoOffAfterCommand({ goesOff = false } = {}) {
+    if (this._autoOffUntil == null) return;
+    if (!goesOff && this._autoOffMode() !== 'ir') return;
+    await this._cancelAutoOff();
+    if (!goesOff) {
+      await this.setWarning(this.homey.__({
+        en: 'The auto-off was cleared: the new command sent to the unit replaces its timer.',
+        es: 'Se borró el apagado automático: el comando nuevo enviado al equipo reemplaza su temporizador.',
+      })).catch(() => {});
+    }
+  }
+
   // -------------------- estado y config --------------------
 
   _config() {
@@ -411,6 +766,7 @@ class AcDevice extends Homey.Device {
       allowSleep: settings.allow_sleep !== false,
       allowFanSpeed: settings.allow_fan_speed !== false,
       learnTempScope: settings.learn_temp_scope || 'range',
+      learnTimerScope: settings.learn_timer_scope || 'range',
       // Token de HA a nivel app (def. 26): habilita el feedback del remote
       // (return_response) y el botón Reconectar. Vacío = webhook clásico.
       haToken: String(this.homey.settings.get('ha_token') || '').trim(),
@@ -438,6 +794,8 @@ class AcDevice extends Homey.Device {
       } else if (kind === 'sleep') {
         const card = value ? driver.flowSleepOn : driver.flowSleepOff;
         card?.trigger(this, {}, {}).catch(this.error);
+      } else if (kind === 'auto_off') {
+        driver.flowAutoOffSet?.trigger(this, { hours: Number(value) }, {}).catch(this.error);
       }
     } catch (err) {
       this.error('No se pudo disparar la flow card:', err);
@@ -447,6 +805,11 @@ class AcDevice extends Homey.Device {
   /** Clave de swing vigente en el tile según el tipo configurado (def. 5 v3). */
   getSwingKey() {
     return this._swingKey();
+  }
+
+  /** ¿Hay un apagado automático corriendo? (condition card, def. 28). */
+  isAutoOffActive() {
+    return this._autoOffUntil != null && this._autoOffUntil > Date.now();
   }
 
   _swingKey() {
@@ -485,6 +848,18 @@ class AcDevice extends Homey.Device {
     };
     await syncCap('sleep_on_off', settings.allow_sleep !== false);
     await syncCap('fan_mode', settings.allow_fan_speed !== false);
+
+    // Apagado automático (def. 28): el slider existe solo si el equipo lo
+    // tiene habilitado en alguno de los dos modos.
+    const autoOffMode = settings.auto_off_mode || 'none';
+    await syncCap('auto_off', autoOffMode !== 'none');
+    if (autoOffMode === 'none') {
+      // Si se deshabilita con un temporizador corriendo, quedaría contando sin
+      // slider (y en modo 'device' apagaría el equipo sin aviso).
+      await this._cancelAutoOff();
+    } else {
+      await this._syncAutoOffOptions(autoOffMode);
+    }
 
     // Learning (def. 7, rev. 2026-07-18): el botón "Aprender" es tarea del
     // instalador. Solo se muestra si NO hay code de planilla configurado; con
@@ -569,11 +944,14 @@ class AcDevice extends Homey.Device {
 
   async onDeleted() {
     this.homey.app.tempMirror?.detach(this);
+    this._clearAutoOffTimeout();
     if (this._phmSettingsListener) this.homey.settings.removeListener('set', this._phmSettingsListener);
   }
 
   async onUninit() {
     this.homey.app.tempMirror?.detach(this);
+    // El vencimiento queda en store: `_restoreAutoOff` lo retoma al arrancar.
+    this._clearAutoOffTimeout();
     if (this._phmSettingsListener) this.homey.settings.removeListener('set', this._phmSettingsListener);
   }
 
@@ -621,9 +999,11 @@ class AcDevice extends Homey.Device {
       }, 500);
     }
 
-    if (changedKeys.some((key) => key.startsWith('allow_') || key === 'swing_type' || key === 'code')) {
+    if (changedKeys.some((key) => key.startsWith('allow_') || key.startsWith('auto_off')
+      || key === 'swing_type' || key === 'code')) {
       // newSettings todavía no está aplicado dentro de onSettings: diferir.
-      // (code afecta la visibilidad del botón "Aprender", def. 7 rev.)
+      // (code afecta la visibilidad del botón "Aprender", def. 7 rev., y los
+      // tiempos aprendidos de apagado automático, def. 28.)
       this.homey.setTimeout(() => this._syncAllowedFeatures().catch(this.error), 500);
     }
   }

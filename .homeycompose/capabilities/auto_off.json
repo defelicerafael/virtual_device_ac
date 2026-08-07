@@ -1,0 +1,19 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Auto-off",
+    "es": "Apagado automático"
+  },
+  "uiComponent": "slider",
+  "getable": true,
+  "setable": true,
+  "min": 0,
+  "max": 12,
+  "step": 0.5,
+  "decimals": 1,
+  "units": {
+    "en": "h",
+    "es": "h"
+  },
+  "insights": false
+}
