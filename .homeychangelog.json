@@ -11,8 +11,8 @@
     "en": "The tile now shows whether the unit is really running. With a contact sensor on the louver, if someone starts the air conditioner with the physical remote the tile follows along — and works out whether it is heating or cooling from the outdoor and room temperatures. It never sends anything to the unit: it only updates the tile.",
     "es": "El tile ahora muestra si el equipo está funcionando de verdad. Con un sensor de contacto en la aleta, si alguien prende el aire con el control físico el tile lo acompaña — y deduce si está en frío o en calor mirando la temperatura de afuera y la del cuarto. Nunca le envía nada al equipo: solo actualiza el tile."
   },
-  "2.3.0": {
-    "en": "Learning mode no longer switches itself off when the command could not be sent: the tile shows why it failed and the mode stays armed so you can retry without pressing the button again. It switches off on its own after 5 minutes without activity, or right away if a code sheet code is entered in the settings.",
-    "es": "El modo Aprender ya no se apaga solo cuando el comando no se pudo enviar: el tile muestra el motivo de la falla y el modo queda armado para reintentar sin volver a apretar el botón. Se apaga solo a los 5 minutos sin actividad, o en el acto si se carga un code de planilla en los ajustes."
+  "2.4.0": {
+    "en": "Learning mode no longer switches itself off when the command could not be sent: the tile shows why it failed and the mode stays armed so you can retry without pressing the button again. Learning now also detects that the IR control is offline, and gives you 5 more minutes to reconnect it. It switches off on its own after 5 minutes without activity, or right away if a code sheet code is entered in the settings.",
+    "es": "El modo Aprender ya no se apaga solo cuando el comando no se pudo enviar: el tile muestra el motivo de la falla y el modo queda armado para reintentar sin volver a apretar el botón. Ahora además detecta que el control IR está sin conexión y te da 5 minutos más para reconectarlo. Se apaga solo a los 5 minutos sin actividad, o en el acto si se carga un code de planilla en los ajustes."
   }
 }

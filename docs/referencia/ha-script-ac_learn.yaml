@@ -1,0 +1,123 @@
+# Aprendizaje IR de AC CON RESPUESTA (def. 7 rev. 2026-08-06).
+#
+# Reemplaza el camino fire-and-forget del webhook `ac_learn`: la app llama
+# `POST /api/services/script/ac_learn?return_response` y recibe
+# `{ok, reason}` igual que en `ac_command` (def. 26), así puede avisar "el
+# control no responde" ANTES de que el instalador se quede apretando botones
+# contra un Broadlink caído.
+#
+# ⚠️ Por qué son DOS scripts: `remote.learn_command` es BLOQUEANTE — se queda
+# esperando a que aprieten el botón, y con la lista del barrido de temperaturas
+# o de timers son varios minutos. Si `ac_learn` esperara eso para contestar, el
+# POST de la app se colgaría hasta expirar. Entonces:
+#   - `ac_learn`     verifica el remote, contesta al instante y LANZA el
+#                    aprendizaje sin esperarlo (`script.turn_on`).
+#   - `ac_learn_run` es el que efectivamente bloquea aprendiendo.
+#
+# Lo que la respuesta SÍ dice: si la entidad remote existe y está viva en el
+# momento de arrancar. Lo que NO puede decir: si el Broadlink llegó a captar el
+# código — eso lo sigue verificando el instalador mirando el LED.
+#
+# `ac_learn_run` va en `mode: restart` a propósito: si el instalador reintenta,
+# el intento nuevo pisa la sesión anterior que quedó colgada esperando un botón.
+#
+# El webhook `ac_learn` clásico sigue existiendo y funcionando: es el fallback
+# de la app para las casas que todavía no tengan estos scripts (y ante un token
+# rechazado, def. 27).
+
+ac_learn:
+  alias: "Aprendizaje IR de AC (verifica y lanza, con respuesta)"
+  fields:
+    remote_entity:
+      description: "Entidad en HA del dispositivo Broadlink (remote)"
+      example: "remote.cuarto"
+    device:
+      description: "Nombre del dispositivo"
+      example: "ac1"
+    hvac_mode:
+      description: "Modo a aprender; también swing_<clave> y timer_off[_XX]"
+      example: "cool"
+    fan_mode:
+      description: "Fan Mode (auto, high, med, low)"
+      example: "auto"
+    sleep:
+      description: "Sleep (on, off)"
+      example: "off"
+    simple_mode:
+      description: "Si es true, aprende un solo comando ir_{dev}_{hvac}"
+      example: "false"
+
+  sequence:
+    - variables:
+        remote_entity_full: "{{ remote_entity | default('remote.nombre_broadlink') }}"
+        remote_exists: "{{ remote_entity_full in (states | map(attribute='entity_id') | list) }}"
+        remote_state: "{{ states(remote_entity_full) }}"
+
+    - if:
+        - condition: template
+          value_template: "{{ not remote_exists }}"
+      then:
+        - variables:
+            result: "{{ {'ok': false, 'reason': 'remote_not_found'} }}"
+        - stop: "Control (remote) inexistente"
+          response_variable: result
+
+    - if:
+        - condition: template
+          value_template: "{{ remote_state in ['unavailable', 'unknown', 'none', 'None'] }}"
+      then:
+        - variables:
+            result: "{{ {'ok': false, 'reason': 'remote_unavailable'} }}"
+        - stop: "Control (remote) no disponible"
+          response_variable: result
+
+    # `script.turn_on` (y no `script.ac_learn_run`) para NO esperar: lo que
+    # sigue es la parte que bloquea minutos.
+    - action: script.turn_on
+      target:
+        entity_id: script.ac_learn_run
+      data:
+        variables:
+          remote_entity: "{{ remote_entity_full }}"
+          device: "{{ device | default('ac1') }}"
+          hvac_mode: "{{ hvac_mode | default('cool') }}"
+          fan_mode: "{{ fan_mode | default('auto') }}"
+          sleep: "{{ sleep | default('off') }}"
+          simple_mode: "{{ simple_mode | default(false) }}"
+
+    - variables:
+        result: "{{ {'ok': true} }}"
+    - stop: "Aprendizaje lanzado"
+      response_variable: result
+
+  mode: parallel
+
+ac_learn_run:
+  alias: "Aprendizaje IR de AC (ejecución, bloquea esperando el botón)"
+  sequence:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ (simple_mode | default(false) | string | lower) == 'true' }}"
+          sequence:
+            - action: remote.learn_command
+              target:
+                entity_id: "{{ remote_entity }}"
+              data:
+                device: "{{ device }}"
+                command: "ir_{{ device }}_{{ hvac_mode }}"
+      default:
+        # Misma resolución que el webhook clásico: los scripts estáticos traen
+        # la LISTA completa (16-30 de temperaturas, 0,5-12 h de timers).
+        - action: >-
+            {% if hvac_mode == "off" %}
+              script.learn_{{ device }}_{{ hvac_mode }}
+            {% elif hvac_mode.startswith("timer_off") %}
+              script.learn_{{ device }}_{{ hvac_mode }}
+            {% else %}
+              script.learn_{{ device }}_{{ hvac_mode }}_{{ fan_mode }}_{{ sleep }}
+            {% endif %}
+          data:
+            remote_entity: "{{ remote_entity }}"
+
+  mode: restart

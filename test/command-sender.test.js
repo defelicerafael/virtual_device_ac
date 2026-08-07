@@ -454,6 +454,64 @@ function makeTokenHarness({ serviceResponse = { ok: true }, failTimes = 0, reloa
 
 const CONFIG_TOKEN = { ...CONFIG_BASE, code: 1, haToken: 'TOK123' };
 
+// ---- Learning con feedback (def. 7 rev. 2026-08-06) ----
+describe('CommandSender — learning con feedback (def. 7 rev.)', () => {
+  const LEARN = { mode: 'cool', fan: 'auto', temp: 24, sleep: 'off' };
+
+  test('con token: ac_learn va por script.ac_learn con return_response y Bearer', async () => {
+    const h = makeTokenHarness({ serviceResponse: { ok: true } });
+    const res = await h.sender.sendLearn(CONFIG_TOKEN, LEARN, 'temperature');
+    assert.deepEqual(res, { ok: true });
+    const { url, headers } = h.posts[0];
+    assert.equal(url, 'http://192.168.88.101:8123/api/services/script/ac_learn?return_response');
+    assert.equal(headers.Authorization, 'Bearer TOK123');
+  });
+
+  test('el remote no responde → remoteDown: no se aprendió nada', async () => {
+    const h = makeTokenHarness({ serviceResponse: { ok: false, reason: 'remote_unavailable' } });
+    const res = await h.sender.sendLearn(CONFIG_TOKEN, LEARN, 'temperature');
+    assert.equal(res.ok, true);
+    assert.equal(res.remoteDown, true);
+    assert.equal(res.reason, 'remote_unavailable');
+  });
+
+  test('remote inexistente → remote_not_found, también en el learning', async () => {
+    const h = makeTokenHarness({ serviceResponse: { ok: false, reason: 'remote_not_found' } });
+    const res = await h.sender.sendSwingLearn({ ...CONFIG_TOKEN, code: 99 }, 'up');
+    assert.equal(res.remoteDown, true);
+    assert.equal(res.reason, 'remote_not_found');
+  });
+
+  test('servidor sin script.ac_learn (400) → cae al webhook y NO reintenta el servicio', async () => {
+    // Las casas que todavía no tienen el script no pueden quedarse sin learning.
+    const h = makeTokenHarness({ serviceStatus: 400 });
+    const primero = await h.sender.sendLearn(CONFIG_TOKEN, LEARN, 'temperature');
+    assert.equal(primero.ok, true, 'el aprendizaje sale igual por el webhook');
+    assert.match(h.posts[0].url, /\/api\/services\/script\/ac_learn\?return_response$/);
+    assert.match(h.posts[1].url, /\/api\/webhook\/ac_learn$/);
+
+    const antes = h.posts.length;
+    await h.sender.sendLearn(CONFIG_TOKEN, LEARN, 'temperature');
+    assert.equal(h.posts.length, antes + 1, 'el segundo learn va directo al webhook');
+    assert.match(h.posts[antes].url, /\/api\/webhook\/ac_learn$/);
+  });
+
+  test('resetTokenState vuelve a habilitar el intento por servicio', async () => {
+    const h = makeTokenHarness({ serviceStatus: 400 });
+    await h.sender.sendLearn(CONFIG_TOKEN, LEARN, 'temperature');
+    h.sender.resetTokenState();
+    const antes = h.posts.length;
+    await h.sender.sendLearn(CONFIG_TOKEN, LEARN, 'temperature');
+    assert.match(h.posts[antes].url, /\?return_response$/);
+  });
+
+  test('sin token el learning sigue por el webhook clásico', async () => {
+    const h = makeTokenHarness();
+    await h.sender.sendLearn({ ...CONFIG_BASE, code: 1 }, LEARN, 'temperature');
+    assert.match(h.posts[0].url, /\/api\/webhook\/ac_learn$/);
+  });
+});
+
 describe('CommandSender — feedback del remote (def. 26)', () => {
   test('con token: ac_command va por REST services con return_response y Bearer', async () => {
     const h = makeTokenHarness({ serviceResponse: { ok: true } });

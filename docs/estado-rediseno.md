@@ -2,14 +2,16 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-08-06 (v2.3.0 — el learning sobrevive a una falla de envío, SIN desplegar)
+## Última actualización: 2026-08-06 (v2.4.0 — el learning sobrevive a la falla y ac_learn deja de ser ciego, SIN desplegar)
 
-### 🆕 Def. 7 rev. — el learning ya no se apaga si el envío falló (v2.3.0, 2026-08-06)
+### 🆕 Def. 7 rev. — el learning sobrevive a la falla + ac_learn con feedback (v2.4.0, 2026-08-06)
 Fernán **revirtió el "no se arregla"** del hallazgo 2 del [checklist](checklist-definiciones.md). Ahora: falla el envío → sale el mensaje con el motivo (eso ya funcionaba) y el modo **queda armado** para reintentar sin volver a apretar el botón. Se apaga por comando exitoso, por **5 minutos sin actividad** (la cuenta se reinicia en cada intento) o porque **aparezca un code en los ajustes** (en el acto, sin esperar los 5 min).
 
-- **⚠️ Sin cobertura de tests.** Toda esta lógica vive en `drivers/ac/device.js`, que no tiene arnés de pruebas — los 88 tests cubren solo `lib/`. Se verifica a mano.
-- **Cómo probarlo:** apuntar el device a una **IP de PHM inexistente** y mandar un comando con "Aprender" activo. Ojo: apuntar a una *entidad remote* inexistente NO sirve — `ac_learn` va por webhook y HA responde 200 igual. Solo una falla de **transporte** (PHM inalcanzable, 404, 5xx) da `ok:false`.
-- **Lo que esto NO puede saber:** si el webhook responde 200, el aprendizaje se da por bueno aunque el Broadlink no haya captado nada. Eso lo sigue verificando el instalador mirando el LED.
+- **`ac_learn` ya no es fire-and-forget (v2.4.0).** Con token va por `script.ac_learn?return_response` y devuelve `{ok, reason}` como `ac_command` (def. 26). Un `remoteDown` cuenta como falla: no se aprendió nada, el modo queda armado y los 5 minutos arrancan de cero.
+- **⚠️ PENDIENTE DE DEPLOY EN EL SERVIDOR (ninguna casa lo tiene, ni ferno):** `docs/referencia/ha-script-ac_learn.yaml` → `/opt/pantea/homeassistant/config/scripts/ac_learn.yaml`. Son DOS scripts (`ac_learn` verifica y contesta al toque; `ac_learn_run` es el que bloquea esperando el botón). Sin ellos la app cae sola al webhook clásico y sigue funcionando **sin** feedback — no rompe nada.
+- **⚠️ Cobertura parcial de tests.** El camino del sender tiene 6 tests nuevos (94/94 en total), pero la máquina de estados del learning vive en `drivers/ac/device.js`, que no tiene arnés — esa parte se verifica a mano.
+- **Cómo probarlo:** con el script puesto, apuntar el device a una **entidad remote inexistente** y mandar un comando con "Aprender" activo → mensaje "no se encuentra la entidad…", el botón **sigue prendido** y se apaga solo a los 5 min. Sin el script (o sin token), el único caso que da falla es el PHM inalcanzable.
+- **Lo que esto NO puede saber:** la respuesta dice que el remote existe y está vivo **al arrancar**; no si el Broadlink captó el código. Eso lo sigue verificando el instalador mirando el LED.
 
 ## Actualización previa: 2026-08-06 (v2.2.0 — estado real por sensor de aleta, def. 29, DESPLEGADA en ferno)
 

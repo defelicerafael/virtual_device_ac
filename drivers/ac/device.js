@@ -251,6 +251,7 @@ class AcDevice extends Homey.Device {
       const result = await this.homey.app.commandSender.sendTimerLearn(config, hours);
       await this._afterLearnAttempt(result);
       if (!result.ok) return this._failure(result);
+      if (result.remoteDown) return this._warnRemoteDown(result.reason);
       this.log(scope === 'single'
         ? `Learning del apagado automático de ${hours} h enviado.`
         : `Learning del apagado automático enviado (barrido ${scope}).`);
@@ -326,7 +327,12 @@ class AcDevice extends Homey.Device {
    * de inactividad arrancando de nuevo.
    */
   async _afterLearnAttempt(result) {
-    if (result && result.ok) await this._endLearning('el comando de aprendizaje salió');
+    // `remoteDown` cuenta como falla (def. 7 rev. 2026-08-06): el control IR no
+    // respondió, así que no se aprendió nada. El learning queda armado y la
+    // cuenta arranca de cero para darle tiempo al instalador de reconectar o
+    // arreglar el Broadlink y reintentar.
+    const salio = Boolean(result && result.ok === true && result.remoteDown !== true);
+    if (salio) await this._endLearning('el comando de aprendizaje salió');
     else this._touchLearning();
   }
 
