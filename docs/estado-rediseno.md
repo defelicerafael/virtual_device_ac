@@ -2,7 +2,7 @@
 
 Este archivo se actualiza al final de cada sesión de trabajo. Leerlo primero para retomar.
 
-## Última actualización: 2026-08-06 (v2.2.0 — estado real por sensor de aleta, def. 29, SIN desplegar)
+## Última actualización: 2026-08-06 (v2.2.0 — estado real por sensor de aleta, def. 29, DESPLEGADA en ferno)
 
 ### 🆕 Def. 29 — Estado real del equipo por sensor de aleta (v2.2.0, 2026-08-06)
 Idea de Fernán (audio): un sensor de contacto en la aleta que el split cierra al parar permite mostrar en el tile si el aire está funcionando **aunque lo hayan prendido con el control físico** — y deducir si arrancó en frío o en calor. **Nunca se envía IR por esto**: solo se escribe la capability. Escalera de inferencia, reglas y tiempos en la [definición 29](rediseno-app.md); el motor (`lib/state-mirror.js` → `decide()`) es puro y tiene 14 tests. `npm test` 88/88 y `validate --level publish` OK.
@@ -11,6 +11,8 @@ Idea de Fernán (audio): un sensor de contacto en la aleta que el split cierra a
 - **Desactivado por defecto** (`flap_source` vacío): ningún device existente cambia de comportamiento.
 - **El sensor ideal del audio no existe en la flota.** Relevado en ferno el 2026-08-06: los de contacto que hay (`TS0203` x4, `lumi.sensor_magnet.aq2`) **no traen temperatura**. Con contacto solo, el prendido/apagado se detecta igual (es lo decisivo) y el frío/calor sale de la temperatura exterior + cómo se mueve la del cuarto. El nivel decisivo (sensor en la salida de aire) queda implementado y a la espera de hardware.
 - **La regla que no hay que romper:** los indicios (tendencia del cuarto, temperatura de afuera, `_lastMode`) **solo infieren cuando el tile estaba apagado**. Si pisaran un modo ya conocido, prender en `cool` desde Homey en invierno terminaría con la app cambiándote el tile sola. Está fijado por el campo `decisive` y por un test dedicado.
+- **Dónde se configura:** `flap_source` está en el **wizard** (desplegable con los devices que tengan `alarm_contact`) **y** en los ajustes del tile (campo de texto, validado contra un device real — misma limitación que `temp_source`: los settings de Homey no admiten desplegables dinámicos). Los otros cuatro (`flap_inverted`, descarga, exterior, corte) están solo en los ajustes del tile.
+- **App v2.2.0 instalada en el Homey "San Fran"** (2026-08-06; clon en `5ea6d35`, limpio). No necesita nada del lado del servidor.
 - **Sin probar en vivo**: falta montar un sensor en la aleta de un split real. Hasta entonces no se sabe si el contacto de la aleta es estable (el debounce es de 30 s, puede necesitar ajuste) ni si todos los splits cierran la aleta al parar.
 
 ## Actualización previa: 2026-08-06 (v2.1.0 — apagado automático, def. 28, DESPLEGADA en ferno)
